@@ -56,132 +56,95 @@ namespace Assimp {
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // --------------------------------------------------------------------------------
-/** Importer class for the 3DS ASE ASCII format.
- *
- */
+/// @class  ASEImporter
+/// @brief  Importer class for the 3DS ASE ASCII format.
+// --------------------------------------------------------------------------------
 class ASEImporter final : public BaseImporter {
 public:
-    ASEImporter();
+    /// @brief Constructor
+    ASEImporter() = default;
+
+    /// @brief Destructor
     ~ASEImporter() override = default;
 
-    // -------------------------------------------------------------------
-    /** Returns whether the class can handle the format of the given file.
-     * See BaseImporter::CanRead() for details.
-     */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const override;
+    bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
 
 protected:
-    // -------------------------------------------------------------------
-    /** Return importer meta information.
-     * See #BaseImporter::GetInfo for the details
-     */
     const aiImporterDesc* GetInfo () const override;
-
-    // -------------------------------------------------------------------
-    /** Imports the given file into the given scene structure.
-    * See BaseImporter::InternReadFile() for details
-    */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler) override;
-
-    // -------------------------------------------------------------------
-    /** Called prior to ReadFile().
-    * The function is a request to the importer to update its configuration
-    * basing on the Importer's configuration property list.
-    */
+    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
     void SetupProperties(const Importer* pImp) override;
 
 private:
-    // -------------------------------------------------------------------
-    /** Generate normal vectors basing on smoothing groups
-     * (in some cases the normal are already contained in the file)
-     * \param mesh Mesh to work on
-     * \return false if the normals have been recomputed
-     */
+     /// @brief Generate normal vectors basing on smoothing groups
+     /// (in some cases the normal are already contained in the file)
+     /// @param [in] mesh Mesh to work on
+     /// @return false if the normals have been recomputed
     bool GenerateNormals(ASE::Mesh& mesh);
 
-    // -------------------------------------------------------------------
-    /** Create valid vertex/normal/UV/color/face lists.
-     *  All elements are unique, faces have only one set of indices
-     *  after this step occurs.
-     * \param mesh Mesh to work on
-     */
+    /// @brief Create valid vertex/normal/UV/color/face lists.
+    /// All elements are unique, faces have only one set of indices after this step occurs.
+    /// @param [in] mesh Mesh to work on
     void BuildUniqueRepresentation(ASE::Mesh& mesh);
 
-    /** Create one-material-per-mesh meshes ;-)
-     * \param mesh Mesh to work with
-     *  \param Receives the list of all created meshes
-     */
+    /// @brief Creates one-material-per-mesh meshes ;-)
+    /// @param [in] mesh  Mesh to work with
+    /// @param [in] avOut Receives the list of all created meshes
     void ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOut);
 
-    // -------------------------------------------------------------------
-    /** Convert a material to a aiMaterial object
-     * \param mat Input material
-     */
+    /// @brief Converts a material to an aiMaterial object
+    /// @param [in] mat Input material
     void ConvertMaterial(ASE::Material& mat);
 
-    // -------------------------------------------------------------------
-    /** Setup the final material indices for each mesh
-     */
+    /// @brief  Sets up the final material indices for each mesh
     void BuildMaterialIndices();
 
-    // -------------------------------------------------------------------
-    /** Build the node graph
-     */
+    /// @brief Builds the node graph.
     void BuildNodes(std::vector<ASE::BaseNode*>& nodes);
 
-    // -------------------------------------------------------------------
-    /** Build output cameras
-     */
+    /// @brief Builds all output cameras
     void BuildCameras();
 
-    // -------------------------------------------------------------------
-    /** Build output lights
-     */
+    /// @brief Builds output lights.
     void BuildLights();
 
-    // -------------------------------------------------------------------
-    /** Build output animations
-     */
+    /// @brief Builds output animations.
+    /// @param [in] nodes Input nodes
     void BuildAnimations(const std::vector<ASE::BaseNode*>& nodes);
 
-    // -------------------------------------------------------------------
-    /** Add sub nodes to a node
-     *  \param pcParent parent node to be filled
-     *  \param szName Name of the parent node
-     *  \param matrix Current transform
-     */
+
+    /// @brief Adds sub nodes to a node
+    /// @param [in] nodes Input nodes
+    /// @param [in] pcParent parent node to be filled
+    /// @param [in] name Name of the parent node
     void AddNodes(const std::vector<ASE::BaseNode*>& nodes,
         aiNode* pcParent, const std::string &name);
 
+    /// @brief Adds sub nodes to a node
+    /// @param [in] nodes Input nodes
+    /// @param [in] pcParent parent node to be filled
+    /// @param [in] name Name of the parent node
+    /// @param [in] matrix Transformation matrix to apply.
     void AddNodes(const std::vector<ASE::BaseNode*>& nodes,
         aiNode* pcParent, const std::string &name,
         const aiMatrix4x4& matrix);
 
+    /// @brief Adds meshes to a given node.
+    /// @param [in] snode Input node
+    /// @param [in] node Parent node to be filled
     void AddMeshes(const ASE::BaseNode* snode, aiNode* node);
 
-    // -------------------------------------------------------------------
-    /** Generate a default material and add it to the parser's list
-     *  Called if no material has been found in the file (rare for ASE,
-     *  but not impossible)
-     */
+    /// @brief Generates a default material and add it to the parser's list
+    ///        Called if no material has been found in the file (rare for ASE, but not impossible)
     void GenerateDefaultMaterial();
 
 protected:
-    /** Parser instance */
-    ASE::Parser* mParser;
+    ASE::Parser* mParser{nullptr};  ///< Parser instance
+    char* mBuffer{nullptr};         ///< Buffer to hold the loaded file
+    aiScene* pcScene{nullptr};      ///< Scene to be filled
 
-    /** Buffer to hold the loaded file */
-    char* mBuffer;
-
-    /** Scene to be filled */
-    aiScene* pcScene;
-
-    /** Config options: Recompute the normals in every case - WA
-        for 3DS Max broken ASE normal export */
-    bool configRecomputeNormals;
-    bool noSkeletonMesh;
+    /// Config options: Recompute the normals in every case - WA for 3DS Max broken ASE normal export
+    bool mConfigRecomputeNormals{false};
+    bool mNoSkeletonMesh{false};
 };
 
 #endif // ASSIMP_BUILD_NO_3DS_IMPORTER

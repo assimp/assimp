@@ -162,6 +162,8 @@ void XFileImporter::CreateDataRepresentationFromImport(aiScene *pScene, XFile::S
         pScene->mNumMaterials = 1;
         // create the Material
         aiMaterial *mat = new aiMaterial;
+        aiString name(AI_DEFAULT_MATERIAL_NAME);
+        mat->AddProperty(&name, AI_MATKEY_NAME);
         int shadeMode = (int)aiShadingMode_Gouraud;
         mat->AddProperty<int>(&shadeMode, 1, AI_MATKEY_SHADING_MODEL);
         // material colours

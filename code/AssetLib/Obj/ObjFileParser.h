@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/vector2.h>
 #include <assimp/vector3.h>
-#include <map>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -62,8 +61,8 @@ class IOSystem;
 class ProgressHandler;
 
 // ------------------------------------------------------------------------------------------------
-/// \class  ObjFileParser
-/// \brief  Parser for a obj waveform file
+/// @class  ObjFileParser
+/// @brief  Parser for a obj waveform file
 // ------------------------------------------------------------------------------------------------
 class ASSIMP_API ObjFileParser {
 public:
@@ -83,6 +82,7 @@ public:
     /// @brief  Model getter.
     ObjFile::Model *GetModel() const;
 
+    // Copying not allowed
     ObjFileParser(const ObjFileParser&) = delete;
     ObjFileParser &operator=(const ObjFileParser& ) = delete;
 
@@ -122,19 +122,17 @@ protected:
     /// Reselect an existing group (Wavefront `group` keyword) for late material assignment.
     void reselectGroup();
     /// Returns the index of the material. Is -1 if not material was found.
-    int getMaterialIndex(const std::string &strMaterialName);
+    int getMaterialIndex(std::string_view strMaterialName);
     /// Parse object name
     void getObjectName();
     /// Creates a new object.
-    void createObject(const std::string &strObjectName);
+    void createObject(std::string_view strObjectName);
     /// Creates a new mesh.
-    void createMesh(const std::string &meshName);
+    void createMesh(std::string_view meshName);
     /// Returns true, if a new mesh instance must be created.
-    bool needsNewMesh(const std::string &rMaterialName);
+    bool needsNewMesh(std::string_view rMaterialName);
     /// Error report in token
     void reportErrorTokenInFace();
-
-    // --- Zero-copy parsing helper functions ---
     /// Parse next token from current position, sets mCurrentToken, mTokenStart, mTokenEnd
     void parseNextToken();
     /// Parse float directly from current token position (uses mTokenStart)
@@ -143,36 +141,22 @@ protected:
     int parseIntDirect();
 
 protected:
-    /// Default material name
-    static constexpr char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;
-    //! Iterator to current position in buffer
-    DataArrayIt mDataIt{};
-    //! Iterator to end position of buffer
-    DataArrayIt mDataItEnd{};
-    //! Pointer to model instance
-    std::unique_ptr<ObjFile::Model> mModel{};
-    //! When true, trailing `group`/`usemtl` assigns materials to already-built meshes (Viewpoint OBJs).
-    bool mReselectMode{ false };
-    //! Current line (for debugging)
-    unsigned int mLine{ 0 };
-    //! Helper buffer (safe) - kept for backward compatibility
-    std::string mBuffer;
-	/// End of buffer
-    const char *mEnd{ nullptr };
-    /// Pointer to IO system instance.
-    IOSystem *mIO{ nullptr };
-    //! Pointer to progress handler
-    ProgressHandler *mProgress{ nullptr };
-    /// Path to the current model, name of the obj file where the buffer comes from
-    const std::string mOriginalObjFileName{};
-
+    static constexpr char DEFAULT_MATERIAL[] = AI_DEFAULT_MATERIAL_NAME;    ///< Default material name
+    DataArrayIt mDataIt{};                                                  ///< Iterator to current position in buffer
+    DataArrayIt mDataItEnd{};                                               ///< Iterator to end position of buffer
+    std::unique_ptr<ObjFile::Model> mModel{};                               ///< Pointer to model instance
+    bool mReselectMode{ false };                                            ///< When true, trailing `group`/`usemtl` assigns materials to already-built meshes (Viewpoint OBJs).
+    unsigned int mLine{ 0 };                                                ///< Current line (for debugging)
+    std::string mBuffer;                                                    ///< Helper buffer (safe) - kept for backward compatibility
+    const char *mEnd{ nullptr };                                            ///< End of buffer
+    IOSystem *mIO{ nullptr };                                               ///< Pointer to the IO-system instance.
+    ProgressHandler *mProgress{ nullptr };                                  ///< Pointer to progress handler
+    const std::string mOriginalObjFileName{};                               ///< Path to the current model, name of the obj file where the buffer comes from
     // --- Zero-copy parsing members ---
     /// Current token as string_view (avoids string allocations)
     std::string_view mCurrentToken;
-    /// Start pointer of the current token
-    const char* mTokenStart{ nullptr };
-    /// End pointer of the current token
-    const char* mTokenEnd{ nullptr };
+    const char* mTokenStart{ nullptr };                                     ///< Start pointer of the current token
+    const char* mTokenEnd{ nullptr };                                       ///< End pointer of the current token
 };
 
 } // Namespace Assimp

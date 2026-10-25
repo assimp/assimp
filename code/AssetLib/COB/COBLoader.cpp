@@ -203,18 +203,26 @@ void COBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     }
     pScene->mNumLights = pScene->mNumCameras = 0;
 
-    // resolve parents by their IDs and build the output graph
+    // resolve parents by their IDs and build the output graph. Each node must be
+    // attached to at most one parent: ids and parent_ids come straight from the file
+    // and a crafted scene can give several nodes the same id, which would otherwise
+    // attach (and later build) the same child once per duplicate parent and overrun
+    // the per-type output arrays allocated above. Start the inner loop at n+1 so a node
+    // whose parent_id equals its own id cannot become its own child (infinite recursion).
     std::unique_ptr<Node> root(new Group());
+    std::vector<bool> attached(scene.nodes.size(), false);
     for (size_t n = 0; n < scene.nodes.size(); ++n) {
         const Node &nn = *scene.nodes[n].get();
-        if (nn.parent_id == 0) {
+        if (nn.parent_id == 0 && !attached[n]) {
             root->temp_children.push_back(&nn);
+            attached[n] = true;
         }
 
-        for (size_t m = n; m < scene.nodes.size(); ++m) {
+        for (size_t m = n + 1; m < scene.nodes.size(); ++m) {
             const Node &mm = *scene.nodes[m].get();
-            if (mm.parent_id == nn.id) {
+            if (mm.parent_id == nn.id && !attached[m]) {
                 nn.temp_children.push_back(&mm);
+                attached[m] = true;
             }
         }
     }

@@ -470,13 +470,14 @@ void glTFImporter::ImportMeshes(Asset &r) {
 
     // Release ownership to the scene: CopyVector takes ownership of the raw
     // pointers, so hand them over only now that import has fully succeeded.
-    std::vector<aiMesh *> rawMeshes;
-    rawMeshes.reserve(meshes.size());
-    for (std::unique_ptr<aiMesh> &m : meshes) {
-        rawMeshes.push_back(m.release());
-    }
+    //std::vector<aiMesh *> rawMeshes;
+    //rawMeshes.reserve(meshes.size());
+    //for (std::unique_ptr<aiMesh> &m : meshes) {
+    //    rawMeshes.push_back(m.release());
+    //}
 
-    CopyVector(rawMeshes, mScene->mMeshes, mScene->mNumMeshes);
+    //CopyVector(rawMeshes, mScene->mMeshes, mScene->mNumMeshes);
+    CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
 }
 
 void glTFImporter::ImportCameras(Asset &r) const {

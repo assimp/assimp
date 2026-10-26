@@ -68,7 +68,7 @@ public:
 
     /// @brief The class constructor with the zip-archive name.
     /// @param pIOHandler    The io handler
-    /// @param pFilename     The archive name
+    /// @param rFilename     The archive name
     /// @param pMode         The access state
     ZipArchiveIOSystem(IOSystem* pIOHandler, const std::string& rFilename, const char* pMode = "r");
 

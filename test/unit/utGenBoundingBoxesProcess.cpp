@@ -91,3 +91,42 @@ TEST_F(utGenBoundingBoxesProcess, executeTest) {
     EXPECT_EQ(99, mesh->mAABB.mMax.y);
     EXPECT_EQ(99, mesh->mAABB.mMax.z);
 }
+
+TEST_F(utGenBoundingBoxesProcess, ExecuteFarFromOriginTest) {
+    // Coordinates beyond the former +/-999999 sentinel values, e.g. from projected
+    // geographic coordinate systems, must still yield a tight bounding box.
+    const ai_real kOffset = (ai_real)2600000;
+    for (unsigned int i = 0; i < mMesh->mNumVertices; ++i) {
+        mMesh->mVertices[i] = aiVector3D(kOffset + (ai_real)i, -(kOffset + (ai_real)i), kOffset + (ai_real)i);
+    }
+
+    mProcess->Execute(mScene);
+
+    aiMesh *mesh = mScene->mMeshes[0];
+    EXPECT_NE(nullptr, mesh);
+    EXPECT_EQ(kOffset, mesh->mAABB.mMin.x);
+    EXPECT_EQ(-(kOffset + 99), mesh->mAABB.mMin.y);
+    EXPECT_EQ(kOffset, mesh->mAABB.mMin.z);
+
+    EXPECT_EQ(kOffset + 99, mesh->mAABB.mMax.x);
+    EXPECT_EQ(-kOffset, mesh->mAABB.mMax.y);
+    EXPECT_EQ(kOffset + 99, mesh->mAABB.mMax.z);
+}
+
+TEST_F(utGenBoundingBoxesProcess, ExecuteEmptyMeshTest) {
+    delete[] mMesh->mVertices;
+    mMesh->mVertices = nullptr;
+    mMesh->mNumVertices = 0;
+
+    mProcess->Execute(mScene);
+
+    aiMesh *mesh = mScene->mMeshes[0];
+    EXPECT_NE(nullptr, mesh);
+    EXPECT_EQ(0, mesh->mAABB.mMin.x);
+    EXPECT_EQ(0, mesh->mAABB.mMin.y);
+    EXPECT_EQ(0, mesh->mAABB.mMin.z);
+
+    EXPECT_EQ(0, mesh->mAABB.mMax.x);
+    EXPECT_EQ(0, mesh->mAABB.mMax.y);
+    EXPECT_EQ(0, mesh->mAABB.mMax.z);
+}

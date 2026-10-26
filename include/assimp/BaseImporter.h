@@ -79,7 +79,8 @@ using UByteBuffer = std::vector<uint8_t>;
 using ByteBuffer = std::vector<int8_t>;
 
 // ---------------------------------------------------------------------------
-/** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface
+/** 
+ *  @brief FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface
  *  for all importer worker classes.
  *
  * The interface defines two functions: CanRead() is used to check if the
@@ -87,6 +88,7 @@ using ByteBuffer = std::vector<int8_t>;
  * this function returns true, the importer then calls ReadFile() which
  * imports the given file. ReadFile is not overridable, it just calls
  * InternReadFile() and catches any ImportErrorException that might occur.
+ * The instance of the scene must be release manually!
  */
 class ASSIMP_API BaseImporter {
     friend class Importer;
@@ -186,7 +188,7 @@ public:
     /** Called by #Importer::GetExtensionList for each loaded importer.
      *  Take the extension list contained in the structure returned by
      *  #GetInfo and insert all file extensions into the given set.
-     *  @param extension set to collect file extensions in*/
+     *  @param extensions set to collect file extensions in*/
     void GetExtensionList(std::set<std::string> &extensions);
 
     // static utilities
@@ -251,9 +253,9 @@ public:
      *  @param pFile Input file
      *  @param pIOHandler IO system to be used
      *  @param magic n magic tokens
-     *  @params num Size of magic
+     *  @param num Size of magic
      *  @param offset Offset from file start where tokens are located
-     *  @param Size of one token, in bytes. Maximally 16 bytes.
+     *  @param size Size of one token, in bytes. Maximally 16 bytes.
      *  @return true if one of the given tokens was found
      *
      *  @note For convenience, the check is also performed for the
@@ -311,7 +313,7 @@ public:
     /** Utility function to move a std::vector into a aiScene array
     *  @param vec The vector to be moved
     *  @param out The output pointer to the allocated array.
-    *  @param numOut The output count of elements copied. */
+    *  @param outLength The output count of elements copied. */
     template <typename T>
     AI_FORCE_INLINE static void CopyVector(
             std::vector<T> &vec,
@@ -328,7 +330,7 @@ public:
     /** Utility function to move a std::vector of unique_ptrs into a aiScene array
     *  @param vec The vector of unique_ptrs to be moved
     *  @param out The output pointer to the allocated array.
-    *  @param numOut The output count of elements copied. */
+    *  @param outLength The output count of elements copied. */
     template <typename T>
     AI_FORCE_INLINE static void CopyVector(
             std::vector<std::unique_ptr<T> > &vec,

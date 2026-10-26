@@ -1,4 +1,4 @@
-/*
+ /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -115,7 +115,6 @@ bool C4DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 const aiImporterDesc* C4DImporter::GetInfo () const {
     return &desc;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.

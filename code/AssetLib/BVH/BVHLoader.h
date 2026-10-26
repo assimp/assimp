@@ -63,7 +63,7 @@ namespace Assimp {
 */
 class BVHLoader final : public BaseImporter {
 
-    /** Possible animation channels for which the motion data holds the values */
+    /// Possible animation channels for which the motion data holds the values
     enum ChannelType {
         Channel_PositionX,
         Channel_PositionY,
@@ -73,90 +73,75 @@ class BVHLoader final : public BaseImporter {
         Channel_RotationZ
     };
 
-    /** Collected list of node. Will be bones of the dummy mesh some day, addressed by their array index */
+    /// Collected list of node. Will be bones of the dummy mesh some day, addressed by their array index
     struct Node {
-        const aiNode *mNode;
-        std::vector<ChannelType> mChannels;
-        std::vector<float> mChannelValues; // motion data values for that node. Of size NumChannels * NumFrames
+        const aiNode *mNode{nullptr};
+        std::vector<ChannelType> mChannels{};
+        std::vector<float> mChannelValues{}; // motion data values for that node. Of size NumChannels * NumFrames
 
-        Node() : mNode(nullptr) {}
-        explicit Node(const aiNode *pNode) :mNode(pNode) {}
+        Node() = default;
+        explicit Node(const aiNode *pNode) :mNode(pNode) {
+            // empty
+        }
     };
 
 public:
-    BVHLoader();
+    /// @brief  Default constructor
+    BVHLoader() = default;
+
+    /// @brief  Default destructor
     ~BVHLoader() override = default;
 
-    /** Returns whether the class can handle the format of the given file.
-     * See BaseImporter::CanRead() for details. */
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool cs) const override;
-
     void SetupProperties(const Importer *pImp) override;
     const aiImporterDesc *GetInfo() const override;
 
 protected:
-    /** Imports the given file into the given scene structure.
-     * See BaseImporter::InternReadFile() for details
-     */
     void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
 
-    /** Reads the file */
+    /// Reads the file.
     void ReadStructure(aiScene *pScene);
 
-    /** Reads the hierarchy */
+    /// Reads the hierarchy
     void ReadHierarchy(aiScene *pScene);
 
-    /** Reads a node and recursively its children and returns the created node. */
+    /// Reads a node and recursively its children and returns the created node.
     aiNode *ReadNode();
 
-    /** Reads an end node and returns the created node. */
+    /// Reads an end node and returns the created node.
     aiNode *ReadEndSite(const std::string &pParentName);
 
-    /** Reads a node offset for the given node */
+    /// Reads a node offset for the given node
     void ReadNodeOffset(aiNode *pNode);
 
-    /** Reads the animation channels into the given node */
-    void ReadNodeChannels(BVHLoader::Node &pNode);
+    /// Reads the animation channels into the given node
+    void ReadNodeChannels(Node &pNode);
 
-    /** Reads the motion data */
+    /// Reads the motion data
     void ReadMotion(aiScene *pScene);
 
-    /** Retrieves the next token */
+    /// Retrieves the next token
     std::string GetNextToken();
 
-    /** Reads the next token as a float */
+    /// Reads the next token as a float
     float GetNextTokenAsFloat();
 
-    /** Aborts the file reading with an exception */
+    /// Aborts the file reading with an exception
     template<typename... T>
     AI_WONT_RETURN void ThrowException(T&&... args) AI_WONT_RETURN_SUFFIX;
 
-    /** Constructs an animation for the motion data and stores it in the given scene */
+    /// Constructs an animation for the motion data and stores it in the given scene
     void CreateAnimation(aiScene *pScene);
 
 protected:
-    /** Filename, for a verbose error message */
-    std::string mFileName;
-
-    /** Buffer to hold the loaded file */
-    std::vector<char> mBuffer;
-
-    /** Next char to read from the buffer */
-    std::vector<char>::const_iterator mReader;
-
-    /** Current line, for error messages */
-    unsigned int mLine;
-
-    /** Collected list of nodes. Will be bones of the dummy mesh some day, addressed by their array index.
-    * Also contain the motion data for the node's channels
-    */
-    std::vector<Node> mNodes;
-
-    /** basic Animation parameters */
-    float mAnimTickDuration;
-    unsigned int mAnimNumFrames;
-
-    bool noSkeletonMesh;
+    std::string mFileName{};                        ///< Filename, for a verbose error message
+    std::vector<char> mBuffer{};                    ///< Buffer to hold the loaded file
+    std::vector<char>::const_iterator mReader{};    ///< Next char to read from the buffer
+    unsigned int mLine{0};                          ///< Current line, for error messages
+    std::vector<Node> mNodes{};                     ///< Collected list of nodes. Will be bones of the dummy mesh some day, addressed by their array index.
+    float mAnimTickDuration{0};                     ///< basic Animation parameters
+    unsigned int mAnimNumFrames{0};                 ///< Number of frames in the animation
+    bool noSkeletonMesh{false};                     ///< Whether to create a skeleton mesh or not
 };
 
 } // end of namespace Assimp

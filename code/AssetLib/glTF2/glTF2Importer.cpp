@@ -397,6 +397,7 @@ void glTF2Importer::ImportMaterials(Asset &r) {
     const unsigned int numImportedMaterials = unsigned(r.materials.Size());
     ASSIMP_LOG_DEBUG("Importing ", numImportedMaterials, " materials");
     Material defaultMaterial;
+    defaultMaterial.name = AI_DEFAULT_MATERIAL_NAME;
 
     mScene->mNumMaterials = numImportedMaterials + 1;
     mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];

@@ -284,9 +284,8 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
         if (insideCstype) {
             switch (*mDataIt) {
 	            case 'e': {
-	                std::string name;
-	                getNameNoSpace(mDataIt, mDataItEnd, name);
-	                insideCstype = name != "end";
+	                std::string_view svName = getNameNoSpaceAsStringView(mDataIt, mDataItEnd);
+	                insideCstype = svName != "end";
 	            } break;
 				default:
 					break;
@@ -344,29 +343,28 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
 
         case 'u': // Parse a material desc. setter
         {
-            std::string name;
-            getNameNoSpace(mDataIt, mDataItEnd, name);
+            std::string_view svName = getNameNoSpaceAsStringView(mDataIt, mDataItEnd);
+            size_t nextSpace = svName.find(' ');
+            if (nextSpace != std::string_view::npos) {
+                svName = svName.substr(0, nextSpace);
+            }
 
-            size_t nextSpace = name.find(' ');
-            if (nextSpace != std::string::npos)
-                name = name.substr(0, nextSpace);
-
-            if (name == "usemtl") {
+            if (svName == "usemtl") {
                 getMaterialDesc();
             }
         } break;
 
         case 'm': // Parse a material library or merging group ('mg')
         {
-            std::string name;
-            getNameNoSpace(mDataIt, mDataItEnd, name);
-            if (const size_t nextSpace = name.find(' '); nextSpace != std::string::npos) {
-                name = name.substr(0, nextSpace);
+            std::string_view svName = getNameNoSpaceAsStringView(mDataIt, mDataItEnd);
+            size_t nextSpace = svName.find(' ');
+            if (nextSpace != std::string_view::npos) {
+                svName = svName.substr(0, nextSpace);
             }
 
-            if (name == "mg") {
+            if (svName == "mg") {
                 skipGroupNumberAndResolution();
-            } else if (name == "mtllib") {
+            } else if (svName == "mtllib") {
                 getMaterialLib();
             } else {
                 goto pf_skip_line;
@@ -395,9 +393,8 @@ void ObjFileParser::parseFile(IOStreamBuffer<char> &streamBuffer) {
 
         case 'c': // handle cstype section start
         {
-            std::string name;
-            getNameNoSpace(mDataIt, mDataItEnd, name);
-            insideCstype = name == "cstype";
+            std::string_view svName = getNameNoSpaceAsStringView(mDataIt, mDataItEnd);
+            insideCstype = svName == "cstype";
             goto pf_skip_line;
         }
 
@@ -567,9 +564,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     int iPos = 0;
     
     // Pre-allocate for typical face sizes (3-4 vertices)
-    face->m_vertices.reserve(4);
-    face->m_texturCoords.reserve(4);
-    face->m_normals.reserve(4);
+    face->mVertices.reserve(4);
+    face->mTextureCoords.reserve(4);
+    face->mNormals.reserve(4);
     
     while (mDataIt < mDataItEnd) {
         if (IsLineEnd(*mDataIt) || *mDataIt == '#') {
@@ -604,11 +601,11 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             if (iVal > 0) {
                 // Store parsed index
                 if (0 == iPos) {
-                    face->m_vertices.push_back(static_cast<unsigned int>(iVal - 1));
+                    face->mVertices.push_back(static_cast<unsigned int>(iVal - 1));
                 } else if (1 == iPos) {
-                    face->m_texturCoords.push_back(static_cast<unsigned int>(iVal - 1));
+                    face->mTextureCoords.push_back(static_cast<unsigned int>(iVal - 1));
                 } else if (2 == iPos) {
-                    face->m_normals.push_back(static_cast<unsigned int>(iVal - 1));
+                    face->mNormals.push_back(static_cast<unsigned int>(iVal - 1));
                     hasNormal = true;
                 } else {
                     reportErrorTokenInFace();
@@ -616,11 +613,11 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
             } else if (iVal < 0) {
                 // Store relatively index
                 if (0 == iPos) {
-                    face->m_vertices.push_back(static_cast<unsigned int>(vSize + iVal));
+                    face->mVertices.push_back(static_cast<unsigned int>(vSize + iVal));
                 } else if (1 == iPos) {
-                    face->m_texturCoords.push_back(static_cast<unsigned int>(vtSize + iVal));
+                    face->mTextureCoords.push_back(static_cast<unsigned int>(vtSize + iVal));
                 } else if (2 == iPos) {
-                    face->m_normals.push_back(static_cast<unsigned int>(vnSize + iVal));
+                    face->mNormals.push_back(static_cast<unsigned int>(vnSize + iVal));
                     hasNormal = true;
                 } else {
                     reportErrorTokenInFace();
@@ -633,7 +630,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         }
     }
 
-    if (face->m_vertices.empty()) {
+    if (face->mVertices.empty()) {
         ASSIMP_LOG_ERROR("Obj: Ignoring empty face");
         // skip line and clean up
         mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
@@ -643,9 +640,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
 
     // Set active material, if one set
     if (nullptr != mModel->mCurrentMaterial) {
-        face->m_pMaterial = mModel->mCurrentMaterial;
+        face->mMaterial = mModel->mCurrentMaterial;
     } else {
-        face->m_pMaterial = mModel->mDefaultMaterial;
+        face->mMaterial = mModel->mDefaultMaterial;
     }
 
     // Create a default object, if nothing is there
@@ -659,11 +656,11 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     }
 
     // Store the face
-    mModel->mCurrentMesh->m_Faces.emplace_back(face);
-    mModel->mCurrentMesh->m_uiNumIndices += static_cast<unsigned int>(face->m_vertices.size());
-    mModel->mCurrentMesh->m_uiUVCoordinates[0] += static_cast<unsigned int>(face->m_texturCoords.size());
-    if (!mModel->mCurrentMesh->m_hasNormals && hasNormal) {
-        mModel->mCurrentMesh->m_hasNormals = true;
+    mModel->mCurrentMesh->mFaces.emplace_back(face);
+    mModel->mCurrentMesh->mNumIndices += static_cast<unsigned int>(face->mVertices.size());
+    mModel->mCurrentMesh->mUVCoordinates[0] += static_cast<unsigned int>(face->mTextureCoords.size());
+    if (!mModel->mCurrentMesh->mHasNormals && hasNormal) {
+        mModel->mCurrentMesh->mHasNormals = true;
     }
     // Skip the rest of the line
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
@@ -685,23 +682,29 @@ void ObjFileParser::getMaterialDesc() {
     // In some cases we should ignore this 'usemtl' command, this variable helps us to do so
     bool skip = false;
 
-    // Get name
-    std::string strName(pStart, &(*mDataIt));
-    strName = ai_trim(strName);
-    if (strName.empty()) {
-        skip = true;
-    }
-
-    // If the current mesh has the same material, we will ignore that 'usemtl' command
-    // There is no need to create another object or even mesh here
-    // (In reselect mode a trailing usemtl must still assign the material to the active group.)
-    if (!mReselectMode && mModel->mCurrentMaterial &&
-            mModel->mCurrentMaterial->MaterialName == aiString(strName)) {
+    // Get name as string_view (zero-copy)
+    std::string_view svName(pStart, static_cast<size_t>(&(*mDataIt) - pStart));
+    svName = trimStringView(svName);
+    if (svName.empty()) {
         skip = true;
     }
 
     if (!skip) {
-        // Search for material
+        // If the current mesh has the same material, we will ignore that 'usemtl' command
+        // There is no need to create another object or even mesh here
+        // (In reselect mode a trailing usemtl must still assign the material to the active group.)
+        if (!mReselectMode && mModel->mCurrentMaterial) {
+            // Compare material names (convert aiString to string_view for comparison)
+            std::string_view currentMatName(mModel->mCurrentMaterial->MaterialName.C_Str());
+            if (currentMatName == svName) {
+                skip = true;
+            }
+        }
+    }
+
+    if (!skip) {
+        // Search for material (need to create a string for the map lookup)
+        std::string strName(svName);
         std::map<std::string, ObjFile::Material *>::iterator it = mModel->mMaterialMap.find(strName);
         if (it == mModel->mMaterialMap.end()) {
             // Not found, so we don't know anything about the material except for its name.
@@ -725,23 +728,23 @@ void ObjFileParser::getMaterialDesc() {
             ASSIMP_LOG_DEBUG("OBJ RESELECT: set meshes in group '", mModel->mActiveGroup,
                     "' to material '", strName, "'");
             for (ObjFile::Object *obj : mModel->mObjects) {
-                if (obj == nullptr || obj->m_strObjName != mModel->mActiveGroup) {
+                if (obj == nullptr || obj->mObjName != mModel->mActiveGroup) {
                     continue;
                 }
-                for (unsigned int meshId : obj->m_Meshes) {
+                for (unsigned int meshId : obj->mMeshes) {
                     if (meshId < mModel->mMeshes.size() && mModel->mMeshes[meshId] != nullptr) {
-                        mModel->mMeshes[meshId]->m_uiMaterialIndex = matIdx;
-                        mModel->mMeshes[meshId]->m_pMaterial = mModel->mCurrentMaterial;
+                        mModel->mMeshes[meshId]->mMaterialIndex = matIdx;
+                        mModel->mMeshes[meshId]->mMaterial = mModel->mCurrentMaterial;
                     }
                 }
             }
         } else {
             if (needsNewMesh(strName)) {
-                auto newMeshName = mModel->mActiveGroup.empty() ? strName : mModel->mActiveGroup;
+                std::string newMeshName = mModel->mActiveGroup.empty() ? strName : mModel->mActiveGroup;
                 createMesh(newMeshName);
             }
 
-            mModel->mCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strName);
+            mModel->mCurrentMesh->mMaterialIndex = getMaterialIndex(strName);
         }
     }
 
@@ -768,15 +771,19 @@ void ObjFileParser::getMaterialLib() {
         ++mDataIt;
     }
 
-    // Check for existence
-    const std::string strMatName(pStart, &(*mDataIt));
-    std::string absName;
+    // Check for existence (use string_view for parsing)
+    std::string_view svMatName(pStart, static_cast<size_t>(&(*mDataIt) - pStart));
+    svMatName = trimStringView(svMatName);
 
     // Check if directive is valid.
-    if (0 == strMatName.length()) {
+    if (svMatName.empty()) {
         ASSIMP_LOG_WARN("OBJ: no name for material library specified.");
         return;
     }
+
+    // Create string for the material name (needed for path construction and storage)
+    std::string strMatName(svMatName);
+    std::string absName;
 
     if (mIO->StackSize() > 0) {
         std::string path = mIO->CurrentDirectory();
@@ -822,11 +829,24 @@ void ObjFileParser::getNewMaterial() {
         return;
     }
 
-    char *pStart = &(*mDataIt);
-    std::string strMat(pStart, *mDataIt);
+    const char *pStart = &(*mDataIt);
+    const char *pEnd = pStart;
     while (mDataIt != mDataItEnd && IsSpaceOrNewLine(*mDataIt)) {
         ++mDataIt;
+        ++pEnd;
     }
+    
+    // Use string_view for lookup (zero-copy)
+    std::string_view svMat(pStart, static_cast<size_t>(pEnd - pStart));
+    svMat = trimStringView(svMat);
+    
+    if (svMat.empty()) {
+        mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
+        return;
+    }
+    
+    // Create string for map lookup
+    std::string strMat(svMat);
     auto it = mModel->mMaterialMap.find(strMat);
     if (it == mModel->mMaterialMap.end()) {
         // Show a warning, if material was not found
@@ -837,7 +857,7 @@ void ObjFileParser::getNewMaterial() {
         if (needsNewMesh(strMat)) {
             createMesh(strMat);
         }
-        mModel->mCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strMat);
+        mModel->mCurrentMesh->mMaterialIndex = getMaterialIndex(strMat);
     }
 
     mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
@@ -846,13 +866,14 @@ void ObjFileParser::getNewMaterial() {
 static constexpr int InvalidMaterialIndex = -1;
 
 // -------------------------------------------------------------------
-int ObjFileParser::getMaterialIndex(const std::string &strMaterialName) {
+int ObjFileParser::getMaterialIndex(std::string_view strMaterialName) {
     int mat_index = InvalidMaterialIndex;
     if (strMaterialName.empty()) {
         return mat_index;
     }
     for (size_t index = 0; index < mModel->mMaterialLib.size(); ++index) {
-        if (strMaterialName == mModel->mMaterialLib[index]) {
+        // Compare string_view with std::string in mMaterialLib
+        if (strMaterialName == std::string_view(mModel->mMaterialLib[index])) {
             mat_index = (int)index;
             break;
         }
@@ -901,22 +922,25 @@ void ObjFileParser::reselectGroup() {
     if (mDataIt == mDataItEnd) {
         return;
     }
-    char *pStart = &(*mDataIt);
+    const char *pStart = &(*mDataIt);
     while (mDataIt != mDataItEnd && !IsSpaceOrNewLine(*mDataIt)) {
         ++mDataIt;
     }
 
-    std::string groupName(pStart, &(*mDataIt));
-    if (groupName.empty()) {
+    std::string_view svGroupName(pStart, static_cast<size_t>(&(*mDataIt) - pStart));
+    svGroupName = trimStringView(svGroupName);
+    if (svGroupName.empty()) {
         ASSIMP_LOG_ERROR("OBJ: fatal error: No GroupName to reselect");
         mDataIt = skipLine<DataArrayIt>(mDataIt, mDataItEnd, mLine);
         return;
     }
 
     // Object names are stored without a "g " / "group " prefix.
+    // Convert to string for storage and comparison
+    std::string groupName(svGroupName);
     mModel->mCurrentObject = nullptr;
     for (ObjFile::Object *obj : mModel->mObjects) {
-        if (obj != nullptr && obj->m_strObjName == groupName) {
+        if (obj != nullptr && obj->mObjName == groupName) {
             mModel->mCurrentObject = obj;
             break;
         }
@@ -951,19 +975,22 @@ void ObjFileParser::getObjectName() {
     if (mDataIt == mDataItEnd) {
         return;
     }
-    char *pStart = &(*mDataIt);
+    const char *pStart = &(*mDataIt);
     while (mDataIt != mDataItEnd && !IsSpaceOrNewLine(*mDataIt)) {
         ++mDataIt;
     }
 
-    std::string strObjectName(pStart, &(*mDataIt));
-    if (!strObjectName.empty()) {
+    std::string_view svObjectName(pStart, static_cast<size_t>(&(*mDataIt) - pStart));
+    svObjectName = trimStringView(svObjectName);
+    if (!svObjectName.empty()) {
+        // Convert to string for storage and comparison
+        std::string strObjectName(svObjectName);
         // Reset current object
         mModel->mCurrentObject = nullptr;
 
         // Search for actual object
         for (auto it = mModel->mObjects.begin(); it != mModel->mObjects.end(); ++it) {
-            if ((*it)->m_strObjName == strObjectName) {
+            if ((*it)->mObjName == strObjectName) {
                 mModel->mCurrentObject = *it;
                 break;
             }
@@ -979,31 +1006,31 @@ void ObjFileParser::getObjectName() {
 
 // -------------------------------------------------------------------
 //  Creates a new object instance
-void ObjFileParser::createObject(const std::string &objName) {
+void ObjFileParser::createObject(std::string_view objName) {
     ai_assert(nullptr != mModel);
 
     mModel->mCurrentObject = new ObjFile::Object;
-    mModel->mCurrentObject->m_strObjName = objName;
+    mModel->mCurrentObject->mObjName = std::string(objName);
     mModel->mObjects.push_back(mModel->mCurrentObject);
 
     createMesh(objName);
 
     if (mModel->mCurrentMaterial) {
-        mModel->mCurrentMesh->m_uiMaterialIndex =
+        mModel->mCurrentMesh->mMaterialIndex =
                 getMaterialIndex(mModel->mCurrentMaterial->MaterialName.data);
-        mModel->mCurrentMesh->m_pMaterial = mModel->mCurrentMaterial;
+        mModel->mCurrentMesh->mMaterial = mModel->mCurrentMaterial;
     }
 }
 // -------------------------------------------------------------------
 //  Creates a new mesh
-void ObjFileParser::createMesh(const std::string &meshName) {
+void ObjFileParser::createMesh(std::string_view meshName) {
     ai_assert(nullptr != mModel);
 
-    mModel->mCurrentMesh = new ObjFile::Mesh(meshName);
+    mModel->mCurrentMesh = new ObjFile::Mesh(std::string(meshName));
     mModel->mMeshes.push_back(mModel->mCurrentMesh);
     auto meshId = static_cast<unsigned int>(mModel->mMeshes.size() - 1);
     if (mModel->mCurrentObject != nullptr) {
-        mModel->mCurrentObject->m_Meshes.push_back(meshId);
+        mModel->mCurrentObject->mMeshes.push_back(meshId);
     } else {
         ASSIMP_LOG_ERROR("OBJ: No object detected to attach a new mesh instance.");
     }
@@ -1011,18 +1038,19 @@ void ObjFileParser::createMesh(const std::string &meshName) {
 
 // -------------------------------------------------------------------
 //  Returns true, if a new mesh must be created.
-bool ObjFileParser::needsNewMesh(const std::string &materialName) {
+bool ObjFileParser::needsNewMesh(std::string_view materialName) {
     // If no mesh data yet
     if (mModel->mCurrentMesh == nullptr) {
         return true;
     }
     bool newMat = false;
+    // Convert to string for getMaterialIndex (which needs to search in mMaterialLib)
     int matIdx = getMaterialIndex(materialName);
-    int curMatIdx = mModel->mCurrentMesh->m_uiMaterialIndex;
+    int curMatIdx = mModel->mCurrentMesh->mMaterialIndex;
     if (curMatIdx != int(ObjFile::Mesh::NoMaterial) && curMatIdx != matIdx
             // no need create a new mesh if no faces in current
             // lets say 'usemtl' goes straight after 'g'
-            && !mModel->mCurrentMesh->m_Faces.empty()) {
+            && !mModel->mCurrentMesh->mFaces.empty()) {
         // New material -> only one material per mesh, so we need to create a new
         // material
         newMat = true;

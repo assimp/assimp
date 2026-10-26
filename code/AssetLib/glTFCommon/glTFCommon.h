@@ -302,9 +302,16 @@ template <unsigned int N>
 struct ReadHelper<float[N]> {
     static bool Read(Value &val, float (&out)[N]) {
         if (!val.IsArray() || val.Size() != N) return false;
+        // Check the whole array before writing any of it. An entry that is not
+        // a number used to be skipped while Read still reported success, so a
+        // Nullable<vec3> went isPresent over a value whose skipped component
+        // was never assigned. Refuse the array whole, the way a wrong size or a
+        // non-array already is refused, and leave out untouched either way.
         for (unsigned int i = 0; i < N; ++i) {
-            if (val[i].IsNumber())
-                out[i] = static_cast<float>(val[i].GetDouble());
+            if (!val[i].IsNumber()) return false;
+        }
+        for (unsigned int i = 0; i < N; ++i) {
+            out[i] = static_cast<float>(val[i].GetDouble());
         }
         return true;
     }

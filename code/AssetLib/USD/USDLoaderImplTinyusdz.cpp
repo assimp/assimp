@@ -253,7 +253,7 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
         newAiAnimation->mName = animation.abs_path;
 
 #if defined(ASSIMP_BUILD_USD_BETA)
-        if (animation.channels.empty()) {
+        if (animation.empty()) {
 #else
         if (animation.channels_map.empty()) {
 #endif //#if defined(ASSIMP_BUILD_USD_BETA)
@@ -264,14 +264,14 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
         // each channel affects a node (joint)
         newAiAnimation->mTicksPerSecond = render_scene.meta.framesPerSecond;
 #if defined(ASSIMP_BUILD_USD_BETA)
-        newAiAnimation->mNumChannels = unsigned(animation.channels.size());
+        newAiAnimation->mNumChannels = unsigned(animation.num_channels());
 #else
         newAiAnimation->mNumChannels = unsigned(animation.channels_map.size());
 #endif //#if defined(ASSIMP_BUILD_USD_BETA)
 
         newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
 #if defined(ASSIMP_BUILD_USD_BETA)
-        for (int channelIndex = 0; channelIndex < animation.channels.size(); ++channelIndex) {
+        for (int channelIndex = 0; channelIndex < animation.num_channels(); ++channelIndex) {
 //            auto &animationChannel = animation.channels[channelIndex];
 #else
         int channelIndex = 0;

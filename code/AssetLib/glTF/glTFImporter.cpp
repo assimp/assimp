@@ -282,7 +282,9 @@ void glTFImporter::ImportMeshes(Asset &r) {
                 attr.position[0]->ExtractData(aim->mVertices);
             }
 
-            if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
+            if (attr.normal.size() > 0 && attr.normal[0]) {
+                attr.normal[0]->ExtractData(aim->mNormals);
+            }
 
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 const bool extracted = attr.texcoord[tc] && attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
@@ -470,13 +472,6 @@ void glTFImporter::ImportMeshes(Asset &r) {
 
     // Release ownership to the scene: CopyVector takes ownership of the raw
     // pointers, so hand them over only now that import has fully succeeded.
-    //std::vector<aiMesh *> rawMeshes;
-    //rawMeshes.reserve(meshes.size());
-    //for (std::unique_ptr<aiMesh> &m : meshes) {
-    //    rawMeshes.push_back(m.release());
-    //}
-
-    //CopyVector(rawMeshes, mScene->mMeshes, mScene->mNumMeshes);
     CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
 }
 

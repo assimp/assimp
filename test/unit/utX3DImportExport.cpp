@@ -85,6 +85,16 @@ TEST_F(utX3DImportExport, importX3DComputerKeyboard) {
     ASSERT_NE(100u, scene->mNumMeshes); // Correct value, to be restored when importer fixed
 }
 
+TEST_F(utX3DImportExport, importX3DMalformedColorIndex) {
+    // IndexedFaceSet whose colorIndex is longer than coordIndex (colorPerVertex=true).
+    // add_color walked the coordIndex vector past its end, a heap out-of-bounds read.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X3D/invalid/MalformedColorIndex.x3d", 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    ASSERT_EQ(scene->mMeshes[0]->mNumVertices, 3u);
+}
+
 TEST_F(utX3DImportExport, importX3DChevyTahoe) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/X3D/Chevy/ChevyTahoe.x3d", aiProcess_ValidateDataStructure);

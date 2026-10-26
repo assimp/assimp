@@ -1032,8 +1032,8 @@ void ColladaLoader::StoreAnimations(aiScene *pScene, const ColladaParser &pParse
     std::string animName = pPrefix.empty() ? pSrcAnim->mName : pPrefix + "_" + pSrcAnim->mName;
 
     // create nested animations, if given
-    for (auto mSubAnim : pSrcAnim->mSubAnims) {
-        StoreAnimations(pScene, pParser, mSubAnim, animName);
+    for (auto &mSubAnim : pSrcAnim->mSubAnims) {
+        StoreAnimations(pScene, pParser, mSubAnim.get(), animName);
     }
 
     // create animation channels, if any

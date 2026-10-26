@@ -615,16 +615,16 @@ public:
     ~Statistics() = default;
 
     /// total number of fields we read
-    unsigned int fields_read;
+    unsigned int fields_read = 0;
 
     /// total number of resolved pointers
-    unsigned int pointers_resolved;
+    unsigned int pointers_resolved = 0;
 
     /// number of pointers resolved from the cache
-    unsigned int cache_hits;
+    unsigned int cache_hits = 0;
 
     /// objects in FileData::cache
-    unsigned int cached_objects;
+    unsigned int cached_objects = 0;
 };
 
 #endif
@@ -778,10 +778,11 @@ private:
 *   @param[out] out memory ptr to set
 *   @param[in]  cdtype  to read
 *   @param[in]  cnt cnt of elements to read
+*   @param[in]  dataSize size in bytes of the file block the elements are read from
 *   @param[in]  db to read elements from
 *   @return true when ok
 */
-bool readCustomData(std::shared_ptr<ElemBase> &out, int cdtype, size_t cnt, const FileDatabase &db);
+bool readCustomData(std::shared_ptr<ElemBase> &out, int cdtype, size_t cnt, size_t dataSize, const FileDatabase &db);
 
 } // namespace Blender
 } // namespace Assimp

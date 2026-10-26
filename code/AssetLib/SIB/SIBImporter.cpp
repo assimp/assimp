@@ -127,7 +127,6 @@ struct SIB {
     // so a copy would hand the same pointers to two destructors.
     SIB(const SIB &) = delete;
     SIB &operator=(const SIB &) = delete;
-
     ~SIB() {
         // Anything still held here was not handed over to the aiScene, which happens
         // when parsing was aborted by an error.
@@ -251,9 +250,17 @@ static void ReadFaces(SIBMesh *mesh, StreamReaderLE *stream) {
     while (stream->GetRemainingSizeToLimit() > 0) {
         uint32_t numPoints = stream->GetU4();
 
+        // Every point of the face is stored as a single 4-byte index, so a face can
+        // never have more points than the remaining chunk data can hold. Rejecting
+        // larger counts here also keeps the index array size below the point where
+        // numPoints * N would wrap around.
+        if (numPoints == 0 || numPoints > stream->GetRemainingSizeToLimit() / 4) {
+            throw DeadlyImportError("SIB: Invalid face point count.");
+        }
+
         // Store room for the N index channels, plus the point count.
         const size_t pos = mesh->idx.size() + 1;
-        mesh->idx.resize(pos + numPoints * N);
+        mesh->idx.resize(pos + static_cast<size_t>(numPoints) * N);
         mesh->idx[pos - 1] = numPoints;
         uint32_t *idx = &mesh->idx[pos];
 
@@ -870,6 +877,11 @@ void SIBImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     if (pScene->mNumLights) {
         memcpy(pScene->mLights, &sib.lights[0], sizeof(aiLight *) * pScene->mNumLights);
     }
+
+    // The scene owns them now, so make sure they are not deleted twice. The light list
+    // is still needed below and is released after the nodes have been built.
+    sib.mtls.clear();
+    sib.meshes.clear();
 
     // The scene owns them now, so make sure they are not deleted twice. The light list
     // is still needed below and is released after the nodes have been built.

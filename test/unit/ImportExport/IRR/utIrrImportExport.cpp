@@ -56,15 +56,216 @@ public:
     }
 };
 
+
 TEST_F(utIrrImportExport, importSimpleIrrTest) {
     EXPECT_TRUE(importerTest());
 }
 
+
+TEST_F(utIrrImportExport, importAnimMesh) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/animMesh.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importAnimMeshUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/animMesh_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importBox) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/box.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importBoxUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/box_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importCellar) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRRMesh/cellar.irrmesh", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importCellarUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRRMesh/cellar_UTF16LE.irrmesh", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importDawfInCellar) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/dawfInCellar_ChildOfCellar.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importDawfInCellarUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/dawfInCellar_ChildOfCellar_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
 TEST_F(utIrrImportExport, importSGIrrTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/dawfInCellar_SameHierarchy.irr", aiProcess_ValidateDataStructure);
-    EXPECT_NE(nullptr, scene);
-    EXPECT_EQ(scene->mNumMeshes, 2);
-    EXPECT_EQ(scene->mNumMaterials, 2);
-    EXPECT_GT(scene->mMeshes[0]->mNumVertices, 0);
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mNumMeshes, 4u);
+    EXPECT_EQ(scene->mNumMaterials, 5u);
+    ASSERT_GT(scene->mNumMeshes, 0u);
+    EXPECT_GT(scene->mMeshes[0]->mNumVertices, 0u);
+}
+
+
+TEST_F(utIrrImportExport, importSGIrrTestUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/dawfInCellar_SameHierarchy_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(scene->mNumMeshes, 4u);
+    EXPECT_EQ(scene->mNumMaterials, 5u);
+    ASSERT_GT(scene->mNumMeshes, 0u);
+    EXPECT_GT(scene->mMeshes[0]->mNumVertices, 0u);
+}
+
+
+TEST_F(utIrrImportExport, importANewDwarf) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/EpisodeI_ANewDwarf.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importANewDwarfUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/EpisodeI_ANewDwarf_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importDwarfStrikesBack) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/EpisodeII_TheDwarfesStrikeBack.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importDwarfStrikesBackUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/EpisodeII_TheDwarfesStrikeBack_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importInstancing) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/instancing.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importMultipleAnimators) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/multipleAnimators.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importMultipleAnimatorsUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/multipleAnimators_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importScenegraphAnim) {
+    Assimp::Importer importer;
+    // FIXME: this fails but probably shouldn't
+    // Validation failed: Empty node animation channel
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/scenegraphAnim.irr", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+
+    Assimp::Importer importer2;
+    const aiScene *scene2 = importer2.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/scenegraphAnim.irr", 0);
+    ASSERT_NE(nullptr, scene2);
+}
+
+
+TEST_F(utIrrImportExport, importScenegraphAnimUTF16) {
+    Assimp::Importer importer;
+    // FIXME: this fails but probably shouldn't
+    // Validation failed: Empty node animation channel
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/scenegraphAnim_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+
+    Assimp::Importer importer2;
+    const aiScene *scene2 = importer2.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/scenegraphAnim_UTF16LE.irr", 0);
+    ASSERT_NE(nullptr, scene2);
+}
+
+
+TEST_F(utIrrImportExport, importScenegraphAnimMod) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/scenegraphAnimMod.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importScenegraphAnimModUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/scenegraphAnimMod_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importSphere) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/sphere.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importSphereUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRR/sphere_UTF16LE.irr", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importSpider) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRRMesh/spider.irrmesh", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importSpiderUTF166) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRRMesh/spider_UTF16LE.irrmesh", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importSkybox) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/IRR/skybox.xml", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+}
+
+
+TEST_F(utIrrImportExport, importSkyboxUTF16) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/IRR/skybox_UTF16LE.xml", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
 }

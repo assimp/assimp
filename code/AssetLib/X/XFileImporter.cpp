@@ -162,6 +162,8 @@ void XFileImporter::CreateDataRepresentationFromImport(aiScene *pScene, XFile::S
         pScene->mNumMaterials = 1;
         // create the Material
         aiMaterial *mat = new aiMaterial;
+        aiString name(AI_DEFAULT_MATERIAL_NAME);
+        mat->AddProperty(&name, AI_MATKEY_NAME);
         int shadeMode = (int)aiShadingMode_Gouraud;
         mat->AddProperty<int>(&shadeMode, 1, AI_MATKEY_SHADING_MODEL);
         // material colours
@@ -334,8 +336,10 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
                     // texture coord sets
                     for (unsigned int e = 0; e < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++e) {
                         if (mesh->HasTextureCoords(e)) {
-                            aiVector2D tex = sourceMesh->mTexCoords[e][pf.mIndices[d]];
-                            mesh->mTextureCoords[e][newIndex] = aiVector3D(tex.x, 1.0f - tex.y, 0.0f);
+                            if (pf.mIndices[d] < sourceMesh->mTexCoords[e].size()) {
+                                aiVector2D tex = sourceMesh->mTexCoords[e][pf.mIndices[d]];
+                                mesh->mTextureCoords[e][newIndex] = aiVector3D(tex.x, 1.0f - tex.y, 0.0f);
+                            }
                         }
                     }
                     // vertex color sets
@@ -360,18 +364,15 @@ void XFileImporter::CreateMeshes(aiScene *pScene, aiNode *pNode, const std::vect
                 // set up a vertex-linear array of the weights for quick searching if a bone influences a vertex
                 std::vector<ai_real> oldWeights(sourceMesh->mPositions.size(), 0.0);
                 for (unsigned int d = 0; d < obone.mWeights.size(); ++d) {
-                    // TODO  The conditional against boneIdx which was added in commit f844c33
-                    // TODO      (https://github.com/assimp/assimp/commit/f844c3397d7726477ab0fdca8efd3df56c18366b)
-                    // TODO  causes massive breakage as detailed in:
-                    // TODO      https://github.com/assimp/assimp/issues/5332
-                    // TODO  In cases like this unit tests are less useful, since the model still has
-                    // TODO  meshes, textures, animations etc. and asserts against these values may pass;
-                    // TODO  when touching importer code, it is crucial that developers also run manual, visual
-                    // TODO  checks to ensure there's no obvious breakage _before_ commiting to main branch
-                    //const unsigned int boneIdx = obone.mWeights[d].mVertex;
-                    //if (boneIdx < obone.mWeights.size()) {
-                        oldWeights[obone.mWeights[d].mVertex] = obone.mWeights[d].mWeight;
-                    //}
+                    // mVertex comes straight from the file and indexes oldWeights, whose
+                    // length is mPositions.size(); a value past the end is an out-of-bounds
+                    // write. The conditional reverted in #5332 bounded by obone.mWeights.size()
+                    // (the weight count, unrelated to the array), which dropped valid weights;
+                    // bound by oldWeights.size() instead so only genuinely invalid indices skip.
+                    const unsigned int vertexIndex = obone.mWeights[d].mVertex;
+                    if (vertexIndex < oldWeights.size()) {
+                        oldWeights[vertexIndex] = obone.mWeights[d].mWeight;
+                    }
                 }
 
                 // collect all vertex weights that influence a vertex in the new mesh

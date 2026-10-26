@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  ASELoader.cpp
+/**
+ *  @file  ASELoader.cpp
  *  @brief Implementation of the ASE importer class
  */
 
@@ -57,13 +58,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/fast_atof.h>
 
 #include <memory>
 
-// utilities
-#include <assimp/fast_atof.h>
-
 namespace Assimp {
+
 using namespace Assimp::ASE;
 
 static constexpr aiImporterDesc desc = {
@@ -78,13 +78,6 @@ static constexpr aiImporterDesc desc = {
     0,
     "ase ask"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-ASEImporter::ASEImporter() :
-        mParser(), mBuffer(), pcScene(), configRecomputeNormals(), noSkeletonMesh() {
-    // empty
-}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -102,12 +95,12 @@ const aiImporterDesc *ASEImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 // Setup configuration options
 void ASEImporter::SetupProperties(const Importer *pImp) {
-    configRecomputeNormals = (pImp->GetPropertyInteger(
+    mConfigRecomputeNormals = (pImp->GetPropertyInteger(
                                       AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS, 1) ?
                                       true :
                                       false);
 
-    noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, 0) != 0;
+    mNoSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, 0) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -189,6 +182,11 @@ void ASEImporter::InternReadFile(const std::string &pFile,
         aiMesh **pp = pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
         for (std::vector<aiMesh *>::const_iterator i = avOutMeshes.begin(); i != avOutMeshes.end(); ++i) {
             if (!(*i)->mNumFaces) {
+                // Channels 2 and 3 hold the source mesh pointer and the
+                // material index, not color arrays, so they must not be freed.
+                (*i)->mColors[2] = nullptr;
+                (*i)->mColors[3] = nullptr;
+                delete *i;
                 continue;
             }
             *pp++ = *i;
@@ -239,7 +237,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
     // ------------------------------------------------------------------
     if (!pScene->mNumMeshes) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
-        if (!noSkeletonMesh) {
+        if (!mNoSkeletonMesh) {
             SkeletonMeshBuilder skeleton(pScene);
         }
     }
@@ -573,8 +571,8 @@ void ASEImporter::AddNodes(const std::vector<BaseNode *> &nodes, aiNode *pcParen
             nd->mParent = node;
 
             // The .Target node is always the first child node
-            for (unsigned int m = 0; m < node->mNumChildren; ++m)
-                node->mChildren[m + 1] = node->mChildren[m];
+            for (unsigned int m = node->mNumChildren; m > 0; --m)
+                node->mChildren[m] = node->mChildren[m - 1];
 
             node->mChildren[0] = nd;
             node->mNumChildren++;
@@ -740,11 +738,19 @@ void ASEImporter::BuildUniqueRepresentation(ASE::Mesh &mesh) {
             // add texture coordinates
             for (unsigned int c = 0; c < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++c) {
                 if (mesh.amTexCoords[c].empty()) break;
-                amTexCoords[c][iCurrent] = mesh.amTexCoords[c][(*i).amUVIndices[c][n]];
+                const uint32_t uvIndex = (*i).amUVIndices[c][n];
+                if (uvIndex >= mesh.amTexCoords[c].size()) {
+                    throw DeadlyImportError("ASE: Invalid UV index in face ", fi, ".");
+                }
+                amTexCoords[c][iCurrent] = mesh.amTexCoords[c][uvIndex];
             }
             // add vertex colors
             if (!mesh.mVertexColors.empty()) {
-                mVertexColors[iCurrent] = mesh.mVertexColors[(*i).mColorIndices[n]];
+                const uint32_t colorIndex = (*i).mColorIndices[n];
+                if (colorIndex >= mesh.mVertexColors.size()) {
+                    throw DeadlyImportError("ASE: Invalid vertex color index in face ", fi, ".");
+                }
+                mVertexColors[iCurrent] = mesh.mVertexColors[colorIndex];
             }
             // add normal vectors
             if (!mesh.mNormals.empty()) {
@@ -1253,17 +1259,18 @@ void ASEImporter::BuildMaterialIndices() {
 // Generate normal vectors basing on smoothing groups
 bool ASEImporter::GenerateNormals(ASE::Mesh &mesh) {
 
-    if (!mesh.mNormals.empty() && !configRecomputeNormals) {
+    if (!mesh.mNormals.empty() && !mConfigRecomputeNormals) {
         // Check whether there are only uninitialized normals. If there are
         // some, skip all normals from the file and compute them on our own
-        for (std::vector<aiVector3D>::const_iterator qq = mesh.mNormals.begin(); qq != mesh.mNormals.end(); ++qq) {
-            if ((*qq).x || (*qq).y || (*qq).z) {
+        for (auto qq = mesh.mNormals.begin(); qq != mesh.mNormals.end(); ++qq) {
+            if (qq->x || qq->y || qq->z) {
                 return true;
             }
         }
     }
     // The array is reused.
     ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
+
     return false;
 }
 

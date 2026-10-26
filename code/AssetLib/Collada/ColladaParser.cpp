@@ -662,32 +662,36 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
 
 // ------------------------------------------------------------------------------------------------
 // Reads the animation clips
-void ColladaParser::ReadAnimationClipLibrary(XmlNode &node) {
+void ColladaParser::ReadAnimationClipLibrary(XmlNode &node /*NODE: library_animation_clips*/) {
     if (node.empty()) {
         return;
     }
-
-    std::string animName;
-    if (!XmlParser::getStdStrAttribute(node, "name", animName)) {
-        if (!XmlParser::getStdStrAttribute(node, "id", animName)) {
-            animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
-        }
-    }
-
-    std::pair<std::string, std::vector<std::string>> clip;
-    clip.first = animName;
-
     for (XmlNode &currentNode : node.children()) {
-        const std::string &currentName = currentNode.name();
-        if (currentName == "instance_animation") {
-            std::string url;
-            readUrlAttribute(currentNode, url);
-            clip.second.push_back(url);
-        }
+        const std::string& currentNodeName = currentNode.name();
+        if (currentNodeName != "animation_clip") {
+            continue;
+		}
+		
+	    std::string animName;
+	    if (!XmlParser::getStdStrAttribute(currentNode, "name", animName) && !XmlParser::getStdStrAttribute(currentNode, "id", animName)) {
+            animName = std::string("animation_") + ai_to_string(mAnimationClipLibrary.size());
+	    }
 
-        if (clip.second.size() > 0) {
-            mAnimationClipLibrary.push_back(clip);
-        }
+	    std::pair<std::string, std::vector<std::string>> clip;
+	    clip.first = animName;
+
+	    for (XmlNode &instanceAnimation : currentNode.children()) {
+		    const std::string &currentName = instanceAnimation.name();
+		    if (currentName == "instance_animation") {
+			    std::string url;
+			    readUrlAttribute(instanceAnimation, url);
+			    clip.second.push_back(url);
+		    }	
+	    }
+
+	    if (clip.second.size() > 0) {
+		    mAnimationClipLibrary.push_back(clip);
+	    }
     }
 }
 
@@ -725,7 +729,7 @@ void ColladaParser::PostProcessRootAnimations() {
         auto *clip = new Animation();
         clip->mName = clipName;
 
-        temp.mSubAnims.push_back(clip);
+        temp.mSubAnims.push_back(std::unique_ptr<Animation>(clip));
 
         for (const std::string &animationID : it.second) {
             auto animation = mAnimationLibrary.find(animationID);
@@ -737,10 +741,7 @@ void ColladaParser::PostProcessRootAnimations() {
         }
     }
 
-    mAnims = temp;
-
-    // Ensure no double deletes.
-    temp.mSubAnims.clear();
+    mAnims = std::move(temp);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -790,7 +791,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
             if (!anim) {
                 anim = new Animation;
                 anim->mName = animName;
-                pParent->mSubAnims.push_back(anim);
+                pParent->mSubAnims.push_back(std::unique_ptr<Animation>(anim));
             }
 
             // recurse into the sub-element
@@ -823,7 +824,7 @@ void ColladaParser::ReadAnimation(XmlNode &node, Collada::Animation *pParent) {
         if (nullptr == anim) {
             anim = new Animation;
             anim->mName = animName;
-            pParent->mSubAnims.push_back(anim);
+            pParent->mSubAnims.push_back(std::unique_ptr<Animation>(anim));
         }
 
         for (const auto &channel : channels) {
@@ -1723,7 +1724,9 @@ void ColladaParser::ReadInputChannel(XmlNode &node, std::vector<InputChannel> &p
 
     // read index offset, if per-index <input>
     if (XmlParser::hasAttribute(node, "offset")) {
-        XmlParser::getUIntAttribute(node, "offset", (unsigned int &)channel.mOffset);
+        unsigned int offsetValue = 0;
+        XmlParser::getUIntAttribute(node, "offset", offsetValue);
+        channel.mOffset = offsetValue;
     }
 
     // read set if texture coordinates

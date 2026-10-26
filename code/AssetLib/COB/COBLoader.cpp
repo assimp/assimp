@@ -234,7 +234,7 @@ void ConvertTexture(const std::shared_ptr<Texture> &tex, aiMaterial *out, aiText
 
 // ------------------------------------------------------------------------------------------------
 aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fill) {
-    aiNode *nd = new aiNode();
+    auto nd = new aiNode();
     nd->mName.Set(root.name);
     nd->mTransformation = root.transform;
 
@@ -361,7 +361,7 @@ aiNode *COBImporter::BuildNodes(const Node &root, const Scene &scin, aiScene *fi
             }
         }
     } else if (Node::TYPE_LIGHT == root.type) {
-        const Light &ndlight = (const Light &)(root);
+        const auto &ndlight = (const Light &)(root);
         aiLight *outlight = fill->mLights[fill->mNumLights++] = new aiLight();
 
         outlight->mName.Set(ndlight.name);
@@ -864,8 +864,13 @@ public:
             try {
                 reader.IncPtr(static_cast<int>(nfo.size) - reader.GetCurrentPos() + cur);
             } catch (const DeadlyImportError &) {
-                // out of limit so correct the value
-                reader.IncPtr(reader.GetReadLimit());
+                // The chunk size points past the end of the buffer; clamp to the
+                // read limit. This must not throw: a destructor is implicitly
+                // noexcept, and the previous code called IncPtr(GetReadLimit()),
+                // which interprets the absolute limit as a relative offset and
+                // seeks out of bounds again -- the escaping exception then
+                // terminated the process. SkipToReadLimit() clamps without throwing.
+                reader.SkipToReadLimit();
             }
         }
     }

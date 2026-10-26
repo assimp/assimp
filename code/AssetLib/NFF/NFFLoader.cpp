@@ -1060,8 +1060,9 @@ void NFFImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 
         // copy vertex positions
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];
-        ::memcpy(mesh->mVertices, &src.vertices[0],
-                sizeof(aiVector3D) * mesh->mNumVertices);
+        if (!src.vertices.empty()) {
+            ::memcpy(mesh->mVertices, &src.vertices[0], sizeof(aiVector3D) * mesh->mNumVertices);
+        }
 
         // NFF2: there could be vertex colors
         if (!src.colors.empty()) {

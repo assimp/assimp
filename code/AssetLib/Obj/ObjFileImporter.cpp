@@ -443,7 +443,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *model, const ObjFi
     for (auto sourceFace : objMesh->mFaces) {
         // Copy all index arrays
         for (size_t vertexIndex = 0, outVertexIndex = 0; vertexIndex < sourceFace->mVertices.size(); vertexIndex++) {
-            const unsigned int vertex = sourceFace->mVertices.at(vertexIndex);
+            const unsigned int vertex = sourceFace->mVertices[vertexIndex];
             if (vertex >= model->mVertices.size()) {
                 throw DeadlyImportError("OBJ: vertex index out of range");
             }
@@ -456,7 +456,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *model, const ObjFi
 
             // Copy all normals
             if (normalsok && !model->mNormals.empty() && vertexIndex < sourceFace->mNormals.size()) {
-                const unsigned int normal = sourceFace->mNormals.at(vertexIndex);
+                const unsigned int normal = sourceFace->mNormals[vertexIndex];
                 if (normal >= model->mNormals.size()) {
                     normalsok = false;
                 } else {
@@ -472,7 +472,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model *model, const ObjFi
 
             // Copy all texture coordinates
             if (uvok && !model->mTextureCoord.empty() && vertexIndex < sourceFace->mTextureCoords.size()) {
-                const unsigned int tex = sourceFace->mTextureCoords.at(vertexIndex);
+                const unsigned int tex = sourceFace->mTextureCoords[vertexIndex];
                 if (tex >= model->mTextureCoord.size()) {
                     uvok = false;
                 } else {

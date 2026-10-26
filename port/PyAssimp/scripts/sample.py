@@ -20,63 +20,60 @@ def recur_node(node,level = 0):
 
 def main(filename=None):
 
-    scene = pyassimp.load(filename, processing=pyassimp.postprocess.aiProcess_Triangulate)
-    
-    #the model we load
-    print("MODEL:" + filename)
-    print
-    
-    #write some statistics
-    print("SCENE:")
-    print("  meshes:" + str(len(scene.meshes)))
-    print("  materials:" + str(len(scene.materials)))
-    print("  textures:" + str(len(scene.textures)))
-    print
-    
-    print("NODES:")
-    recur_node(scene.rootnode)
+    with pyassimp.load(filename, processing=pyassimp.postprocess.aiProcess_Triangulate) as scene:
 
-    print
-    print("MESHES:")
-    for index, mesh in enumerate(scene.meshes):
-        print("  MESH" + str(index+1))
-        print("    material id:" + str(mesh.materialindex+1))
-        print("    vertices:" + str(len(mesh.vertices)))
-        print("    first 3 verts:\n" + str(mesh.vertices[:3]))
-        if mesh.normals.any():
-                print("    first 3 normals:\n" + str(mesh.normals[:3]))
-        else:
-                print("    no normals")
-        print("    colors:" + str(len(mesh.colors)))
-        tcs = mesh.texturecoords
-        if tcs.any():
-            for tc_index, tc in enumerate(tcs):
-                print("    texture-coords "+ str(tc_index) + ":" + str(len(tcs[tc_index])) + "first3:" + str(tcs[tc_index][:3]))
+        #the model we load
+        print("MODEL:" + filename)
+        print()
 
-        else:
-            print("    no texture coordinates")
-        print("    uv-component-count:" + str(len(mesh.numuvcomponents)))
-        print("    faces:" + str(len(mesh.faces)) + " -> first:\n" + str(mesh.faces[:3]))
-        print("    bones:" + str(len(mesh.bones)) + " -> first:" + str([str(b) for b in mesh.bones[:3]]))
-        print
+        #write some statistics
+        print("SCENE:")
+        print("  meshes:" + str(len(scene.meshes)))
+        print("  materials:" + str(len(scene.materials)))
+        print("  textures:" + str(len(scene.textures)))
+        print()
 
-    print("MATERIALS:")
-    for index, material in enumerate(scene.materials):
-        print("  MATERIAL (id:" + str(index+1) + ")")
-        for key, value in material.properties.items():
-            print("    %s: %s" % (key, value))
-    print
-    
-    print("TEXTURES:")
-    for index, texture in enumerate(scene.textures):
-        print("  TEXTURE" + str(index+1))
-        print("    width:" + str(texture.width))
-        print("    height:" + str(texture.height))
-        print("    hint:" + str(texture.achformathint))
-        print("    data (size):" + str(len(texture.data)))
-   
-    # Finally release the model
-    pyassimp.release(scene)
+        print("NODES:")
+        recur_node(scene.rootnode)
+
+        print()
+        print("MESHES:")
+        for index, mesh in enumerate(scene.meshes):
+            print("  MESH" + str(index+1))
+            print("    material id:" + str(mesh.materialindex+1))
+            print("    vertices:" + str(len(mesh.vertices)))
+            print("    first 3 verts:\n" + str(mesh.vertices[:3]))
+            if mesh.normals.any():
+                    print("    first 3 normals:\n" + str(mesh.normals[:3]))
+            else:
+                    print("    no normals")
+            print("    colors:" + str(len(mesh.colors)))
+            tcs = mesh.texturecoords
+            if tcs.any():
+                for tc_index, tc in enumerate(tcs):
+                    print("    texture-coords "+ str(tc_index) + ":" + str(len(tcs[tc_index])) + "first3:" + str(tcs[tc_index][:3]))
+
+            else:
+                print("    no texture coordinates")
+            print("    uv-component-count:" + str(len(mesh.numuvcomponents)))
+            print("    faces:" + str(len(mesh.faces)) + " -> first:\n" + str(mesh.faces[:3]))
+            print("    bones:" + str(len(mesh.bones)) + " -> first:" + str([str(b) for b in mesh.bones[:3]]))
+            print()
+
+        print("MATERIALS:")
+        for index, material in enumerate(scene.materials):
+            print("  MATERIAL (id:" + str(index+1) + ")")
+            for key, value in material.properties.items():
+                print("    %s: %s" % (key, value))
+        print()
+
+        print("TEXTURES:")
+        for index, texture in enumerate(scene.textures):
+            print("  TEXTURE" + str(index+1))
+            print("    width:" + str(texture.width))
+            print("    height:" + str(texture.height))
+            print("    hint:" + str(texture.achformathint))
+            print("    data (size):" + str(len(texture.data)))
 
 def usage():
     print("Usage: sample.py <3d model>")

@@ -524,6 +524,10 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     bool motion_file = false;
     std::list<LWS::Element>::const_iterator it = root.children.begin();
 
+    if (it == root.children.end()) {
+        throw DeadlyImportError("LWS: Not a LightWave scene, no elements found");
+    }
+
     if ((*it).tokens[0] == "LWMO") {
         motion_file = true;
     }
@@ -536,8 +540,7 @@ void LWSImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
     ++it;
 
     if (it == root.children.end() || (*it).tokens[0].empty()) {
-        ASSIMP_LOG_ERROR("Invalid LWS file detectedm abort import.");
-        return;
+        throw DeadlyImportError("LWS: Missing file format version");
     }
     unsigned int version = strtoul10((*it).tokens[0].c_str());
     ASSIMP_LOG_INFO("LWS file format version is ", (*it).tokens[0]);

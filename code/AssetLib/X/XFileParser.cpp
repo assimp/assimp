@@ -1031,31 +1031,40 @@ std::string XFileParser::GetNextToken() {
         }
             return s;
 
-        case 2:
+        case 2: {
             // string token
             if (mEnd - mP < 4) return s;
             len = ReadBinDWord();
-            if (mEnd - mP < int(len)) return s;
+            // len is a uint32 from the file: a value >= 0x80000000 made int(len)
+            // negative, bypassing the "< int(len)" check below and over-reading in
+            // the std::string copy. Reject it, and never advance mP past mEnd.
+            const int iLen = int(len);
+            if (iLen < 0 || mEnd - mP < iLen) return s;
             s = std::string(mP, len);
-            mP += (len + 2);
+            mP += len;
+            mP += (mEnd - mP >= 2) ? 2 : (mEnd - mP);
             return s;
+        }
         case 3:
             // integer token
+            if (mEnd - mP < 4) return s;
             mP += 4;
             return "<integer>";
         case 5:
             // GUID token
+            if (mEnd - mP < 16) return s;
             mP += 16;
             return "<guid>";
         case 6:
             if (mEnd - mP < 4) return s;
             len = ReadBinDWord();
-            mP += (len * 4);
+            // bound the skip so a large/overflowing count cannot push mP past mEnd
+            mP += (len > static_cast<size_t>(mEnd - mP) / 4) ? (mEnd - mP) : (len * 4);
             return "<int_list>";
         case 7:
             if (mEnd - mP < 4) return s;
             len = ReadBinDWord();
-            mP += (len * mBinaryFloatSize);
+            mP += (mBinaryFloatSize == 0 || len > static_cast<size_t>(mEnd - mP) / mBinaryFloatSize) ? (mEnd - mP) : (len * mBinaryFloatSize);
             return "<flt_list>";
         case 0x0a:
             return "{";
@@ -1233,8 +1242,9 @@ unsigned int XFileParser::ReadInt() {
         }
 
         --mBinaryNumCount;
-        const size_t len(mEnd - mP);
-        if (len >= 4) {
+        // signed compare: if an earlier token skip left mP at/after mEnd, mEnd - mP
+        // is <= 0 and we must not treat it as a huge size_t and read past the buffer.
+        if (mEnd - mP >= 4) {
             return ReadBinDWord();
         } else {
             mP = mEnd;

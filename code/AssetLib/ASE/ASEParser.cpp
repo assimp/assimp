@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 
 namespace Assimp {
+
 using namespace Assimp::ASE;
 
 // ------------------------------------------------------------------------------------------------

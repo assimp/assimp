@@ -19,6 +19,10 @@ jobs:
             os: windows-latest
             arch: x86
             cmake_args: -A Win32
+          - name: windows-arm64
+            os: windows-11-arm
+            arch: arm64
+            cmake_args: -A ARM64
           - name: macos-x64
             os: macos-13
           - name: macos-arm64

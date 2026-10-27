@@ -172,8 +172,8 @@ int ConvertMappingMode(const std::string &mode) {
 
 // ------------------------------------------------------------------------------------------------
 // Parse a material from the XML file
-aiMaterial *IrrlichtBase::ParseMaterial(pugi::xml_node& materialNode, unsigned int &matFlags) {
-    aiMaterial *mat = new aiMaterial();
+std::unique_ptr<aiMaterial> IrrlichtBase::ParseMaterial(pugi::xml_node& materialNode, unsigned int &matFlags) {
+    auto mat = std::make_unique<aiMaterial>();
     aiColor4D clr;
     aiString s;
 

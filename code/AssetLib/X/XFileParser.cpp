@@ -160,7 +160,10 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
 
         // First find out how much storage we'll need. Count sections.
         const char *P1 = mP;
-        unsigned int est_out = 0;
+        // size_t so this running total cannot wrap a 32-bit counter and under-size the
+        // output buffer: a crafted file with enough MSZIP sections made est_out wrap, so
+        // uncompressed was far smaller than the data a block then decompressed into it.
+        size_t est_out = 0;
 
         while (P1 + 3 < mEnd) {
             // read next offset
@@ -198,7 +201,10 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
                 if (mP + ofs > mEnd + 2) {
                     throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
                 }
-                out += compression.decompressBlock(mP, ofs, out, MSZIP_BLOCK);
+                // never let a block decompress past the end of the output buffer, so a
+                // wrong size estimate cannot cause a heap overflow inside inflate.
+                const size_t avail = uncompressed.size() - 1 - static_cast<size_t>(out - &uncompressed.front());
+                out += compression.decompressBlock(mP, ofs, out, std::min<size_t>(MSZIP_BLOCK, avail));
                 mP += ofs;
             }
             compression.close();

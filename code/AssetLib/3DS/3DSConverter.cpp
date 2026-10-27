@@ -126,13 +126,13 @@ void Discreet3DSImporter::CheckIndices(Mesh &sMesh) {
     for (auto i = sMesh.mFaces.begin(); i != sMesh.mFaces.end(); ++i) {
         // check whether all indices are in range
         for (unsigned int a = 0; a < 3; ++a) {
-            if ((*i).mIndices[a] >= sMesh.mPositions.size()) {
+            if (i->mIndices[a] >= sMesh.mPositions.size()) {
                 ASSIMP_LOG_WARN("3DS: Vertex index overflow)");
-                (*i).mIndices[a] = static_cast<uint32_t>(sMesh.mPositions.size() - 1);
+                i->mIndices[a] = static_cast<uint32_t>(sMesh.mPositions.size() - 1);
             }
-            if (!sMesh.mTexCoords.empty() && (*i).mIndices[a] >= sMesh.mTexCoords.size()) {
+            if (!sMesh.mTexCoords.empty() && i->mIndices[a] >= sMesh.mTexCoords.size()) {
                 ASSIMP_LOG_WARN("3DS: Texture coordinate index overflow)");
-                (*i).mIndices[a] = static_cast<uint32_t>(sMesh.mTexCoords.size() - 1);
+                i->mIndices[a] = static_cast<uint32_t>(sMesh.mTexCoords.size() - 1);
             }
         }
     }
@@ -273,9 +273,9 @@ void Discreet3DSImporter::ConvertMaterial(Material &oldMat, aiMaterial &mat) {
         eShading = aiShadingMode_CookTorrance;
         break;
 
-        // FIX to workaround a warning with GCC 4 who complained
-        // about a missing case Blinn: here - Blinn isn't a valid
-        // value in the 3DS Loader, it is just needed for ASE
+    // FIX to workaround a warning with GCC 4 who complained
+    // about a missing case Blinn: here - Blinn isn't a valid
+    // value in the 3DS Loader, it is just needed for ASE
     case Discreet3DS::Blinn:
         eShading = aiShadingMode_Blinn;
         break;
@@ -323,6 +323,8 @@ void Discreet3DSImporter::ConvertMaterial(Material &oldMat, aiMaterial &mat) {
 // ------------------------------------------------------------------------------------------------
 // Split meshes by their materials and generate output aiMesh'es
 void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
+    ai_assert(pcOut != nullptr);
+
     std::vector<aiMesh *> avOutMeshes;
     avOutMeshes.reserve(mScene->mMeshes.size() * 2);
 
@@ -367,7 +369,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
 
             meshOut->mVertices = new aiVector3D[meshOut->mNumVertices];
             meshOut->mNormals = new aiVector3D[meshOut->mNumVertices];
-            if ((*i).mTexCoords.size()) {
+            if (i->mTexCoords.size()) {
                 meshOut->mTextureCoords[0] = new aiVector3D[meshOut->mNumVertices];
             }
             for (unsigned int q = 0, base = 0; q < aiSplit[p].size(); ++q) {
@@ -378,12 +380,13 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
                 face.mNumIndices = 3;
 
                 for (unsigned int a = 0; a < 3; ++a, ++base) {
-                    unsigned int idx = (*i).mFaces[index].mIndices[a];
-                    meshOut->mVertices[base] = (*i).mPositions[idx];
-                    meshOut->mNormals[base] = (*i).mNormals[idx];
+                    const unsigned int idx = i->mFaces[index].mIndices[a];
+                    meshOut->mVertices[base] = i->mPositions[idx];
+                    meshOut->mNormals[base] = i->mNormals[idx];
 
-                    if ((*i).mTexCoords.size())
-                        meshOut->mTextureCoords[0][base] = (*i).mTexCoords[idx];
+                    if (i->mTexCoords.size()) {
+                        meshOut->mTextureCoords[0][base] = i->mTexCoords[idx];
+                    }
 
                     face.mIndices[a] = base;
                 }
@@ -392,7 +395,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene *pcOut) {
     }
 
     // Copy them to the output array
-    pcOut->mNumMeshes = (unsigned int)avOutMeshes.size();
+    pcOut->mNumMeshes = static_cast<unsigned int>(avOutMeshes.size());
     pcOut->mMeshes = new aiMesh *[pcOut->mNumMeshes]();
     for (unsigned int a = 0; a < pcOut->mNumMeshes; ++a) {
         pcOut->mMeshes[a] = avOutMeshes[a];
@@ -415,15 +418,18 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut, D3DS::N
     // Find all meshes with the same name as the node
     for (unsigned int a = 0; a < pcSOut->mNumMeshes; ++a) {
         const auto *pcMesh = (const D3DS::Mesh *)pcSOut->mMeshes[a]->mColors[0];
-        ai_assert(nullptr != pcMesh);
+        if (pcMesh == nullptr) {
+            continue;
+        }
 
-        if (pcIn->mName == pcMesh->mName)
+        if (pcIn->mName == pcMesh->mName) {
             iArray.push_back(a);
+        }
     }
     if (!iArray.empty()) {
         // The matrix should be identical for all meshes with the
         // same name. It HAS to be identical for all meshes .....
-        auto *imesh = ((D3DS::Mesh *)pcSOut->mMeshes[iArray[0]]->mColors[0]);
+        auto *imesh = reinterpret_cast<Mesh *>(pcSOut->mMeshes[iArray[0]]->mColors[0]);
 
         // Compute the inverse of the transformation matrix to move the
         // vertices back to their relative and local space
@@ -466,9 +472,9 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene *pcSOut, aiNode *pcOut, D3DS::N
                     }
                 }
 
-                mesh->mColors[1] = (aiColor4D *)1;
+                mesh->mColors[1] = reinterpret_cast<aiColor4D *>(1);
             } else
-                mesh->mColors[1] = (aiColor4D *)1;
+                mesh->mColors[1] = reinterpret_cast<aiColor4D *>(1);
 
             // Setup the mesh index
             pcOut->mMeshes[i] = iIndex;

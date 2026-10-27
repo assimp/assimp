@@ -292,7 +292,7 @@ bool STEP::StringToUTF8(std::string& s)
                 // STEP encodes \S\X using an ASCII byte remapped into the CP1252 upper half.
                 // Bytes outside the [0,127] range are malformed input and must be rejected
                 // without tripping debug asserts.
-                const uint8_t cp1252LowHalf = static_cast<uint8_t>(s[i+3]);
+                const auto cp1252LowHalf = static_cast<uint8_t>(s[i+3]);
                 if (cp1252LowHalf >= 0x80) {
                     return false;
                 }
@@ -306,7 +306,6 @@ bool STEP::StringToUTF8(std::string& s)
             }
             // \X\xx - mac/roman (xx is a hex sequence)
             else if (i+4 < s.size() && s[i+1] == 'X' && s[i+2] == '\\') {
-
                 const uint8_t macval = HexOctetToDecimal(s.c_str() + i + 3);
                 if(macval < 0x20) {
                     return false;
@@ -319,7 +318,7 @@ bool STEP::StringToUTF8(std::string& s)
                 unsigned char temp[5], *tempp = temp;
                 ai_assert(sizeof( unsigned char ) == 1);
 
-                utf8::utf32to8( univalp, univalp + 1, tempp );
+                utf8::utf32to8(univalp, univalp + 1, tempp );
 
                 const size_t outcount = static_cast<size_t>(tempp-temp);
 

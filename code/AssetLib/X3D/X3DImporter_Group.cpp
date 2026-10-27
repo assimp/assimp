@@ -64,7 +64,7 @@ namespace Assimp {
 // A ProtoInstance node (with the proper node type) can be substituted for any node in this content model.
 // </Group>
 // A Group node contains children nodes without introducing a new transformation. It is equivalent to a Transform node containing an identity transform.
-void X3DImporter::startReadGroup(XmlNode &node) {
+bool X3DImporter::startReadGroup(XmlNode &node) {
     std::string def, use;
 
     MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
@@ -73,15 +73,14 @@ void X3DImporter::startReadGroup(XmlNode &node) {
     if (!use.empty()) {
         X3DNodeElementBase *ne(nullptr);
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
-    } else {
-        ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
-        // at this place new group mode created and made current, so we can name it.
-        if (!def.empty()) mNodeElementCur->ID = def;
-        // in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
+        return false;
+    }
 
-        // for empty element exit from node in that place
-        if (isNodeEmpty(node)) ParseHelper_Node_Exit();
-    } // if(!use.empty()) else
+    ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
+    // at this place new group mode created and made current, so we can name it.
+    if (!def.empty()) mNodeElementCur->ID = def;
+    // in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
+    return true;
 }
 
 void X3DImporter::endReadGroup() {
@@ -102,7 +101,7 @@ void X3DImporter::endReadGroup() {
 // </StaticGroup>
 // The StaticGroup node contains children nodes which cannot be modified. StaticGroup children are guaranteed to not change, send events, receive events or
 // contain any USE references outside the StaticGroup.
-void X3DImporter::startReadStaticGroup(XmlNode &node) {
+bool X3DImporter::startReadStaticGroup(XmlNode &node) {
     std::string def, use;
 
     MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
@@ -110,17 +109,15 @@ void X3DImporter::startReadStaticGroup(XmlNode &node) {
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
         X3DNodeElementBase *ne(nullptr);
-
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
-    } else {
-        ParseHelper_Group_Begin(true); // create new grouping element and go deeper if node has children.
-        // at this place new group mode created and made current, so we can name it.
-        if (!def.empty()) mNodeElementCur->ID = def;
-        // in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
+        return false;
+    }
 
-        // for empty element exit from node in that place
-        if (isNodeEmpty(node)) ParseHelper_Node_Exit();
-    } // if(!use.empty()) else
+    ParseHelper_Group_Begin(true); // create new grouping element and go deeper if node has children.
+    // at this place new group mode created and made current, so we can name it.
+    if (!def.empty()) mNodeElementCur->ID = def;
+    // in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
+    return true;
 }
 
 void X3DImporter::endReadStaticGroup() {
@@ -143,31 +140,30 @@ void X3DImporter::endReadStaticGroup() {
 // The Switch grouping node traverses zero or one of the nodes specified in the children field. The whichChoice field specifies the index of the child
 // to traverse, with the first child having index 0. If whichChoice is less than zero or greater than the number of nodes in the children field, nothing
 // is chosen.
-void X3DImporter::startReadSwitch(XmlNode &node) {
+bool X3DImporter::startReadSwitch(XmlNode &node) {
     std::string def, use;
-    int32_t whichChoice = -1;
 
     MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
-    XmlParser::getIntAttribute(node, "whichChoice", whichChoice);
 
     // if "USE" defined then find already defined element.
     if (!use.empty()) {
         X3DNodeElementBase *ne(nullptr);
-
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
-    } else {
-        ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
-        // at this place new group mode created and made current, so we can name it.
-        if (!def.empty()) mNodeElementCur->ID = def;
+        return false;
+    }
 
-        // also set values specific to this type of group
-        ((X3DNodeElementGroup *)mNodeElementCur)->UseChoice = true;
-        ((X3DNodeElementGroup *)mNodeElementCur)->Choice = whichChoice;
-        // in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
+    int32_t whichChoice = -1;
+    XmlParser::getIntAttribute(node, "whichChoice", whichChoice);
 
-        // for empty element exit from node in that place
-        if (isNodeEmpty(node)) ParseHelper_Node_Exit();
-    } // if(!use.empty()) else
+    ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
+    // at this place new group mode created and made current, so we can name it.
+    if (!def.empty()) mNodeElementCur->ID = def;
+
+    // also set values specific to this type of group
+    ((X3DNodeElementGroup *)mNodeElementCur)->UseChoice = true;
+    ((X3DNodeElementGroup *)mNodeElementCur)->Choice = whichChoice;
+    // in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
+    return true;
 }
 
 void X3DImporter::endReadSwitch() {
@@ -197,16 +193,25 @@ void X3DImporter::endReadSwitch() {
 // transformations. In matrix transformation notation, where C (center), SR (scaleOrientation), T (translation), R (rotation), and S (scale) are the
 // equivalent transformation matrices,
 //   P' = T * C * R * SR * S * -SR * -C * P
-void X3DImporter::startReadTransform(XmlNode &node) {
+bool X3DImporter::startReadTransform(XmlNode &node) {
+    std::string def, use;
+
+    MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
+
+    // if "USE" defined then find already defined element.
+    if (!use.empty()) {
+        X3DNodeElementBase *ne(nullptr);
+        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
+        return false;
+    }
+
     aiVector3D center(0, 0, 0);
     float rotation[4] = { 0, 0, 1, 0 };
     aiVector3D scale(1, 1, 1); // A value of zero indicates that any child geometry shall not be displayed
     float scale_orientation[4] = { 0, 0, 1, 0 };
     aiVector3D translation(0, 0, 0);
     aiMatrix4x4 matr, tmatr;
-    std::string use, def;
 
-    MACRO_ATTRREAD_CHECKUSEDEF_RET(node, def, use);
     X3DXmlHelper::getVector3DAttribute(node, "center", center);
     X3DXmlHelper::getVector3DAttribute(node, "scale", scale);
     X3DXmlHelper::getVector3DAttribute(node, "translation", translation);
@@ -222,49 +227,33 @@ void X3DImporter::startReadTransform(XmlNode &node) {
         tvec.clear();
     }
 
-    // if "USE" defined then find already defined element.
-    if (!use.empty()) {
-        X3DNodeElementBase *ne(nullptr);
-        bool newgroup = (nullptr == mNodeElementCur);
-        if(newgroup)
-            ParseHelper_Group_Begin();
-        ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Group, ne);
-        if (newgroup && isNodeEmpty(node)) {
-            ParseHelper_Node_Exit();
-        }
-    } else {
-        ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
-        // at this place new group mode created and made current, so we can name it.
-        if (!def.empty()) {
-            mNodeElementCur->ID = def;
-        }
+    ParseHelper_Group_Begin(); // create new grouping element and go deeper if node has children.
+    // at this place new group mode created and made current, so we can name it.
+    if (!def.empty()) {
+        mNodeElementCur->ID = def;
+    }
 
-        //
-        // also set values specific to this type of group
-        //
-        // calculate transformation matrix
-        aiMatrix4x4::Translation(translation, matr); // T
-        aiMatrix4x4::Translation(center, tmatr); // C
-        matr *= tmatr;
-        aiMatrix4x4::Rotation(rotation[3], aiVector3D(rotation[0], rotation[1], rotation[2]), tmatr); // R
-        matr *= tmatr;
-        aiMatrix4x4::Rotation(scale_orientation[3], aiVector3D(scale_orientation[0], scale_orientation[1], scale_orientation[2]), tmatr); // SR
-        matr *= tmatr;
-        aiMatrix4x4::Scaling(scale, tmatr); // S
-        matr *= tmatr;
-        aiMatrix4x4::Rotation(-scale_orientation[3], aiVector3D(scale_orientation[0], scale_orientation[1], scale_orientation[2]), tmatr); // -SR
-        matr *= tmatr;
-        aiMatrix4x4::Translation(-center, tmatr); // -C
-        matr *= tmatr;
-        // and assign it
-        ((X3DNodeElementGroup *)mNodeElementCur)->Transformation = matr;
-        // in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
-
-        // for empty element exit from node in that place
-        if (isNodeEmpty(node)) {
-            ParseHelper_Node_Exit();
-        }
-    } // if(!use.empty()) else
+    //
+    // also set values specific to this type of group
+    //
+    // calculate transformation matrix
+    aiMatrix4x4::Translation(translation, matr); // T
+    aiMatrix4x4::Translation(center, tmatr); // C
+    matr *= tmatr;
+    aiMatrix4x4::Rotation(rotation[3], aiVector3D(rotation[0], rotation[1], rotation[2]), tmatr); // R
+    matr *= tmatr;
+    aiMatrix4x4::Rotation(scale_orientation[3], aiVector3D(scale_orientation[0], scale_orientation[1], scale_orientation[2]), tmatr); // SR
+    matr *= tmatr;
+    aiMatrix4x4::Scaling(scale, tmatr); // S
+    matr *= tmatr;
+    aiMatrix4x4::Rotation(-scale_orientation[3], aiVector3D(scale_orientation[0], scale_orientation[1], scale_orientation[2]), tmatr); // -SR
+    matr *= tmatr;
+    aiMatrix4x4::Translation(-center, tmatr); // -C
+    matr *= tmatr;
+    // and assign it
+    ((X3DNodeElementGroup *)mNodeElementCur)->Transformation = matr;
+    // in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
+    return true;
 }
 
 void X3DImporter::endReadTransform() {

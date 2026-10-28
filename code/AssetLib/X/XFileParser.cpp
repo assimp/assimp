@@ -197,13 +197,19 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
             AI_SWAP2(ofs);
             mP += 4;
 
-            // The announced block length can run past the end of the
-            // buffer (the last block of shipped MSZIP files counts two
-            // bytes more than the file holds) and inflate only consumes
-            // the bytes the deflate stream really needs, so clamp the
-            // input window to the buffer instead of reading out of
-            // bounds behind the announced length.
+            // The last block of shipped MSZIP files can announce a couple
+            // of bytes more than the chunk holds (test_cube_compressed.x
+            // announces two; the terminating zero of the parse buffer
+            // covers one and inflate never consumes the other), so clamp
+            // the input window to the buffer instead of reading past it.
+            // An announce beyond that allowance means the chunk is cut off
+            // mid-block: inflate would return without producing the block
+            // and the importer would silently keep whatever prefix was
+            // decompressed so far, so reject the file instead.
             const size_t avail = static_cast<size_t>(mEnd - mP + 1);
+            if (ofs > avail + 1) {
+                throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
+            }
             const size_t bounded = ofs < avail ? ofs : avail;
             out += compression.decompressBlock(mP, bounded, out, MSZIP_BLOCK);
             mP += ofs;

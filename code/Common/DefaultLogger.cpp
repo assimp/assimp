@@ -407,14 +407,9 @@ void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev) 
         return;
     } else {
         // append a new-line character to the message to be printed
-        lastLen = thisLen;
-        if (lastLen + 2 > sizeof(lastMsg)) {
-            // truncate overlong messages instead of overrunning the buffer
-            lastLen = sizeof(lastMsg) - 2;
-        }
-        ::memcpy(lastMsg, message, lastLen);
-        lastMsg[lastLen] = '\n';
-        lastMsg[lastLen + 1] = '\0';
+        // truncate overlong messages instead of overrunning the buffer
+        lastLen = std::min(thisLen, sizeof(lastMsg) - 2);
+        ai_snprintf(lastMsg, sizeof(lastMsg), "%.*s\n", static_cast<int>(lastLen), message);
 
         message = lastMsg;
         noRepeatMsg = false;

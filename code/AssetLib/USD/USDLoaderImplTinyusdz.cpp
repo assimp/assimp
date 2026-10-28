@@ -270,69 +270,69 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
 
             for (const auto &[channelType, animChannel] : animationChannelMap) {
                 switch (channelType) {
-                    case AnimationChannel::ChannelType::Rotation:
-                        if (animChannel.rotations.static_value.has_value()) {
-                            rotationKeys.emplace_back(0, tinyUsdzQuatToAiQuat(animChannel.rotations.static_value.value()));
+                case AnimationChannel::ChannelType::Rotation:
+                    if (animChannel.rotations.static_value.has_value()) {
+                        rotationKeys.emplace_back(0, tinyUsdzQuatToAiQuat(animChannel.rotations.static_value.value()));
+                    }
+                    for (const auto &rotationAnimSampler : animChannel.rotations.samples) {
+                        if (rotationAnimSampler.t > newAiAnimation->mDuration) {
+                            newAiAnimation->mDuration = rotationAnimSampler.t;
                         }
-                        for (const auto &rotationAnimSampler: animChannel.rotations.samples) {
-                            if (rotationAnimSampler.t > newAiAnimation->mDuration) {
-                                newAiAnimation->mDuration = rotationAnimSampler.t;
-                            }
 
-                            rotationKeys.emplace_back(rotationAnimSampler.t, tinyUsdzQuatToAiQuat(rotationAnimSampler.value));
+                        rotationKeys.emplace_back(rotationAnimSampler.t, tinyUsdzQuatToAiQuat(rotationAnimSampler.value));
+                    }
+                    break;
+                case AnimationChannel::ChannelType::Scale:
+                    if (animChannel.scales.static_value.has_value()) {
+                        scalingKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.scales.static_value.value()));
+                    }
+                    for (const auto &scaleAnimSampler : animChannel.scales.samples) {
+                        if (scaleAnimSampler.t > newAiAnimation->mDuration) {
+                            newAiAnimation->mDuration = scaleAnimSampler.t;
                         }
-                        break;
-                    case AnimationChannel::ChannelType::Scale:
-                        if (animChannel.scales.static_value.has_value()) {
-                            scalingKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.scales.static_value.value()));
-                        }
-                        for (const auto &scaleAnimSampler: animChannel.scales.samples) {
-                            if (scaleAnimSampler.t > newAiAnimation->mDuration) {
-                                newAiAnimation->mDuration = scaleAnimSampler.t;
-                            }
-                            scalingKeys.emplace_back(scaleAnimSampler.t, tinyUsdzScaleOrPosToAssimp(scaleAnimSampler.value));
-                        }
-                        break;
-                    case AnimationChannel::ChannelType::Transform:
-                        if (animChannel.transforms.static_value.has_value()) {
-                            aiVector3D position;
-                            aiVector3D scale;
-                            aiQuaternion rotation;
-                            tinyUsdzMat4ToAiMat4(animChannel.transforms.static_value.value().m).Decompose(scale, rotation, position);
+                        scalingKeys.emplace_back(scaleAnimSampler.t, tinyUsdzScaleOrPosToAssimp(scaleAnimSampler.value));
+                    }
+                    break;
+                case AnimationChannel::ChannelType::Transform:
+                    if (animChannel.transforms.static_value.has_value()) {
+                        aiVector3D position;
+                        aiVector3D scale;
+                        aiQuaternion rotation;
+                        tinyUsdzMat4ToAiMat4(animChannel.transforms.static_value.value().m).Decompose(scale, rotation, position);
 
-                            positionKeys.emplace_back(0, position);
-                            scalingKeys.emplace_back(0, scale);
-                            rotationKeys.emplace_back(0, rotation);
+                        positionKeys.emplace_back(0, position);
+                        scalingKeys.emplace_back(0, scale);
+                        rotationKeys.emplace_back(0, rotation);
+                    }
+                    for (const auto &transformAnimSampler : animChannel.transforms.samples) {
+                        if (transformAnimSampler.t > newAiAnimation->mDuration) {
+                            newAiAnimation->mDuration = transformAnimSampler.t;
                         }
-                        for (const auto &transformAnimSampler: animChannel.transforms.samples) {
-                            if (transformAnimSampler.t > newAiAnimation->mDuration) {
-                                newAiAnimation->mDuration = transformAnimSampler.t;
-                            }
 
-                            aiVector3D position;
-                            aiVector3D scale;
-                            aiQuaternion rotation;
-                            tinyUsdzMat4ToAiMat4(transformAnimSampler.value.m).Decompose(scale, rotation, position);
+                        aiVector3D position;
+                        aiVector3D scale;
+                        aiQuaternion rotation;
+                        tinyUsdzMat4ToAiMat4(transformAnimSampler.value.m).Decompose(scale, rotation, position);
 
-                            positionKeys.emplace_back(transformAnimSampler.t, position);
-                            scalingKeys.emplace_back(transformAnimSampler.t, scale);
-                            rotationKeys.emplace_back(transformAnimSampler.t, rotation);
+                        positionKeys.emplace_back(transformAnimSampler.t, position);
+                        scalingKeys.emplace_back(transformAnimSampler.t, scale);
+                        rotationKeys.emplace_back(transformAnimSampler.t, rotation);
+                    }
+                    break;
+                case AnimationChannel::ChannelType::Translation:
+                    if (animChannel.translations.static_value.has_value()) {
+                        positionKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.translations.static_value.value()));
+                    }
+                    for (const auto &translationAnimSampler : animChannel.translations.samples) {
+                        if (translationAnimSampler.t > newAiAnimation->mDuration) {
+                            newAiAnimation->mDuration = translationAnimSampler.t;
                         }
-                        break;
-                    case AnimationChannel::ChannelType::Translation:
-                        if (animChannel.translations.static_value.has_value()) {
-                            positionKeys.emplace_back(0, tinyUsdzScaleOrPosToAssimp(animChannel.translations.static_value.value()));
-                        }
-                        for (const auto &translationAnimSampler: animChannel.translations.samples) {
-                            if (translationAnimSampler.t > newAiAnimation->mDuration) {
-                                newAiAnimation->mDuration = translationAnimSampler.t;
-                            }
 
-                            positionKeys.emplace_back(translationAnimSampler.t,tinyUsdzScaleOrPosToAssimp(translationAnimSampler.value));
-                        }
-                        break;
-                    default:
-                        TINYUSDZLOGW(TAG, "Unsupported animation channel type (%s). Please update the USD importer to support this animation channel.", tinyusdzAnimChannelTypeFor(channelType).c_str());
+                        positionKeys.emplace_back(translationAnimSampler.t, tinyUsdzScaleOrPosToAssimp(translationAnimSampler.value));
+                    }
+                    break;
+                default:
+                    TINYUSDZLOGW(TAG, "Unsupported animation channel type (%s). Please update the USD importer to support this animation channel.", tinyusdzAnimChannelTypeFor(channelType).c_str());
                 }
             }
 

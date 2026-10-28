@@ -62,10 +62,13 @@ namespace Assimp {
 */
 class AC3DImporter final : public BaseImporter {
 public:
-    AC3DImporter();
+    /// @brief Default constructor
+    AC3DImporter() = default;
+
+    /// @brief Destructor.
     ~AC3DImporter() override = default;
 
-    // Represents an AC3D material
+    /// Represents an AC3D material
     struct Material {
         Material() :
                 rgb(0.6f, 0.6f, 0.6f),
@@ -73,38 +76,36 @@ public:
                 shin(0.f),
                 trans(0.f) {}
 
-        // base color of the material
+        /// base color of the material
         aiColor3D rgb;
 
-        // ambient color of the material
+        /// ambient color of the material
         aiColor3D amb;
 
-        // emissive color of the material
+        /// emissive color of the material
         aiColor3D emis;
 
-        // specular color of the material
+        /// specular color of the material
         aiColor3D spec;
 
-        // shininess exponent
+        /// shininess exponent
         float shin;
 
-        // transparency. 0 == opaque
+        /// transparency. 0 == opaque
         float trans;
 
-        // name of the material. optional.
+        /// name of the material. optional.
         std::string name;
     };
 
-    // Represents an AC3D surface
+    /// Represents an AC3D surface
     struct Surface {
-        Surface() :
-                mat(0),
-                flags(0) {}
+        Surface() = default;
 
-        unsigned int mat, flags;
-
+        unsigned int mat{0};
+        unsigned int flags{0};
         using SurfaceEntry = std::pair<unsigned int, aiVector2D>;
-        std::vector<SurfaceEntry> entries;
+        std::vector<SurfaceEntry> entries{};
 
         // Type is low nibble of flags
         enum Type : uint8_t {
@@ -116,115 +117,100 @@ public:
             Mask = 0xf,
         };
 
-        inline uint8_t GetType() const { return (flags & Mask); }
+        uint8_t GetType() const { return (flags & Mask); }
     };
 
-    // Represents an AC3D object
+    /// Represents an AC3D object
     struct Object {
-        Object() :
-                type(World),
-                name(),
-                children(),
-                texRepeat(1.f, 1.f),
-                texOffset(0.0f, 0.0f),
-                rotation(),
-                translation(),
-                vertices(),
-                surfaces(),
-                numRefs(0),
-                subDiv(0),
-                crease() {}
+        Object() = default;
 
-        // Type description
+        /// Type description
         enum Type {
             World = 0x0,
             Poly = 0x1,
             Group = 0x2,
             Light = 0x4
-        } type;
+        } type{};
 
-        // name of the object
-        std::string name;
+        /// name of the object
+        std::string name{};
 
-        // object children
-        std::vector<Object> children;
+        /// object children
+        std::vector<Object> children{};
 
-        // texture to be assigned to all surfaces of the object
-        // the .acc format supports up to 4 textures
-        std::vector<std::string> textures;
+        /// texture to be assigned to all surfaces of the object
+        /// the .acc format supports up to 4 textures
+        std::vector<std::string> textures{};
 
-        // texture repat factors (scaling for all coordinates)
-        aiVector2D texRepeat, texOffset;
+        /// texture repat factor repeat
+        aiVector2D texRepeat{1, 1};
+        /// texture repat factor offset
+        aiVector2D texOffset{0, 0};
 
-        // rotation matrix
-        aiMatrix3x3 rotation;
+        /// rotation matrix
+        aiMatrix3x3 rotation{};
 
-        // translation vector
-        aiVector3D translation;
+        /// translation vector
+        aiVector3D translation{};
 
-        // vertices
-        std::vector<aiVector3D> vertices;
+        /// vertices
+        std::vector<aiVector3D> vertices{};
 
-        // surfaces
-        std::vector<Surface> surfaces;
+        /// surfaces
+        std::vector<Surface> surfaces{};
 
-        // number of indices (= num verts in verbose format)
-        unsigned int numRefs;
+        /// number of indices (= num vert's in verbose format)
+        unsigned int numRefs{0};
 
-        // number of subdivisions to be performed on the
-        // imported data
-        unsigned int subDiv;
+        /// number of subdivisions to be performed on the imported data
+        unsigned int subDiv{0};
 
-        // max angle limit for smoothing
-        float crease;
+        /// max angle limit for smoothing
+        float crease{0.0f};
     };
 
 public:
-    // -------------------------------------------------------------------
-    /** Returns whether the class can handle the format of the given file.
-     * See BaseImporter::CanRead() for details.
-     */
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
             bool checkSig) const override;
 
 protected:
     // -------------------------------------------------------------------
-    /** Return importer meta information.
-     * See #BaseImporter::GetInfo for the details */
     const aiImporterDesc *GetInfo() const override;
 
     // -------------------------------------------------------------------
-    /** Imports the given file into the given scene structure.
-     * See BaseImporter::InternReadFile() for details*/
     void InternReadFile(const std::string &pFile, aiScene *pScene,
             IOSystem *pIOHandler) override;
 
     // -------------------------------------------------------------------
-    /** Called prior to ReadFile().
-    * The function is a request to the importer to update its configuration
-    * basing on the Importer's configuration property list.*/
     void SetupProperties(const Importer *pImp) override;
 
 private:
     // -------------------------------------------------------------------
-    /** Get the next line from the file.
-     *  @return false if the end of the file was reached*/
+    /**
+     * Get the next line from the file.
+     * @return false if the end of the file was reached
+     */
     bool GetNextLine();
 
     // -------------------------------------------------------------------
-    /** Load the object section. This method is called recursively to
-     *  load subobjects, the method returns after a 'kids 0' was
-     *  encountered.
-     *  @objects List of output objects*/
+    /**
+     * Load the object section. This method is called recursively to
+     * load subobjects, the method returns after a 'kids 0' was
+     * encountered.
+     * @objects List of output objects
+     */
     bool LoadObjectSection(std::vector<Object> &objects);
 
     // -------------------------------------------------------------------
-    /** Convert all objects into meshes and nodes.
-     *  @param object Current object to work on
-     *  @param meshes Pointer to the list of output meshes
-     *  @param outMaterials List of output materials
-     *  @param materials Material list
-     *  @param Scenegraph node for the object */
+    /**
+     * Convert all objects into meshes and nodes.
+     * @param [in] object Current object to work on
+     * @param [in] meshes Pointer to the list of output meshes
+     * @param [in] outMaterials List of output materials
+     * @param [in] materials Material list
+     * @param [in] Scenegraph node for the object
+     * @return Scenegraph node for the object
+     */
     aiNode *ConvertObjectSection(Object &object,
             std::vector<aiMesh *> &meshes,
             std::vector<aiMaterial *> &outMaterials,
@@ -232,37 +218,41 @@ private:
             aiNode *parent = nullptr);
 
     // -------------------------------------------------------------------
-    /** Convert a material
-     *  @param object Current object
-     *  @param matSrc Source material description
-     *  @param matDest Destination material to be filled */
+    /**
+     * Convert a material
+     * @param [in] object Current object
+     * @param [in] matSrc Source material description
+     * @param [in] matDest Destination material to be filled */
     void ConvertMaterial(const Object &object,
             const Material &matSrc,
             aiMaterial &matDest);
 
 private:
     // points to the next data line
-    aiBuffer mBuffer;
+    aiBuffer mBuffer{};
 
     // Configuration option: if enabled, up to two meshes
     // are generated per material: those faces who have
     // their bf cull flags set are separated.
-    bool configSplitBFCull;
+    bool configSplitBFCull{false};
 
     // Configuration switch: subdivision surfaces are only
     // evaluated if the value is true.
-    bool configEvalSubdivision;
+    bool configEvalSubdivision{false};
 
     // counts how many objects we have in the tree.
     // basing on this information we can find a
     // good estimate how many meshes we'll have in the final scene.
-    unsigned int mNumMeshes;
+    unsigned int mNumMeshes{0};
 
     // current list of light sources
-    std::vector<aiLight *> *mLights;
+    std::vector<aiLight *> *mLights{};
 
     // name counters
-    unsigned int mLightsCounter, mGroupsCounter, mPolysCounter, mWorldsCounter;
+    unsigned int mLightsCounter{0};
+    unsigned int mGroupsCounter{0};
+    unsigned int mPolysCounter{0};
+    unsigned int mWorldsCounter{0};
 };
 
 } // end of namespace Assimp

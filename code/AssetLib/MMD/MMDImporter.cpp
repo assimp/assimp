@@ -157,7 +157,8 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
     // still walks the whole array and would delete whatever the allocator
     // handed back otherwise.
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes]();
-    for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
+    int indexStart = 0;
+    for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
         const int indexCount = pModel->materials[i].index_count;
 
         // The per-material index counts partition the shared vertex index

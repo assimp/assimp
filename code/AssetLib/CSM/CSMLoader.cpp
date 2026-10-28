@@ -191,7 +191,10 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     }
                 }
 
-                unsigned int filled = 0;
+                // Track every channel's own buffer capacity. A single shared counter
+                // is not enough: a DROPOUT marker makes a channel skip a frame, so the
+                // channels' key counts drift apart and each buffer has to grow on its own.
+                std::vector<unsigned int> capacity(anim->mNumChannels, alloc);
 
                 // Now read all point data.
                 while (true) {
@@ -207,12 +210,13 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     for (unsigned int i = 0; i < anim->mNumChannels;++i)    {
 
                         aiNodeAnim* s = anim->mChannels[i];
-                        if (s->mNumPositionKeys == alloc)   {
-                            // need to reallocate?
+                        if (s->mNumPositionKeys == capacity[i])   {
+                            // this channel's buffer is full, grow it
                             aiVectorKey* old = s->mPositionKeys;
-                            s->mPositionKeys = new aiVectorKey[alloc*2];
-                            ::memcpy(s->mPositionKeys,old,sizeof(aiVectorKey)*alloc);
+                            s->mPositionKeys = new aiVectorKey[capacity[i]*2];
+                            ::memcpy(s->mPositionKeys,old,sizeof(aiVectorKey)*capacity[i]);
                             delete[] old;
+                            capacity[i] *= 2;
                         }
 
                         // read x,y,z
@@ -241,13 +245,6 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                             ++s->mNumPositionKeys;
                         }
                     }
-
-                    // update allocation granularity
-                    if (filled == alloc) {
-                        alloc *= 2;
-                    }
-
-                    ++filled;
                 }
                 // all channels must be complete in order to continue safely.
                 for (unsigned int i = 0; i < anim->mNumChannels;++i)    {

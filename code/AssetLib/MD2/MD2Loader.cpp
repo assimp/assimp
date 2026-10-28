@@ -171,13 +171,17 @@ void MD2Importer::ValidateHeader( )
     }
 
     // -1 because Frame already contains one
-    unsigned int frameSize = sizeof (MD2::Frame) + (m_pcHeader->numVertices - 1) * sizeof(MD2::Vertex);
+    // Compute in 64-bit: numVertices/numFrames are attacker-controlled uint32 header
+    // fields, so numFrames * frameSize (frameSize itself grows with numVertices) overflows
+    // a 32-bit product and can wrap past the file-size check below. The AI_MAX_ALLOC guards
+    // above only bound each count against sizeof(element), not against this product.
+    const uint64_t frameSize = (uint64_t)sizeof(MD2::Frame) + (uint64_t)(m_pcHeader->numVertices - 1) * sizeof(MD2::Vertex);
 
-    if (m_pcHeader->offsetSkins     + m_pcHeader->numSkins * sizeof (MD2::Skin)         >= fileSize ||
-        m_pcHeader->offsetTexCoords + m_pcHeader->numTexCoords * sizeof (MD2::TexCoord) >= fileSize ||
-        m_pcHeader->offsetTriangles + m_pcHeader->numTriangles * sizeof (MD2::Triangle) >= fileSize ||
-        m_pcHeader->offsetFrames    + m_pcHeader->numFrames * frameSize                 >= fileSize ||
-        m_pcHeader->offsetEnd           > fileSize)
+    if ((uint64_t)m_pcHeader->offsetSkins     + (uint64_t)m_pcHeader->numSkins     * sizeof(MD2::Skin)     >= fileSize ||
+        (uint64_t)m_pcHeader->offsetTexCoords + (uint64_t)m_pcHeader->numTexCoords * sizeof(MD2::TexCoord) >= fileSize ||
+        (uint64_t)m_pcHeader->offsetTriangles + (uint64_t)m_pcHeader->numTriangles * sizeof(MD2::Triangle) >= fileSize ||
+        (uint64_t)m_pcHeader->offsetFrames    + (uint64_t)m_pcHeader->numFrames    * frameSize             >= fileSize ||
+        m_pcHeader->offsetEnd > fileSize)
     {
         throw DeadlyImportError("Invalid MD2 header: Some offsets are outside the file");
     }
@@ -308,8 +312,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
     const int iMode = (int)aiShadingMode_Gouraud;
     pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
-    if (m_pcHeader->numTexCoords && m_pcHeader->numSkins)
-    {
+    if (m_pcHeader->numTexCoords && m_pcHeader->numSkins) {
         // navigate to the first texture associated with the mesh
         const MD2::Skin* pcSkins = (const MD2::Skin*) ((unsigned char*)m_pcHeader +
             m_pcHeader->offsetSkins);
@@ -323,26 +326,27 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         pcHelper->AddProperty<aiColor3D>(&clr, 1,AI_MATKEY_COLOR_AMBIENT);
 
         const ai_uint32 MaxNameLength = AI_MAXLEN - 1; // one byte reserved for \0
-        ai_uint32 iLen = static_cast<ai_uint32>(::strlen(pcSkins->name));
+        // pcSkins->name is a fixed-size field copied straight out of the file
+        // buffer with no guarantee of a terminating NUL, so a plain strlen()
+        // can walk past the end of that buffer on a malformed file. Cap the
+        // scan at one less than the field's size, matching how MDCLoader
+        // handles the same kind of fixed-size name field.
+        auto iLen = static_cast<ai_uint32>(::strnlen(pcSkins->name, sizeof(pcSkins->name) - 1));
         bool nameTooLong = iLen > MaxNameLength;
 
-        if (pcSkins->name[0] && !nameTooLong)
-        {
+        if (pcSkins->name[0] && !nameTooLong) {
             aiString szString;
             ::memcpy(szString.data, pcSkins->name, iLen);
             szString.data[iLen] = '\0';
             szString.length = iLen;
 
             pcHelper->AddProperty(&szString,AI_MATKEY_TEXTURE_DIFFUSE(0));
-        }
-        else if (nameTooLong) {
+        } else if (nameTooLong) {
             ASSIMP_LOG_WARN("Texture file name is too long. It will be skipped.");
-        }
-        else{
+        } else{
             ASSIMP_LOG_WARN("Texture file name has zero length. It will be skipped.");
         }
-    }
-    else    {
+    } else {
         // apply a default material
         aiColor3D clr;
         clr.b = clr.g = clr.r = 0.6f;
@@ -364,11 +368,11 @@ void MD2Importer::InternReadFile( const std::string& pFile,
         pcHelper->AddProperty(&sz,AI_MATKEY_TEXTURE_DIFFUSE(0));
     }
 
-
     // now read all triangles of the first frame, apply scaling and translation
     unsigned int iCurrent = 0;
 
-    float fDivisorU = 1.0f,fDivisorV = 1.0f;
+    float fDivisorU = 1.0f;
+	float fDivisorV = 1.0f;
     if (m_pcHeader->numTexCoords)   {
         // allocate storage for texture coordinates, too
         pcMesh->mTextureCoords[0] = new aiVector3D[pcMesh->mNumVertices];

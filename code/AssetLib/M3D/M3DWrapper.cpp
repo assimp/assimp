@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "M3DWrapper.h"
 
 #include <assimp/DefaultIOSystem.h>
+#include <assimp/DefaultLogger.hpp>
 #include <assimp/IOStreamBuffer.h>
 #include <assimp/ai_assert.h>
 

@@ -1902,6 +1902,10 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
             ReadPrimTriStrips(numOffsets, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
             break;
         case Prim_Polylist:
+            // a malformed <polylist> can declare more primitives than it has <vcount> entries
+            if (currentPrimitive >= pVCount.size()) {
+                throw DeadlyImportError("Collada: <polylist> count exceeds the number of <vcount> entries.");
+            }
             numPoints = pVCount[currentPrimitive];
             for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
                 CopyVertex(polylistStartVertex + currentVertex, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, 0, indices);

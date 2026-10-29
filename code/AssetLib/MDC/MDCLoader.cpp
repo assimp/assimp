@@ -136,8 +136,8 @@ void MDCImporter::ValidateHeader() {
         ASSIMP_LOG_WARN("Unsupported MDC file version (2 (AI_MDC_VERSION) was expected)");
     }
 
-    if (pcHeader->ulOffsetBorderFrames + pcHeader->ulNumFrames * sizeof(MDC::Frame) > this->fileSize ||
-            pcHeader->ulOffsetSurfaces + pcHeader->ulNumSurfaces * sizeof(MDC::Surface) > this->fileSize) {
+    if (pcHeader->ulOffsetBorderFrames + static_cast<uint64_t>(pcHeader->ulNumFrames) * sizeof(MDC::Frame) > this->fileSize ||
+            pcHeader->ulOffsetSurfaces + static_cast<uint64_t>(pcHeader->ulNumSurfaces) * sizeof(MDC::Surface) > this->fileSize) {
         throw DeadlyImportError("Some of the offset values in the MDC header are invalid "
                                 "and point to something behind the file.");
     }
@@ -167,13 +167,13 @@ void MDCImporter::ValidateSurfaceHeader(BE_NCONST MDC::Surface *pcSurf) {
 
     const unsigned int iMax = this->fileSize - (unsigned int)((int8_t *)pcSurf - (int8_t *)pcHeader);
 
-    if (pcSurf->ulOffsetBaseVerts + pcSurf->ulNumVertices * sizeof(MDC::BaseVertex) > iMax ||
-            (pcSurf->ulNumCompFrames && pcSurf->ulOffsetCompVerts + pcSurf->ulNumVertices * sizeof(MDC::CompressedVertex) > iMax) ||
-            pcSurf->ulOffsetTriangles + pcSurf->ulNumTriangles * sizeof(MDC::Triangle) > iMax ||
-            pcSurf->ulOffsetTexCoords + pcSurf->ulNumVertices * sizeof(MDC::TexturCoord) > iMax ||
-            pcSurf->ulOffsetShaders + pcSurf->ulNumShaders * sizeof(MDC::Shader) > iMax ||
-            pcSurf->ulOffsetFrameBaseFrames + pcSurf->ulNumBaseFrames * sizeof(int16_t) > iMax ||
-            (pcSurf->ulNumCompFrames && pcSurf->ulOffsetFrameCompFrames + pcSurf->ulNumCompFrames * sizeof(int16_t) > iMax) ||
+    if (pcSurf->ulOffsetBaseVerts + static_cast<uint64_t>(pcSurf->ulNumVertices) * sizeof(MDC::BaseVertex) > iMax ||
+            (pcSurf->ulNumCompFrames && pcSurf->ulOffsetCompVerts + static_cast<uint64_t>(pcSurf->ulNumVertices) * sizeof(MDC::CompressedVertex) > iMax) ||
+            pcSurf->ulOffsetTriangles + static_cast<uint64_t>(pcSurf->ulNumTriangles) * sizeof(MDC::Triangle) > iMax ||
+            pcSurf->ulOffsetTexCoords + static_cast<uint64_t>(pcSurf->ulNumVertices) * sizeof(MDC::TexturCoord) > iMax ||
+            pcSurf->ulOffsetShaders + static_cast<uint64_t>(pcSurf->ulNumShaders) * sizeof(MDC::Shader) > iMax ||
+            pcSurf->ulOffsetFrameBaseFrames + static_cast<uint64_t>(pcSurf->ulNumBaseFrames) * sizeof(int16_t) > iMax ||
+            (pcSurf->ulNumCompFrames && pcSurf->ulOffsetFrameCompFrames + static_cast<uint64_t>(pcSurf->ulNumCompFrames) * sizeof(int16_t) > iMax) ||
             pcSurf->ulOffsetEnd > iMax) {
         throw DeadlyImportError("Some of the offset values in the MDC surface header "
                                 "are invalid and point somewhere behind the file.");

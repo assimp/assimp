@@ -150,6 +150,14 @@ void MDCImporter::ValidateHeader() {
 // ------------------------------------------------------------------------------------------------
 // Validate the header of a given MDC file surface
 void MDCImporter::ValidateSurfaceHeader(BE_NCONST MDC::Surface *pcSurf) {
+    const unsigned int iMax = this->fileSize - (unsigned int)((int8_t *)pcSurf - (int8_t *)pcHeader);
+
+    // the surface is reached through the previous surface's ulOffsetEnd,
+    // so its header may itself lie partly behind the file
+    if (sizeof(MDC::Surface) > iMax) {
+        throw DeadlyImportError("MDC surface header is outside the file bounds.");
+    }
+
     AI_SWAP4(pcSurf->ulFlags);
     AI_SWAP4(pcSurf->ulNumCompFrames);
     AI_SWAP4(pcSurf->ulNumBaseFrames);
@@ -164,8 +172,6 @@ void MDCImporter::ValidateSurfaceHeader(BE_NCONST MDC::Surface *pcSurf) {
     AI_SWAP4(pcSurf->ulOffsetFrameBaseFrames);
     AI_SWAP4(pcSurf->ulOffsetFrameCompFrames);
     AI_SWAP4(pcSurf->ulOffsetEnd);
-
-    const unsigned int iMax = this->fileSize - (unsigned int)((int8_t *)pcSurf - (int8_t *)pcHeader);
 
     if (pcSurf->ulOffsetBaseVerts + pcSurf->ulNumVertices * sizeof(MDC::BaseVertex) > iMax ||
             (pcSurf->ulNumCompFrames && pcSurf->ulOffsetCompVerts + pcSurf->ulNumVertices * sizeof(MDC::CompressedVertex) > iMax) ||

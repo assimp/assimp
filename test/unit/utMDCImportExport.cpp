@@ -66,3 +66,9 @@ TEST_F(utMDCImportExport, importInvalidFrameBaseOffset) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MDC/invalid/InvalidFrameBaseOffset.mdc", 0);
     EXPECT_EQ(nullptr, scene);
 }
+
+TEST_F(utMDCImportExport, importSurfaceHeaderOutOfBounds) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MDC/invalid/SurfaceHeaderOutOfBounds.mdc", 0);
+    EXPECT_EQ(nullptr, scene);
+}

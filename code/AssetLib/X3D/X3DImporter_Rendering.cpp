@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 #include "X3DXmlHelper.h"
+#include <memory>
 
 namespace Assimp {
 
@@ -180,7 +181,8 @@ void X3DImporter::readIndexedLineSet(XmlNode &node) {
             throw DeadlyImportError("IndexedLineSet must contain not empty \"coordIndex\" attribute.");
 
         // create and if needed - define new geometry object.
-        ne = new X3DNodeElementIndexedSet(X3DElemType::ENET_IndexedLineSet, mNodeElementCur);
+        auto ownedNode = std::make_unique<X3DNodeElementIndexedSet>(X3DElemType::ENET_IndexedLineSet, mNodeElementCur);
+        ne = ownedNode.get();
         if (!def.empty()) ne->ID = def;
 
         X3DNodeElementIndexedSet &ne_alias = *((X3DNodeElementIndexedSet *)ne);
@@ -211,6 +213,7 @@ void X3DImporter::readIndexedLineSet(XmlNode &node) {
         }
 
         NodeElement_List.push_back(ne); // add element to node element list because its a new object in graph
+        ownedNode.release();
     } // if(!use.empty()) else
 }
 

@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 #include "X3DXmlHelper.h"
+#include <memory>
 
 namespace Assimp {
 
@@ -62,7 +63,8 @@ void X3DImporter::readShape(XmlNode &node) {
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Shape, ne);
     } else {
         // create and if needed - define new geometry object.
-        ne = new X3DNodeElementShape(mNodeElementCur);
+        auto ownedNode = std::make_unique<X3DNodeElementShape>(mNodeElementCur);
+        ne = ownedNode.get();
         if (!def.empty()) ne->ID = def;
 
         // check for child nodes
@@ -131,6 +133,7 @@ void X3DImporter::readShape(XmlNode &node) {
         }
 
         NodeElement_List.push_back(ne); // add element to node element list because its a new object in graph
+        ownedNode.release();
     } // if(!use.empty()) else
 }
 
@@ -155,7 +158,8 @@ void X3DImporter::readAppearance(XmlNode &node) {
         ne = MACRO_USE_CHECKANDAPPLY(node, def, use, ENET_Appearance, ne);
     } else {
         // create and if needed - define new geometry object.
-        ne = new X3DNodeElementAppearance(mNodeElementCur);
+        auto ownedNode = std::make_unique<X3DNodeElementAppearance>(mNodeElementCur);
+        ne = ownedNode.get();
         if (!def.empty()) ne->ID = def;
 
         // check for child nodes
@@ -180,6 +184,7 @@ void X3DImporter::readAppearance(XmlNode &node) {
         }
 
         NodeElement_List.push_back(ne); // add element to node element list because its a new object in graph
+        ownedNode.release();
     } // if(!use.empty()) else
 }
 

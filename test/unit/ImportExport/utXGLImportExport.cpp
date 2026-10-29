@@ -194,3 +194,18 @@ TEST(utXGLImporter, importWusonDXF) {
     EXPECT_EQ(scene->mMeshes[0]->mNumVertices, 11196u);
     EXPECT_EQ(scene->mMeshes[0]->mNumFaces, 3732u);
 }
+
+TEST(utXGLImporter, importEmptyMeshMaterialIndex) {
+    // A <mesh> without any primitive must not produce an output mesh that
+    // carries its material id (or the 99999 default) as material index.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/empty_mesh_material.xgl", 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(scene->mNumMeshes, 1u);
+    for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+        EXPECT_LT(scene->mMeshes[i]->mMaterialIndex, scene->mNumMaterials);
+    }
+
+    scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/XGL/empty_mesh_material.xgl", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}

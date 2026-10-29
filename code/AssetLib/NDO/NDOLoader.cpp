@@ -112,8 +112,8 @@ void ProcessFaceEdgesAndVertices(const NDOImporter::Object& obj,
             next_edge = obj.edges[cur_edge].edge[4];
             next_vert = obj.edges[cur_edge].edge[0];
         }
-        indices.push_back( static_cast<unsigned int>(vertices.size()) );
         if (next_vert < obj.vertices.size()) {
+            indices.push_back(static_cast<unsigned int>(vertices.size()));
             vertices.push_back(obj.vertices[ next_vert ].val);
         }
         else {

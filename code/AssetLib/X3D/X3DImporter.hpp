@@ -320,13 +320,29 @@ private:
     void readSphere(XmlNode &node);
 
     // group
-    void startReadGroup(XmlNode &node);
+    /// \brief Parse <Group> tag.
+    /// \param [in] node - xml node to read.
+    /// \return true if node was opened as a group and needs child parsing, false if USE was applied.
+    bool startReadGroup(XmlNode &node);
+    /// \brief Exit <Group> tag.
     void endReadGroup();
-    void startReadStaticGroup(XmlNode &node);
+    /// \brief Parse <StaticGroup> tag.
+    /// \param [in] node - xml node to read.
+    /// \return true if node was opened as a static group and needs child parsing, false if USE was applied.
+    bool startReadStaticGroup(XmlNode &node);
+    /// \brief Exit <StaticGroup> tag.
     void endReadStaticGroup();
-    void startReadSwitch(XmlNode &node);
+    /// \brief Parse <Switch> tag.
+    /// \param [in] node - xml node to read.
+    /// \return true if node was opened as a switch and needs child parsing, false if USE was applied.
+    bool startReadSwitch(XmlNode &node);
+    /// \brief Exit <Switch> tag.
     void endReadSwitch();
-    void startReadTransform(XmlNode &node);
+    /// \brief Parse <Transform> tag.
+    /// \param [in] node - xml node to read.
+    /// \return true if node was opened as a transform and needs child parsing, false if USE was applied.
+    bool startReadTransform(XmlNode &node);
+    /// \brief Exit <Transform> tag.
     void endReadTransform();
 
     // light

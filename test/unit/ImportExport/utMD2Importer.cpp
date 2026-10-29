@@ -41,9 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnitTestPCH.h"
 
+#include <assimp/config.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
+
+#include <string>
 
 using namespace Assimp;
 
@@ -91,4 +94,25 @@ TEST(utMD2Importer, importMalformedUnterminatedSkinName) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/malformed_unterminated_skin_name.md2", 0);
     ASSERT_NE(nullptr, scene);
+}
+
+TEST(utMD2Importer, importMalformedStoredFrameSize) {
+    // The frameSize stored in the header (380) disagrees with the one computed from numVertices
+    // (48). With keyframe 1 the frame is navigated with the stored value, which puts the vertices
+    // behind the end of the 512 byte file.
+    Assimp::Importer importer;
+    importer.SetPropertyInteger(AI_CONFIG_IMPORT_MD2_KEYFRAME, 1);
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/malformed_stored_framesize.md2", 0);
+    ASSERT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("outside the file"));
+}
+
+TEST(utMD2Importer, importStoredFrameSizeMatchingHeader) {
+    // Same file layout, but the stored frameSize equals the computed one: any keyframe is fine.
+    for (int keyframe = 0; keyframe <= 1; ++keyframe) {
+        Assimp::Importer importer;
+        importer.SetPropertyInteger(AI_CONFIG_IMPORT_MD2_KEYFRAME, keyframe);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/MD2/framesize_matches_header.md2", aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene) << "keyframe " << keyframe << ": " << importer.GetErrorString();
+    }
 }

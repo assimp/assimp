@@ -78,11 +78,7 @@ TEST_F(utX3DImportExport, importX3DComputerKeyboard) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X3D/ComputerKeyboard.x3d", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
-    // TODO: CHANGE INCORRECT VALUE WHEN IMPORTER FIXED
-    //   As noted in assimp issue 4992, X3D importer was severely broken with 5 Oct 2020 commit 3b9d4cf.
-    //   ComputerKeyboard.x3d should have 100 meshes but broken importer only has 4
-    ASSERT_EQ(4u, scene->mNumMeshes);  // Incorrect value from currently broken importer
-    ASSERT_NE(100u, scene->mNumMeshes); // Correct value, to be restored when importer fixed
+    ASSERT_EQ(100u, scene->mNumMeshes);
 }
 
 TEST_F(utX3DImportExport, importX3DMalformedColorIndex) {
@@ -99,9 +95,116 @@ TEST_F(utX3DImportExport, importX3DChevyTahoe) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/X3D/Chevy/ChevyTahoe.x3d", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
-    // TODO: CHANGE INCORRECT VALUE WHEN IMPORTER FIXED
-    //   As noted in assimp issue 4992, X3D importer was severely broken with 5 Oct 2020 commit 3b9d4cf.
-    //   ChevyTahoe.x3d should have 20 meshes but broken importer only has 19
-    ASSERT_EQ(19u, scene->mNumMeshes); // Incorrect value from currently broken importer
-    ASSERT_NE(20u, scene->mNumMeshes); // Correct value, to be restored when importer fixed
+    ASSERT_EQ(20u, scene->mNumMeshes);
+}
+
+TEST_F(utX3DImportExport, importX3DEmptyGroupingNodes) {
+    // Empty Group, StaticGroup, Switch, and Transform (childless or comment-only)
+    // should not crash or corrupt the node hierarchy via double Node_Exit.
+    const std::string xml =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<X3D profile=\"Immersive\" version=\"3.0\">\n"
+        "  <Scene>\n"
+        "    <Group/>\n"
+        "    <StaticGroup/>\n"
+        "    <Switch whichChoice=\"-1\"/>\n"
+        "    <Transform><!-- comment only --></Transform>\n"
+        "    <Transform translation=\"0 0 0\"/>\n"
+        "    <Shape>\n"
+        "      <Appearance>\n"
+        "        <Material diffuseColor=\"1 0 0\"/>\n"
+        "      </Appearance>\n"
+        "      <IndexedFaceSet coordIndex=\"0 1 2 -1\">\n"
+        "        <Coordinate point=\"0 0 0, 1 0 0, 0 1 0\"/>\n"
+        "      </IndexedFaceSet>\n"
+        "    </Shape>\n"
+        "  </Scene>\n"
+        "</X3D>\n";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(xml.c_str(), xml.length(), aiProcess_ValidateDataStructure, "x3d");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(3u, scene->mMeshes[0]->mNumVertices);
+    ASSERT_EQ(1u, scene->mMeshes[0]->mNumFaces);
+}
+
+TEST_F(utX3DImportExport, importX3DNestedEmptyGroupingNodes) {
+    const std::string xml =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<X3D profile=\"Immersive\" version=\"3.0\">\n"
+        "  <Scene>\n"
+        "    <Group>\n"
+        "      <Transform>\n"
+        "        <StaticGroup>\n"
+        "          <Switch whichChoice=\"-1\"/>\n"
+        "        </StaticGroup>\n"
+        "      </Transform>\n"
+        "    </Group>\n"
+        "    <Shape>\n"
+        "      <Appearance>\n"
+        "        <Material diffuseColor=\"0 1 0\"/>\n"
+        "      </Appearance>\n"
+        "      <IndexedFaceSet coordIndex=\"0 1 2 -1\">\n"
+        "        <Coordinate point=\"0 0 0, 1 0 0, 0 1 0\"/>\n"
+        "      </IndexedFaceSet>\n"
+        "    </Shape>\n"
+        "  </Scene>\n"
+        "</X3D>\n";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(xml.c_str(), xml.length(), aiProcess_ValidateDataStructure, "x3d");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+}
+
+TEST_F(utX3DImportExport, importX3DGroupingNodeUseReferences) {
+    // Verify USE instancing on Group, StaticGroup, Switch, and Transform nodes,
+    // ensuring parent hierarchy pointers are preserved and subsequent siblings are loaded.
+    const std::string xml =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<X3D profile=\"Immersive\" version=\"3.0\">\n"
+        "  <Scene>\n"
+        "    <Transform DEF=\"OriginalTransform\" translation=\"0 1 0\">\n"
+        "      <Shape>\n"
+        "        <Appearance>\n"
+        "          <Material diffuseColor=\"0 0 1\"/>\n"
+        "        </Appearance>\n"
+        "        <IndexedFaceSet coordIndex=\"0 1 2 -1\">\n"
+        "          <Coordinate point=\"0 0 0, 1 0 0, 0 1 0\"/>\n"
+        "        </IndexedFaceSet>\n"
+        "      </Shape>\n"
+        "    </Transform>\n"
+        "    <Transform USE=\"OriginalTransform\"/>\n"
+        "    <Group USE=\"OriginalTransform\"/>\n"
+        "    <StaticGroup USE=\"OriginalTransform\"/>\n"
+        "    <Switch whichChoice=\"0\">\n"
+        "      <Transform USE=\"OriginalTransform\"/>\n"
+        "    </Switch>\n"
+        "    <Shape>\n"
+        "      <Appearance>\n"
+        "        <Material diffuseColor=\"1 1 0\"/>\n"
+        "      </Appearance>\n"
+        "      <IndexedFaceSet coordIndex=\"0 1 2 -1\">\n"
+        "        <Coordinate point=\"0 0 0, 1 0 0, 0 1 0\"/>\n"
+        "      </IndexedFaceSet>\n"
+        "    </Shape>\n"
+        "  </Scene>\n"
+        "</X3D>\n";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(xml.c_str(), xml.length(), aiProcess_ValidateDataStructure, "x3d");
+    ASSERT_NE(nullptr, scene);
+    // Original (1) + 4 USE references (4) + trailing Shape (1) = 6 meshes total
+    ASSERT_EQ(6u, scene->mNumMeshes);
+}
+
+TEST_F(utX3DImportExport, importX3DEmptyScene) {
+    const std::string xml =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<X3D profile=\"Immersive\" version=\"3.0\">\n"
+        "  <Scene/>\n"
+        "</X3D>\n";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(xml.c_str(), xml.length(), 0, "x3d");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(0u, scene->mNumMeshes);
+    ASSERT_NE(nullptr, scene->mRootNode);
 }

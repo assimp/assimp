@@ -124,7 +124,7 @@ namespace Assimp {
                 case EDT_Short:
                     return static_cast<ai_real>(val.iInt + (0xFFFF / 2)) / static_cast<ai_real>(0xFFFF);
                 case EDT_UInt:
-                    return static_cast<ai_real>(val.iUInt) / static_cast<ai_real>(0xFFFF);
+                    return static_cast<ai_real>(val.iUInt) / static_cast<ai_real>(0xFFFFFFFFu);
                 case EDT_Int:
                     return (static_cast<ai_real>(val.iInt) / static_cast<ai_real>(0xFF)) + 0.5f;
                 default:

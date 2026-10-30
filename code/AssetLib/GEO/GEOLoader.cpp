@@ -437,6 +437,13 @@ void GEOImporter::InternReadFaces(unsigned int count, bool faceColors) {
         for (unsigned int m = 0; m < faces->mNumIndices; m++) {
             SkipSpaces(&sz, line + sizeof(line));
             const unsigned int pos = strtoul10(sz, &sz);
+            // Same class of bug as NDO/Q3D: authored indices must be in-range.
+            if (pos >= tempPositions.size()) {
+                throw DeadlyImportError("GEO: face vertex index out of range");
+            }
+            if (!faceColors && pos >= tempColors.size()) {
+                throw DeadlyImportError("GEO: face vertex color index out of range");
+            }
             faces->mIndices[m] = p++;
             *verts++ = tempPositions[pos];
             if (!faceColors) {

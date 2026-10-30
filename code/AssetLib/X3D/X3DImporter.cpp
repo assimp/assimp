@@ -377,21 +377,25 @@ void X3DImporter::readChildNodes(XmlNode &node, const std::string &pParentNodeNa
         if (currentName == "Shape")
             readShape(currentNode);
         else if (currentName == "Group") {
-            startReadGroup(currentNode);
-            readChildNodes(currentNode, "Group");
-            endReadGroup();
+            if (startReadGroup(currentNode)) {
+                readChildNodes(currentNode, "Group");
+                endReadGroup();
+            }
         } else if (currentName == "StaticGroup") {
-            startReadStaticGroup(currentNode);
-            readChildNodes(currentNode, "StaticGroup");
-            endReadStaticGroup();
+            if (startReadStaticGroup(currentNode)) {
+                readChildNodes(currentNode, "StaticGroup");
+                endReadStaticGroup();
+            }
         } else if (currentName == "Transform") {
-            startReadTransform(currentNode);
-            readChildNodes(currentNode, "Transform");
-            endReadTransform();
+            if (startReadTransform(currentNode)) {
+                readChildNodes(currentNode, "Transform");
+                endReadTransform();
+            }
         } else if (currentName == "Switch") {
-            startReadSwitch(currentNode);
-            readChildNodes(currentNode, "Switch");
-            endReadSwitch();
+            if (startReadSwitch(currentNode)) {
+                readChildNodes(currentNode, "Switch");
+                endReadSwitch();
+            }
         } else if (currentName == "DirectionalLight") {
             readDirectionalLight(currentNode);
         } else if (currentName == "PointLight") {

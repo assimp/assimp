@@ -628,7 +628,11 @@ namespace Assimp {
                             GetProperty(instElement->alProperties, iProperty).avList.begin();
 
                     for (unsigned int a = 0; a < iNum; ++a, ++p) {
-                        mGeneratedMesh->mFaces[pos].mIndices[a] = PropertyInstance::ConvertTo<unsigned int>(*p, eType);
+                        const unsigned int vi = PropertyInstance::ConvertTo<unsigned int>(*p, eType);
+                        if (vi >= mGeneratedMesh->mNumVertices) {
+                            throw DeadlyImportError("Invalid .ply file: Face vertex index out of range");
+                        }
+                        mGeneratedMesh->mFaces[pos].mIndices[a] = vi;
                     }
                 }
 
@@ -699,12 +703,18 @@ namespace Assimp {
                 aiTable[1] = p;
                 continue;
             }
+            if (aiTable[0] < 0 || aiTable[1] < 0 || p < 0 ||
+                    static_cast<unsigned int>(aiTable[0]) >= mGeneratedMesh->mNumVertices ||
+                    static_cast<unsigned int>(aiTable[1]) >= mGeneratedMesh->mNumVertices ||
+                    static_cast<unsigned int>(p) >= mGeneratedMesh->mNumVertices) {
+                throw DeadlyImportError("Invalid .ply file: Triangle-strip vertex index out of range");
+            }
             aiFace face;
             face.mNumIndices = 3;
             face.mIndices = new unsigned int[3];
-            face.mIndices[0] = aiTable[0];
-            face.mIndices[1] = aiTable[1];
-            face.mIndices[2] = p;
+            face.mIndices[0] = static_cast<unsigned int>(aiTable[0]);
+            face.mIndices[1] = static_cast<unsigned int>(aiTable[1]);
+            face.mIndices[2] = static_cast<unsigned int>(p);
             if (flip) {
                 std::swap(face.mIndices[0], face.mIndices[1]);
             }

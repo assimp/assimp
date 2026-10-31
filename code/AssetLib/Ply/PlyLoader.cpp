@@ -88,6 +88,17 @@ namespace Assimp {
         }
 
         // ------------------------------------------------------------------------------------------------
+        // Property instance must carry at least one value (Kulling-week empty-prop class).
+        const PLY::PropertyInstance::ValueUnion &GetPropertyFront(
+                const std::vector<PLY::PropertyInstance> &props, int idx) {
+            const PLY::PropertyInstance &pi = GetProperty(props, idx);
+            if (pi.avList.empty()) {
+                throw DeadlyImportError("Invalid .ply file: Empty property value");
+            }
+            return pi.avList.front();
+        }
+
+        // ------------------------------------------------------------------------------------------------
         bool isBigEndian(const char *szMe) {
             ai_assert(nullptr != szMe);
 
@@ -143,26 +154,26 @@ namespace Assimp {
             if (NotSet == positions[0]) {
                 clrOut->r = 0.0f;
             } else {
-                clrOut->r = NormalizeColorValue(GetProperty(avList, positions[0]).avList.front(), types[0]);
+                clrOut->r = NormalizeColorValue(GetPropertyFront(avList, static_cast<int>(positions[0])), types[0]);
             }
 
             if (NotSet == positions[1]) {
                 clrOut->g = 0.0f;
             } else {
-                clrOut->g = NormalizeColorValue(GetProperty(avList, positions[1]).avList.front(), types[1]);
+                clrOut->g = NormalizeColorValue(GetPropertyFront(avList, static_cast<int>(positions[1])), types[1]);
             }
 
             if (NotSet == positions[2]) {
                 clrOut->b = 0.0f;
             } else {
-                clrOut->b = NormalizeColorValue(GetProperty(avList, positions[2]).avList.front(), types[2]);
+                clrOut->b = NormalizeColorValue(GetPropertyFront(avList, static_cast<int>(positions[2])), types[2]);
             }
 
             // assume 1.0 for the alpha channel ifit is not set
             if (NotSet == positions[3]) {
                 clrOut->a = 1.0f;
             } else {
-                clrOut->a = NormalizeColorValue(GetProperty(avList, positions[3]).avList.front(), types[3]);
+                clrOut->a = NormalizeColorValue(GetPropertyFront(avList, static_cast<int>(positions[3])), types[3]);
             }
         }
 
@@ -303,11 +314,26 @@ namespace Assimp {
         pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
         pScene->mMeshes[0] = mGeneratedMesh;
 
+        // Name mesh from file stem (Assimp info / tooling); PLY has no mesh names.
+        {
+            std::string::size_type slash = pFile.find_last_of("/\\");
+            std::string stem = (slash == std::string::npos) ? pFile : pFile.substr(slash + 1);
+            const std::string::size_type dot = stem.find_last_of('.');
+            if (dot != std::string::npos) {
+                stem.resize(dot);
+            }
+            if (stem.empty()) {
+                stem = "PLY";
+            }
+            mGeneratedMesh->mName.Set(stem);
+        }
+
         // Move the mesh ownership into the scene instance
         mGeneratedMesh = nullptr;
 
         // generate a simple node structure
         pScene->mRootNode = new aiNode();
+        pScene->mRootNode->mName.Set("<PLYRoot>");
         pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
         pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
 
@@ -400,17 +426,17 @@ namespace Assimp {
             aiVector3D vOut;
             if (NotSet != aiPositions[0]) {
                 vOut.x = PropertyInstance::ConvertTo<ai_real>(
-                        GetProperty(instElement->alProperties, aiPositions[0]).avList.front(), aiTypes[0]);
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiPositions[0])), aiTypes[0]);
             }
 
             if (NotSet != aiPositions[1]) {
                 vOut.y = PropertyInstance::ConvertTo<ai_real>(
-                        GetProperty(instElement->alProperties, aiPositions[1]).avList.front(), aiTypes[1]);
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiPositions[1])), aiTypes[1]);
             }
 
             if (NotSet != aiPositions[2]) {
                 vOut.z = PropertyInstance::ConvertTo<ai_real>(
-                        GetProperty(instElement->alProperties, aiPositions[2]).avList.front(), aiTypes[2]);
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiPositions[2])), aiTypes[2]);
             }
 
             // Normals
@@ -418,19 +444,19 @@ namespace Assimp {
             bool haveNormal = false;
             if (NotSet != aiNormal[0]) {
                 nOut.x = PropertyInstance::ConvertTo<ai_real>(
-                        GetProperty(instElement->alProperties, aiNormal[0]).avList.front(), aiNormalTypes[0]);
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiNormal[0])), aiNormalTypes[0]);
                 haveNormal = true;
             }
 
             if (NotSet != aiNormal[1]) {
                 nOut.y = PropertyInstance::ConvertTo<ai_real>(
-                        GetProperty(instElement->alProperties, aiNormal[1]).avList.front(), aiNormalTypes[1]);
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiNormal[1])), aiNormalTypes[1]);
                 haveNormal = true;
             }
 
             if (NotSet != aiNormal[2]) {
                 nOut.z = PropertyInstance::ConvertTo<ai_real>(
-                        GetProperty(instElement->alProperties, aiNormal[2]).avList.front(), aiNormalTypes[2]);
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiNormal[2])), aiNormalTypes[2]);
                 haveNormal = true;
             }
 
@@ -438,25 +464,22 @@ namespace Assimp {
             aiColor4D cOut;
             bool haveColor = false;
             if (NotSet != aiColors[0]) {
-                cOut.r = NormalizeColorValue(GetProperty(instElement->alProperties,
-                                                    aiColors[0])
-                                                    .avList.front(),
+                cOut.r = NormalizeColorValue(
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiColors[0])),
                         aiColorsTypes[0]);
                 haveColor = true;
             }
 
             if (NotSet != aiColors[1]) {
-                cOut.g = NormalizeColorValue(GetProperty(instElement->alProperties,
-                                                    aiColors[1])
-                                                    .avList.front(),
+                cOut.g = NormalizeColorValue(
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiColors[1])),
                         aiColorsTypes[1]);
                 haveColor = true;
             }
 
             if (NotSet != aiColors[2]) {
-                cOut.b = NormalizeColorValue(GetProperty(instElement->alProperties,
-                                                    aiColors[2])
-                                                    .avList.front(),
+                cOut.b = NormalizeColorValue(
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiColors[2])),
                         aiColorsTypes[2]);
                 haveColor = true;
             }
@@ -465,9 +488,8 @@ namespace Assimp {
             if (NotSet == aiColors[3]) {
                 cOut.a = 1.0;
             } else {
-                cOut.a = NormalizeColorValue(GetProperty(instElement->alProperties,
-                                                    aiColors[3])
-                                                    .avList.front(),
+                cOut.a = NormalizeColorValue(
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiColors[3])),
                         aiColorsTypes[3]);
 
                 haveColor = true;
@@ -479,13 +501,13 @@ namespace Assimp {
             bool haveTextureCoords = false;
             if (NotSet != aiTexcoord[0]) {
                 tOut.x = PropertyInstance::ConvertTo<ai_real>(
-                        GetProperty(instElement->alProperties, aiTexcoord[0]).avList.front(), aiTexcoordTypes[0]);
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiTexcoord[0])), aiTexcoordTypes[0]);
                 haveTextureCoords = true;
             }
 
             if (NotSet != aiTexcoord[1]) {
                 tOut.y = PropertyInstance::ConvertTo<ai_real>(
-                        GetProperty(instElement->alProperties, aiTexcoord[1]).avList.front(), aiTexcoordTypes[1]);
+                        GetPropertyFront(instElement->alProperties, static_cast<int>(aiTexcoord[1])), aiTexcoordTypes[1]);
                 haveTextureCoords = true;
             }
 
@@ -613,7 +635,11 @@ namespace Assimp {
                             GetProperty(instElement->alProperties, iProperty).avList.begin();
 
                     for (unsigned int a = 0; a < iNum; ++a, ++p) {
-                        mGeneratedMesh->mFaces[pos].mIndices[a] = PropertyInstance::ConvertTo<unsigned int>(*p, eType);
+                        const unsigned int vi = PropertyInstance::ConvertTo<unsigned int>(*p, eType);
+                        if (vi >= mGeneratedMesh->mNumVertices) {
+                            throw DeadlyImportError("Invalid .ply file: Face vertex index out of range");
+                        }
+                        mGeneratedMesh->mFaces[pos].mIndices[a] = vi;
                     }
                 }
 
@@ -684,12 +710,18 @@ namespace Assimp {
                 aiTable[1] = p;
                 continue;
             }
+            if (aiTable[0] < 0 || aiTable[1] < 0 || p < 0 ||
+                    static_cast<unsigned int>(aiTable[0]) >= mGeneratedMesh->mNumVertices ||
+                    static_cast<unsigned int>(aiTable[1]) >= mGeneratedMesh->mNumVertices ||
+                    static_cast<unsigned int>(p) >= mGeneratedMesh->mNumVertices) {
+                throw DeadlyImportError("Invalid .ply file: Triangle-strip vertex index out of range");
+            }
             aiFace face;
             face.mNumIndices = 3;
             face.mIndices = new unsigned int[3];
-            face.mIndices[0] = aiTable[0];
-            face.mIndices[1] = aiTable[1];
-            face.mIndices[2] = p;
+            face.mIndices[0] = static_cast<unsigned int>(aiTable[0]);
+            face.mIndices[1] = static_cast<unsigned int>(aiTable[1]);
+            face.mIndices[2] = static_cast<unsigned int>(p);
             if (flip) {
                 std::swap(face.mIndices[0], face.mIndices[1]);
             }
@@ -829,7 +861,8 @@ namespace Assimp {
                 // handle phong power and shading mode
                 int iMode = aiShadingMode_Gouraud;
                 if (0xFFFFFFFF != iPhong) {
-                    ai_real fSpec = PropertyInstance::ConvertTo<ai_real>(GetProperty((*i).alProperties, iPhong).avList.front(), ePhong);
+                    ai_real fSpec = PropertyInstance::ConvertTo<ai_real>(
+                            GetPropertyFront((*i).alProperties, static_cast<int>(iPhong)), ePhong);
 
                     // if shininess is 0 (and the pow() calculation would therefore always
                     // become 1, not depending on the angle), use gouraud lighting
@@ -845,7 +878,8 @@ namespace Assimp {
 
                 // handle opacity
                 if (0xFFFFFFFF != iOpacity) {
-                    ai_real fOpacity = PropertyInstance::ConvertTo<ai_real>(GetProperty((*i).alProperties, iPhong).avList.front(), eOpacity);
+                    ai_real fOpacity = PropertyInstance::ConvertTo<ai_real>(
+                            GetPropertyFront((*i).alProperties, static_cast<int>(iOpacity)), eOpacity);
                     pcHelper->AddProperty<ai_real>(&fOpacity, 1, AI_MATKEY_OPACITY);
                 }
 

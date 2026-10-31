@@ -486,6 +486,7 @@ const aiScene* Importer::ReadFileFromMemory(const void* pBuffer, size_t pLength,
     ai_assert(nullptr != pimpl);
 
     IOSystem* io = pimpl->mIOHandler;
+    const bool isDefaultHandler = pimpl->mIsDefaultHandler;
     try {
         if (pHint == nullptr) {
             pHint = "";
@@ -506,15 +507,18 @@ const aiScene* Importer::ReadFileFromMemory(const void* pBuffer, size_t pLength,
 
         ReadFile(fbuff,pFlags);
         SetIOHandler(io);
+        pimpl->mIsDefaultHandler = isDefaultHandler;
     } catch(const DeadlyImportError &e) {
         pimpl->mErrorString = e.what();
         pimpl->mException = std::current_exception();
         SetIOHandler(io);
+        pimpl->mIsDefaultHandler = isDefaultHandler;
         return ExceptionSwallower<const aiScene*>()();                                                                                                    \
     } catch(...) {
         pimpl->mErrorString = "Unknown exception";
         pimpl->mException = std::current_exception();
         SetIOHandler(io);
+        pimpl->mIsDefaultHandler = isDefaultHandler;
         return ExceptionSwallower<const aiScene*>()();                                                                                                    \
 
     }

@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
@@ -72,4 +73,26 @@ TEST_F(utCSMImportExport, importDropoutBufferOverflow) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/CSM/invalid/DropoutBufferOverflow.csm", 0);
     EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utCSMImportExport, importRepeatedPointsKeepsBuffer) {
+    // The second $points section keeps the one-key buffer sized from
+    // $lastframe by the first section, but used to assume 100 free slots.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/CSM/invalid/RepeatedPointsKeepsBuffer.csm", 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumAnimations);
+    ASSERT_EQ(1u, scene->mAnimations[0]->mNumChannels);
+    EXPECT_EQ(2u, scene->mAnimations[0]->mChannels[0]->mNumPositionKeys);
+}
+
+TEST_F(utCSMImportExport, importRepeatedPointsReallocates) {
+    // The second $points section reallocates the key buffer from $lastframe,
+    // but used to keep writing at the key count of the first section.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/CSM/invalid/RepeatedPointsReallocates.csm", 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumAnimations);
+    ASSERT_EQ(1u, scene->mAnimations[0]->mNumChannels);
+    EXPECT_EQ(1u, scene->mAnimations[0]->mChannels[0]->mNumPositionKeys);
 }

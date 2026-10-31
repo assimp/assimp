@@ -111,6 +111,12 @@ TEST(utXImporter, importTestCubeCompressed) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utXImporter, importTestCubeCompressedTruncatedChunk) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test_cube_compressed_truncated.x", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(nullptr, scene);
+}
+
 TEST(utXImporter, importTestCubeText) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test_cube_text.x", aiProcess_ValidateDataStructure);

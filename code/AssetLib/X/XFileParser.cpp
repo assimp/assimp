@@ -188,21 +188,33 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         Compression compression;
         uncompressed.resize(est_out + 1);
         char *out = &uncompressed.front();
-        if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII,
-                Compression::FlushMode::SyncFlush, -Compression::MaxWBits)) {
-            while (mP + 3 < mEnd) {
-                uint16_t ofs = *((uint16_t *)mP);
-                AI_SWAP2(ofs);
-                mP += 4;
-
-                if (mP + ofs > mEnd + 2) {
-                    throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
-                }
-                out += compression.decompressBlock(mP, ofs, out, MSZIP_BLOCK);
-                mP += ofs;
-            }
-            compression.close();
+        if (!compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII,
+                    Compression::FlushMode::SyncFlush, -Compression::MaxWBits)) {
+            throw DeadlyImportError("X: Failed to open the MSZIP decompression stream");
         }
+        while (mP + 3 < mEnd) {
+            uint16_t ofs = *((uint16_t *)mP);
+            AI_SWAP2(ofs);
+            mP += 4;
+
+            // The last block of shipped MSZIP files can announce a couple
+            // of bytes more than the chunk holds (test_cube_compressed.x
+            // announces two; the terminating zero of the parse buffer
+            // covers one and inflate never consumes the other), so clamp
+            // the input window to the buffer instead of reading past it.
+            // An announce beyond that allowance means the chunk is cut off
+            // mid-block: inflate would return without producing the block
+            // and the importer would silently keep whatever prefix was
+            // decompressed so far, so reject the file instead.
+            const size_t avail = static_cast<size_t>(mEnd - mP + 1);
+            if (ofs > avail + 1) {
+                throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
+            }
+            const size_t bounded = ofs < avail ? ofs : avail;
+            out += compression.decompressBlock(mP, bounded, out, MSZIP_BLOCK);
+            mP += ofs;
+        }
+        compression.close();
 
         // ok, update pointers to point to the uncompressed file data
         mP = &uncompressed[0];
@@ -407,7 +419,7 @@ void XFileParser::ParseDataObjectMesh(Mesh *pMesh) {
         Face &face = pMesh->mPosFaces[a];
         for (unsigned int b = 0; b < numIndices; ++b) {
             const int idx(ReadInt());
-            if (static_cast<unsigned int>(idx) <= numVertices) {
+            if (static_cast<unsigned int>(idx) < numVertices) {
                 face.mIndices.push_back(idx);
             }
         }

@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "USDLoaderImplTinyusdzHelper.h"
 #include "USDLoaderUtil.h"
 #include "USDPreprocessor.h"
-#include "io-util.hh" // namespace tinyusdz::io
+#include "io-util.hh" // namespace lightusd::io
 #include "tydra/scene-access.hh"
 #include "tydra/shader-network.hh"
 
@@ -82,8 +82,8 @@ namespace Assimp {
 
 using Assimp::tinyUsdzMat4ToAiMat4;
 using Assimp::tinyusdzNodeTypeFor;
-using tinyusdz::tydra::NodeType;
-using namespace tinyusdz::tydra;
+using lightusd::tydra::NodeType;
+using namespace lightusd::tydra;
 
 void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     // Grab filename for logging purposes
@@ -111,8 +111,8 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
     }
 
     bool ret{ false };
-    tinyusdz::USDLoadOptions options;
-    tinyusdz::Stage stage;
+    lightusd::USDLoadOptions options;
+    lightusd::Stage stage;
     std::string warn, err;
     bool is_usdz{ false };
     if (isUsdc(pFile)) {
@@ -167,14 +167,14 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
     RenderScene render_scene;
     RenderSceneConverter converter;
     RenderSceneConverterEnv env(stage);
-    std::string usd_basedir = tinyusdz::io::GetBaseDir(pFile);
+    std::string usd_basedir = lightusd::io::GetBaseDir(pFile);
     env.set_search_paths({ usd_basedir }); // {} needed to convert to vector of char
 
     // NOTE: Pointer address of usdz_asset must be valid until the call of RenderSceneConverter::ConvertToRenderScene.
-    tinyusdz::USDZAsset usdz_asset;
+    lightusd::USDZAsset usdz_asset;
     if (is_usdz) {
-        bool is_read_USDZ_asset = is_load_from_mem ? tinyusdz::ReadUSDZAssetInfoFromMemory(in_mem_data.data(), in_mem_data.size(), false, &usdz_asset, &warn, &err) :
-                                                     tinyusdz::ReadUSDZAssetInfoFromFile(pFile, &usdz_asset, &warn, &err);
+        bool is_read_USDZ_asset = is_load_from_mem ? lightusd::ReadUSDZAssetInfoFromMemory(in_mem_data.data(), in_mem_data.size(), false, &usdz_asset, &warn, &err) :
+                                                     lightusd::ReadUSDZAssetInfoFromFile(pFile, &usdz_asset, &warn, &err);
         if (!is_read_USDZ_asset) {
             if (!warn.empty()) {
                 ss.str("");
@@ -195,8 +195,8 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
             TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         }
 
-        tinyusdz::AssetResolutionResolver arr;
-        if (!tinyusdz::SetupUSDZAssetResolution(arr, &usdz_asset)) {
+        lightusd::AssetResolutionResolver arr;
+        if (!lightusd::SetupUSDZAssetResolution(arr, &usdz_asset)) {
             ss.str("");
             ss << "InternReadFile(): SetupUSDZAssetResolution: ERROR: load failed! ret: " << ret;
             TINYUSDZLOGE(TAG, "%s", ss.str().c_str());
@@ -219,6 +219,7 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
     // sanityCheckNodesRecursive(pScene->mRootNode);
     animations(render_scene, pScene);
     meshes(render_scene, pScene, nameWExt);
+    bones(render_scene, pScene, nameWExt);
     materials(render_scene, pScene, nameWExt);
     textures(render_scene, pScene, nameWExt);
     textureImages(render_scene, pScene, nameWExt);
@@ -228,7 +229,8 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
     setupBlendShapes(render_scene, pScene, nameWExt);
 }
 
-void USDImporterImplTinyusdz::animations(const tinyusdz::tydra::RenderScene &render_scene, aiScene *pScene) {
+void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &render_scene, aiScene *pScene) {
+#if !defined(ASSIMP_BUILD_USD_BETA)
     if (render_scene.animations.empty()) {
         return;
     }
@@ -349,10 +351,69 @@ void USDImporterImplTinyusdz::animations(const tinyusdz::tydra::RenderScene &ren
             ++channelIndex;
         }
     }
+#else
+#if defined(ASSIMP_BUILD_USD_BETA)
+    // TODO: restore animation functionality
+    // Don't want to populate animations at all; dummy values will
+    // cause model import to fail entirely
+    return;
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
+    if (render_scene.animations.empty()) {
+        return;
+    }
+
+    pScene->mNumAnimations = unsigned(render_scene.animations.size());
+    pScene->mAnimations = new aiAnimation *[pScene->mNumAnimations];
+
+    for (unsigned animationIndex = 0; animationIndex < pScene->mNumAnimations; ++animationIndex) {
+
+        const auto &animation = render_scene.animations[animationIndex];
+
+        auto newAiAnimation = new aiAnimation();
+        pScene->mAnimations[animationIndex] = newAiAnimation;
+
+        newAiAnimation->mName = animation.abs_path;
+
+        if (animation.empty()) {
+            newAiAnimation->mNumChannels = 0;
+            continue;
+        }
+
+        // each channel affects a node (joint)
+        newAiAnimation->mTicksPerSecond = render_scene.meta.framesPerSecond;
+        newAiAnimation->mNumChannels = unsigned(animation.num_channels());
+
+        newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
+        for (int channelIndex = 0; channelIndex < animation.num_channels(); ++channelIndex) {
+//            auto &animationChannel = animation.channels[channelIndex];
+            auto newAiNodeAnim = new aiNodeAnim();
+            newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
+            newAiAnimation->mDuration = 0;
+
+            std::vector<aiVectorKey> positionKeys;
+            std::vector<aiQuatKey> rotationKeys;
+            std::vector<aiVectorKey> scalingKeys;
+
+            // TODO: add switch on channel type (rot/scale/translate/weights etc)
+
+            newAiNodeAnim->mNumPositionKeys = unsigned(positionKeys.size());
+            newAiNodeAnim->mPositionKeys = new aiVectorKey[newAiNodeAnim->mNumPositionKeys];
+            std::move(positionKeys.begin(), positionKeys.end(), newAiNodeAnim->mPositionKeys);
+
+            newAiNodeAnim->mNumRotationKeys = unsigned(rotationKeys.size());
+            newAiNodeAnim->mRotationKeys = new aiQuatKey[newAiNodeAnim->mNumRotationKeys];
+            std::move(rotationKeys.begin(), rotationKeys.end(), newAiNodeAnim->mRotationKeys);
+
+            newAiNodeAnim->mNumScalingKeys = unsigned(scalingKeys.size());
+            newAiNodeAnim->mScalingKeys = new aiVectorKey[newAiNodeAnim->mNumScalingKeys];
+            std::move(scalingKeys.begin(), scalingKeys.end(), newAiNodeAnim->mScalingKeys);
+        }
+    }
+#endif // #if !defined(ASSIMP_BUILD_USD_BETA)
 }
 
 void USDImporterImplTinyusdz::meshes(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene,
         const std::string &nameWExt) {
     std::stringstream ss;
@@ -386,16 +447,94 @@ void USDImporterImplTinyusdz::meshes(
     }
 }
 
-void USDImporterImplTinyusdz::verticesForMesh(const tinyusdz::tydra::RenderScene &render_scene, 
+void USDImporterImplTinyusdz::verticesForMesh(const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene, size_t meshIdx, const std::string &) {
     const auto numVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
     pScene->mMeshes[meshIdx]->mNumVertices = numVertices;
     pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
 
+    for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
+        pScene->mMeshes[meshIdx]->mVertices[j].x = render_scene.meshes[meshIdx].points[j][0];
+        pScene->mMeshes[meshIdx]->mVertices[j].y = render_scene.meshes[meshIdx].points[j][1];
+        pScene->mMeshes[meshIdx]->mVertices[j].z = render_scene.meshes[meshIdx].points[j][2];
+    }
+}
+
+void USDImporterImplTinyusdz::facesForMesh(const RenderScene &render_scene, aiScene *pScene,
+        size_t meshIdx, const std::string &) {
+    pScene->mMeshes[meshIdx]->mNumFaces = static_cast<unsigned int>(render_scene.meshes[meshIdx].faceVertexCounts().size());
+    pScene->mMeshes[meshIdx]->mFaces = new aiFace[pScene->mMeshes[meshIdx]->mNumFaces]();
+    size_t faceVertIdxOffset = 0;
+    for (size_t faceIdx = 0; faceIdx < pScene->mMeshes[meshIdx]->mNumFaces; ++faceIdx) {
+        pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices = render_scene.meshes[meshIdx].faceVertexCounts()[faceIdx];
+        pScene->mMeshes[meshIdx]->mFaces[faceIdx].mIndices = new unsigned int[pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices];
+        for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices; ++j) {
+            pScene->mMeshes[meshIdx]->mFaces[faceIdx].mIndices[j] =
+                    render_scene.meshes[meshIdx].faceVertexIndices()[j + faceVertIdxOffset];
+        }
+        faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices;
+    }
+}
+
+void USDImporterImplTinyusdz::normalsForMesh(const RenderScene &render_scene, aiScene *pScene,
+        size_t meshIdx, const std::string &) {
+    pScene->mMeshes[meshIdx]->mNormals = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
+    const float *floatPtr = reinterpret_cast<const float *>(render_scene.meshes[meshIdx].normals.get_data().data());
+    for (size_t vertIdx = 0, fpj = 0; vertIdx < pScene->mMeshes[meshIdx]->mNumVertices; ++vertIdx, fpj += 3) {
+        pScene->mMeshes[meshIdx]->mNormals[vertIdx].x = floatPtr[fpj];
+        pScene->mMeshes[meshIdx]->mNormals[vertIdx].y = floatPtr[fpj + 1];
+        pScene->mMeshes[meshIdx]->mNormals[vertIdx].z = floatPtr[fpj + 2];
+    }
+}
+
+void USDImporterImplTinyusdz::materialsForMesh(const RenderScene&, aiScene*,
+        size_t, const std::string&) {
+    // todo
+}
+
+void USDImporterImplTinyusdz::uvsForMesh(
+        const lightusd::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        size_t meshIdx,
+        const std::string&) {
+    const size_t uvSlotsCount = render_scene.meshes[meshIdx].texcoords.size();
+    if (uvSlotsCount < 1) {
+        return;
+    }
+    pScene->mMeshes[meshIdx]->mTextureCoords[0] = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
+    pScene->mMeshes[meshIdx]->mNumUVComponents[0] = 2; // U and V stored in "x", "y" of aiVector3D.
+    for (unsigned int uvSlotIdx = 0; uvSlotIdx < uvSlotsCount; ++uvSlotIdx) {
+        const auto uvsForSlot = render_scene.meshes[meshIdx].texcoords.at(uvSlotIdx);
+        if (uvsForSlot.get_data().size() == 0) {
+            continue;
+        }
+        const float *floatPtr = reinterpret_cast<const float *>(uvsForSlot.get_data().data());
+        for (size_t vertIdx = 0, fpj = 0; vertIdx < pScene->mMeshes[meshIdx]->mNumVertices; ++vertIdx, fpj += 2) {
+            pScene->mMeshes[meshIdx]->mTextureCoords[uvSlotIdx][vertIdx].x = floatPtr[fpj];
+            pScene->mMeshes[meshIdx]->mTextureCoords[uvSlotIdx][vertIdx].y = floatPtr[fpj + 1];
+        }
+    }
+}
+
+void USDImporterImplTinyusdz::bones(
+        const lightusd::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        const std::string &nameWExt) {
+    for (size_t meshIdx = 0; meshIdx < render_scene.meshes.size(); ++meshIdx) {
+        bonesForMesh(render_scene, pScene, meshIdx, nameWExt);
+    }
+}
+
+void USDImporterImplTinyusdz::bonesForMesh(
+        const lightusd::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        size_t meshIdx,
+        const std::string &nameWExt) {
+    const auto numVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
     // Check if this is a skinned mesh
     if (int skeleton_id = render_scene.meshes[meshIdx].skel_id; skeleton_id > -1) {
         // Recursively iterate to collect all the joints in the hierarchy into a flattened array
-        std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
+        std::vector<const lightusd::tydra::SkelNode *> skeletonNodes;
         skeletonNodes.push_back(&render_scene.skeletons[skeleton_id].root_node);
         for (int i = 0; i < skeletonNodes.size(); ++i) {
             for (const auto &child : skeletonNodes[i]->children) {
@@ -409,7 +548,7 @@ void USDImporterImplTinyusdz::verticesForMesh(const tinyusdz::tydra::RenderScene
         pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones];
 
         for (unsigned int i = 0; i < numBones; ++i) {
-            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
+            const lightusd::tydra::SkelNode *skeletonNode = skeletonNodes[i];
             const int boneIndex = skeletonNode->joint_id;
 
             // Sorted so that Assimp bone ids align with USD joint id
@@ -447,68 +586,6 @@ void USDImporterImplTinyusdz::verticesForMesh(const tinyusdz::tydra::RenderScene
             std::swap_ranges(aiBonesVertexWeights[boneIndex].begin(), aiBonesVertexWeights[boneIndex].end(), pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights);
         }
     } // Skinned mesh end
-
-    for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
-        pScene->mMeshes[meshIdx]->mVertices[j].x = render_scene.meshes[meshIdx].points[j][0];
-        pScene->mMeshes[meshIdx]->mVertices[j].y = render_scene.meshes[meshIdx].points[j][1];
-        pScene->mMeshes[meshIdx]->mVertices[j].z = render_scene.meshes[meshIdx].points[j][2];
-    }
-}
-
-void USDImporterImplTinyusdz::facesForMesh(const RenderScene &render_scene, aiScene *pScene, 
-        size_t meshIdx, const std::string &) {
-    pScene->mMeshes[meshIdx]->mNumFaces = static_cast<unsigned int>(render_scene.meshes[meshIdx].faceVertexCounts().size());
-    pScene->mMeshes[meshIdx]->mFaces = new aiFace[pScene->mMeshes[meshIdx]->mNumFaces]();
-    size_t faceVertIdxOffset = 0;
-    for (size_t faceIdx = 0; faceIdx < pScene->mMeshes[meshIdx]->mNumFaces; ++faceIdx) {
-        pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices = render_scene.meshes[meshIdx].faceVertexCounts()[faceIdx];
-        pScene->mMeshes[meshIdx]->mFaces[faceIdx].mIndices = new unsigned int[pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices];
-        for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices; ++j) {
-            pScene->mMeshes[meshIdx]->mFaces[faceIdx].mIndices[j] =
-                    render_scene.meshes[meshIdx].faceVertexIndices()[j + faceVertIdxOffset];
-        }
-        faceVertIdxOffset += pScene->mMeshes[meshIdx]->mFaces[faceIdx].mNumIndices;
-    }
-}
-
-void USDImporterImplTinyusdz::normalsForMesh(const RenderScene &render_scene, aiScene *pScene,
-        size_t meshIdx, const std::string &) {
-    pScene->mMeshes[meshIdx]->mNormals = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
-    const float *floatPtr = reinterpret_cast<const float *>(render_scene.meshes[meshIdx].normals.get_data().data());
-    for (size_t vertIdx = 0, fpj = 0; vertIdx < pScene->mMeshes[meshIdx]->mNumVertices; ++vertIdx, fpj += 3) {
-        pScene->mMeshes[meshIdx]->mNormals[vertIdx].x = floatPtr[fpj];
-        pScene->mMeshes[meshIdx]->mNormals[vertIdx].y = floatPtr[fpj + 1];
-        pScene->mMeshes[meshIdx]->mNormals[vertIdx].z = floatPtr[fpj + 2];
-    }
-}
-
-void USDImporterImplTinyusdz::materialsForMesh(const RenderScene&, aiScene*,
-        size_t, const std::string&) {
-    // todo
-}
-
-void USDImporterImplTinyusdz::uvsForMesh(
-        const tinyusdz::tydra::RenderScene &render_scene,
-        aiScene *pScene,
-        size_t meshIdx,
-        const std::string&) {
-    const size_t uvSlotsCount = render_scene.meshes[meshIdx].texcoords.size();
-    if (uvSlotsCount < 1) {
-        return;
-    }
-    pScene->mMeshes[meshIdx]->mTextureCoords[0] = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
-    pScene->mMeshes[meshIdx]->mNumUVComponents[0] = 2; // U and V stored in "x", "y" of aiVector3D.
-    for (unsigned int uvSlotIdx = 0; uvSlotIdx < uvSlotsCount; ++uvSlotIdx) {
-        const auto uvsForSlot = render_scene.meshes[meshIdx].texcoords.at(uvSlotIdx);
-        if (uvsForSlot.get_data().size() == 0) {
-            continue;
-        }
-        const float *floatPtr = reinterpret_cast<const float *>(uvsForSlot.get_data().data());
-        for (size_t vertIdx = 0, fpj = 0; vertIdx < pScene->mMeshes[meshIdx]->mNumVertices; ++vertIdx, fpj += 2) {
-            pScene->mMeshes[meshIdx]->mTextureCoords[uvSlotIdx][vertIdx].x = floatPtr[fpj];
-            pScene->mMeshes[meshIdx]->mTextureCoords[uvSlotIdx][vertIdx].y = floatPtr[fpj + 1];
-        }
-    }
 }
 
 static std::string nameForTextureWithId(const RenderScene &render_scene, const int targetId) {
@@ -547,7 +624,7 @@ static void assignTexture(
 }
 
 void USDImporterImplTinyusdz::materials(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene,
         const std::string &nameWExt) {
     const size_t numMaterials{ render_scene.materials.size() };
@@ -571,6 +648,70 @@ void USDImporterImplTinyusdz::materials(
         materialName.Set(material.name);
         mat->AddProperty(&materialName, AI_MATKEY_NAME);
 
+#if defined(ASSIMP_BUILD_USD_BETA)
+        if (material.surfaceShader.has_value()) {
+            mat->AddProperty(
+                    reinterpret_cast<const aiColor3D *>(material.surfaceShader->diffuseColor.value.data()),
+                    1, AI_MATKEY_COLOR_DIFFUSE);
+            mat->AddProperty(
+                    reinterpret_cast<const aiColor3D *>(material.surfaceShader->specularColor.value.data()),
+                    1, AI_MATKEY_COLOR_SPECULAR);
+            mat->AddProperty(
+                    reinterpret_cast<const aiColor3D *>(material.surfaceShader->emissiveColor.value.data()),
+                    1, AI_MATKEY_COLOR_EMISSIVE);
+
+            ss.str("");
+            if (material.surfaceShader->diffuseColor.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->diffuseColor.texture_id, aiTextureType_DIFFUSE);
+                ss << "    material[" << pScene->mNumMaterials << "]: diff tex id " << material.surfaceShader->diffuseColor.texture_id << "\n";
+            }
+            if (material.surfaceShader->specularColor.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->specularColor.texture_id, aiTextureType_SPECULAR);
+                ss << "    material[" << pScene->mNumMaterials << "]: spec tex id " << material.surfaceShader->specularColor.texture_id << "\n";
+            }
+            if (material.surfaceShader->normal.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->normal.texture_id, aiTextureType_NORMALS);
+                ss << "    material[" << pScene->mNumMaterials << "]: normal tex id " << material.surfaceShader->normal.texture_id << "\n";
+            }
+            if (material.surfaceShader->emissiveColor.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->emissiveColor.texture_id, aiTextureType_EMISSIVE);
+                ss << "    material[" << pScene->mNumMaterials << "]: emissive tex id " << material.surfaceShader->emissiveColor.texture_id << "\n";
+            }
+            if (material.surfaceShader->occlusion.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->occlusion.texture_id, aiTextureType_LIGHTMAP);
+                ss << "    material[" << pScene->mNumMaterials << "]: lightmap (occlusion) tex id " << material.surfaceShader->occlusion.texture_id << "\n";
+            }
+            if (material.surfaceShader->metallic.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->metallic.texture_id, aiTextureType_METALNESS);
+                ss << "    material[" << pScene->mNumMaterials << "]: metallic tex id " << material.surfaceShader->metallic.texture_id << "\n";
+            }
+            if (material.surfaceShader->roughness.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->roughness.texture_id, aiTextureType_DIFFUSE_ROUGHNESS);
+                ss << "    material[" << pScene->mNumMaterials << "]: roughness tex id " << material.surfaceShader->roughness.texture_id << "\n";
+            }
+            if (material.surfaceShader->clearcoat.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->clearcoat.texture_id, aiTextureType_CLEARCOAT);
+                ss << "    material[" << pScene->mNumMaterials << "]: clearcoat tex id " << material.surfaceShader->clearcoat.texture_id << "\n";
+            }
+            if (material.surfaceShader->opacity.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->opacity.texture_id, aiTextureType_OPACITY);
+                ss << "    material[" << pScene->mNumMaterials << "]: opacity tex id " << material.surfaceShader->opacity.texture_id << "\n";
+            }
+            if (material.surfaceShader->displacement.is_texture()) {
+                assignTexture(render_scene, material, mat, material.surfaceShader->displacement.texture_id, aiTextureType_DISPLACEMENT);
+                ss << "    material[" << pScene->mNumMaterials << "]: displacement tex id " << material.surfaceShader->displacement.texture_id << "\n";
+            }
+            if (material.surfaceShader->clearcoatRoughness.is_texture()) {
+                ss << "    material[" << pScene->mNumMaterials << "]: clearcoatRoughness tex id " << material.surfaceShader->clearcoatRoughness.texture_id << "\n";
+            }
+            if (material.surfaceShader->opacityThreshold.is_texture()) {
+                ss << "    material[" << pScene->mNumMaterials << "]: opacityThreshold tex id " << material.surfaceShader->opacityThreshold.texture_id << "\n";
+            }
+            if (material.surfaceShader->ior.is_texture()) {
+                ss << "    material[" << pScene->mNumMaterials << "]: ior tex id " << material.surfaceShader->ior.texture_id << "\n";
+            }
+        } // if (material.surfaceShader.has_value())
+#else
         mat->AddProperty(
                 reinterpret_cast<const aiColor3D *>(material.surfaceShader.diffuseColor.value.data()),
                 1, AI_MATKEY_COLOR_DIFFUSE);
@@ -631,6 +772,7 @@ void USDImporterImplTinyusdz::materials(
         if (material.surfaceShader.ior.is_texture()) {
             ss << "    material[" << pScene->mNumMaterials << "]: ior tex id " << material.surfaceShader.ior.texture_id << "\n";
         }
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
         if (!ss.str().empty()) {
             TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         }
@@ -641,7 +783,7 @@ void USDImporterImplTinyusdz::materials(
 }
 
 void USDImporterImplTinyusdz::textures(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene*,
         const std::string &nameWExt) {
     const size_t numTextures{ render_scene.textures.size() };
@@ -759,7 +901,7 @@ void USDImporterImplTinyusdz::buffers(
     }
 }
 
-aiNode *USDImporterImplTinyusdz::nodesRecursive(aiNode *pNodeParent, const tinyusdz::tydra::Node &node,
+aiNode *USDImporterImplTinyusdz::nodesRecursive(aiNode *pNodeParent, const lightusd::tydra::Node &node,
         const std::vector<SkelHierarchy> &skeletons) {
     std::stringstream ss;
     aiNode *cNode = new aiNode();
@@ -790,7 +932,7 @@ aiNode *USDImporterImplTinyusdz::nodesRecursive(aiNode *pNodeParent, const tinyu
 
     // Find any tinyusdz skeletons which might begin at this node
     // Add the skeleton bones as child nodes
-    const tinyusdz::tydra::SkelNode *skelNode = nullptr;
+    const lightusd::tydra::SkelNode *skelNode = nullptr;
     for (const auto &skeleton : skeletons) {
         if (skeleton.abs_path == node.abs_path) {
             // Add this skeleton's bones as child nodes
@@ -874,7 +1016,7 @@ void USDImporterImplTinyusdz::setupBlendShapes(const RenderScene &render_scene, 
 }
 
 void USDImporterImplTinyusdz::blendShapesForMesh(
-        const tinyusdz::tydra::RenderScene &render_scene,
+        const lightusd::tydra::RenderScene &render_scene,
         aiScene *pScene,
         size_t meshIdx,
         const std::string &) {
@@ -892,7 +1034,7 @@ void USDImporterImplTinyusdz::blendShapesForMesh(
     size_t animMeshIdx{ 0 };
     for (; mapIter != render_scene.meshes[meshIdx].targets.end(); ++mapIter) {
         const std::string name{ mapIter->first };
-        const tinyusdz::tydra::ShapeTarget shapeTarget{ mapIter->second };
+        const lightusd::tydra::ShapeTarget shapeTarget{ mapIter->second };
         pScene->mMeshes[meshIdx]->mAnimMeshes[animMeshIdx] = aiCreateAnimMesh(pScene->mMeshes[meshIdx]);
         ss.str("");
         ss << "        mAnimMeshes[" << animMeshIdx << "]: mNumVertices: " << pScene->mMeshes[meshIdx]->mAnimMeshes[animMeshIdx]->mNumVertices << ", target: " << shapeTarget.pointIndices.size() << " pointIndices, " << shapeTarget.pointOffsets.size() << " pointOffsets, " << shapeTarget.normalOffsets.size() << " normalOffsets";

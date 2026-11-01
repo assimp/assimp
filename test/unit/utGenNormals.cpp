@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
-// copycd::
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
@@ -90,7 +89,6 @@ TEST_F(GenNormalsTest, testSimpleTriangle) {
     EXPECT_TRUE(pcMesh->mNormals != nullptr);
 }
 
-// copycd:: ------------------------------------------------------------------------------------------------
 // With aiProcess_ForceGenNormals the existing normals are freed first, then line/point meshes
 // are skipped. The freed pointer must not stay in the mesh, or it is deleted twice later.
 TEST(GenFaceNormalsTest, forceOnLineMeshDoesNotLeaveDanglingNormals) {

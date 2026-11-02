@@ -55,9 +55,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <rapidjson/schema.h>
 
+#include <assimp/DefaultIOSystem.h>
+
 #include <array>
+#include <cerrno>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <vector>
+#ifdef _WIN32
+#    include <direct.h>
+#    include <process.h>
+#else
+#    include <sys/stat.h>
+#    include <unistd.h>
+#endif
 
 #include <assimp/material.h>
 #include <assimp/GltfMaterial.h>
@@ -1230,5 +1242,284 @@ TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
             EXPECT_EQ(expected.interpolation, channel->mPositionKeys[i].mInterpolation)
                     << expected.file << " key " << i;
         }
+    }
+}
+
+
+namespace {
+
+// Three float32 vertices: (0,0,0), (1,0,0), (0,1,0).
+const unsigned char kTriangleBytes[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x00, 0x00
+};
+
+const char kDataUri36Zeros[] =
+        "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+class RecordingIOSystem final : public Assimp::IOSystem {
+public:
+    std::vector<std::string> opened;
+
+    bool Exists(const char *pFile) const override { return mInner.Exists(pFile); }
+    char getOsSeparator() const override { return mInner.getOsSeparator(); }
+    IOStream *Open(const char *pFile, const char *pMode) override {
+        opened.emplace_back(pFile != nullptr ? pFile : "");
+        return mInner.Open(pFile, pMode);
+    }
+    void Close(IOStream *pFile) override { mInner.Close(pFile); }
+    bool ComparePaths(const char *one, const char *second) const override {
+        return mInner.ComparePaths(one, second);
+    }
+
+private:
+    Assimp::DefaultIOSystem mInner;
+};
+
+int CurrentPid() {
+#ifdef _WIN32
+    return _getpid();
+#else
+    return static_cast<int>(::getpid());
+#endif
+}
+
+std::string JoinPath(const std::string &dir, const std::string &name) {
+#ifdef _WIN32
+    const char sep = '\\';
+#else
+    const char sep = '/';
+#endif
+    if (dir.empty() || dir.back() == '/' || dir.back() == '\\') {
+        return dir + name;
+    }
+    return dir + sep + name;
+}
+
+bool EnsureDir(const std::string &path) {
+#ifdef _WIN32
+    if (::_mkdir(path.c_str()) != 0 && errno != EEXIST) {
+        return false;
+    }
+#else
+    if (::mkdir(path.c_str(), 0777) != 0 && errno != EEXIST) {
+        return false;
+    }
+#endif
+    return true;
+}
+
+bool WriteBytes(const std::string &path, const void *data, size_t length) {
+    std::ofstream out(path, std::ios::binary);
+    if (!out) {
+        return false;
+    }
+    out.write(static_cast<const char *>(data), static_cast<std::streamsize>(length));
+    return static_cast<bool>(out);
+}
+
+bool WriteText(const std::string &path, const std::string &text) {
+    return WriteBytes(path, text.data(), text.size());
+}
+
+std::string JsonEscape(const std::string &in) {
+    std::string out;
+    out.reserve(in.size());
+    for (char c : in) {
+        if (c == '\\' || c == '"') {
+            out.push_back('\\');
+        }
+        out.push_back(c);
+    }
+    return out;
+}
+
+std::string Gltf2Buffer(const std::string &bufferUri) {
+    std::ostringstream json;
+    json << "{\n"
+            "  \"asset\": {\"version\": \"2.0\"},\n"
+            "  \"scene\": 0,\n"
+            "  \"scenes\": [{\"nodes\": [0]}],\n"
+            "  \"nodes\": [{\"mesh\": 0}],\n"
+            "  \"meshes\": [{\"primitives\": [{\"attributes\": {\"POSITION\": 0}}]}],\n"
+            "  \"accessors\": [{\"bufferView\": 0, \"componentType\": 5126, \"count\": 3, \"type\": \"VEC3\"}],\n"
+            "  \"bufferViews\": [{\"buffer\": 0, \"byteLength\": 36}],\n"
+            "  \"buffers\": [{\"uri\": \""
+         << JsonEscape(bufferUri) << "\", \"byteLength\": 36}]\n"
+            "}\n";
+    return json.str();
+}
+
+std::string Gltf2Image(const std::string &imageUri) {
+    std::ostringstream json;
+    json << "{\n"
+            "  \"asset\": {\"version\": \"2.0\"},\n"
+            "  \"scene\": 0,\n"
+            "  \"scenes\": [{\"nodes\": [0]}],\n"
+            "  \"nodes\": [{\"mesh\": 0}],\n"
+            "  \"meshes\": [{\"primitives\": [{\"attributes\": {\"POSITION\": 0}, \"material\": 0}]}],\n"
+            "  \"materials\": [{\"pbrMetallicRoughness\": {\"baseColorTexture\": {\"index\": 0}}}],\n"
+            "  \"textures\": [{\"source\": 0}],\n"
+            "  \"images\": [{\"uri\": \""
+         << JsonEscape(imageUri) << "\"}],\n"
+            "  \"accessors\": [{\"bufferView\": 0, \"componentType\": 5126, \"count\": 3, \"type\": \"VEC3\"}],\n"
+            "  \"bufferViews\": [{\"buffer\": 0, \"byteLength\": 36}],\n"
+            "  \"buffers\": [{\"uri\": \""
+         << kDataUri36Zeros << "\", \"byteLength\": 36}]\n"
+            "}\n";
+    return json.str();
+}
+
+bool OpenedContains(const RecordingIOSystem &io, const char *needle) {
+    for (const std::string &path : io.opened) {
+        if (path.find(needle) != std::string::npos) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ExpectFileRejected(const std::string &path, const char *errorFragment, const char *forbidden) {
+    Assimp::Importer importer;
+    auto *io = new RecordingIOSystem();
+    importer.SetIOHandler(io);
+    const aiScene *scene = importer.ReadFile(path, aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene) << path << ": " << importer.GetErrorString();
+    const std::string error = importer.GetErrorString();
+    EXPECT_NE(std::string::npos, error.find(errorFragment)) << path << ": " << error;
+    EXPECT_FALSE(OpenedContains(*io, forbidden)) << path;
+}
+
+void ExpectVertices(const aiScene *scene) {
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_NE(nullptr, scene->mMeshes[0]);
+    ASSERT_EQ(3u, scene->mMeshes[0]->mNumVertices);
+    EXPECT_EQ(ai_real(0), scene->mMeshes[0]->mVertices[0].x);
+    EXPECT_EQ(ai_real(1), scene->mMeshes[0]->mVertices[1].x);
+    EXPECT_EQ(ai_real(0), scene->mMeshes[0]->mVertices[1].y);
+    EXPECT_EQ(ai_real(1), scene->mMeshes[0]->mVertices[2].y);
+}
+
+} // namespace
+
+TEST_F(utglTF2ImportExport, externalUriIsContained) {
+    Assimp::Importer importer;
+    const aiScene *benign = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/issue_6933/triangle.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, benign) << importer.GetErrorString();
+    ASSERT_NO_FATAL_FAILURE(ExpectVertices(benign));
+
+#ifdef _WIN32
+    const char *tmp = std::getenv("TEMP");
+    if (tmp == nullptr || tmp[0] == '\0') {
+        tmp = ".";
+    }
+    const std::string root = JoinPath(tmp, "assimp-issue6933-" + std::to_string(CurrentPid()));
+#else
+    const std::string root = "/tmp/assimp-issue6933-" + std::to_string(CurrentPid());
+#endif
+    const std::string pkg = JoinPath(root, "pkg");
+    const std::string sub = JoinPath(pkg, "sub");
+    ASSERT_TRUE(EnsureDir(root));
+    ASSERT_TRUE(EnsureDir(pkg));
+    ASSERT_TRUE(EnsureDir(sub));
+
+    const unsigned char secret[36] = {
+        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11
+    };
+    ASSERT_TRUE(WriteBytes(JoinPath(root, "secret.bin"), secret, sizeof(secret)));
+    ASSERT_TRUE(WriteBytes(JoinPath(pkg, "triangle.bin"), kTriangleBytes, sizeof(kTriangleBytes)));
+    ASSERT_TRUE(WriteBytes(JoinPath(sub, "triangle.bin"), kTriangleBytes, sizeof(kTriangleBytes)));
+
+    const std::string dotSlash = JoinPath(pkg, "dotslash.gltf");
+    const std::string nested = JoinPath(pkg, "nested.gltf");
+    ASSERT_TRUE(WriteText(dotSlash, Gltf2Buffer("./triangle.bin")));
+    ASSERT_TRUE(WriteText(nested, Gltf2Buffer("sub/triangle.bin")));
+
+    {
+        Assimp::Importer nestedImporter;
+        const aiScene *scene = nestedImporter.ReadFile(dotSlash, aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene) << nestedImporter.GetErrorString();
+        ASSERT_NO_FATAL_FAILURE(ExpectVertices(scene));
+    }
+    {
+        Assimp::Importer nestedImporter;
+        const aiScene *scene = nestedImporter.ReadFile(nested, aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene) << nestedImporter.GetErrorString();
+        ASSERT_NO_FATAL_FAILURE(ExpectVertices(scene));
+    }
+
+    const std::string traversal = JoinPath(pkg, "traversal.gltf");
+    const std::string nestedEscape = JoinPath(pkg, "nested_escape.gltf");
+    const std::string backslash = JoinPath(pkg, "backslash.gltf");
+    const std::string absolute = JoinPath(pkg, "absolute.gltf");
+    const std::string drive = JoinPath(pkg, "drive.gltf");
+    const std::string scheme = JoinPath(pkg, "scheme.gltf");
+    ASSERT_TRUE(WriteText(traversal, Gltf2Buffer("../secret.bin")));
+    ASSERT_TRUE(WriteText(nestedEscape, Gltf2Buffer("sub/../../secret.bin")));
+    ASSERT_TRUE(WriteText(backslash, Gltf2Buffer("..\\secret.bin")));
+    ASSERT_TRUE(WriteText(absolute, Gltf2Buffer("/etc/passwd")));
+    ASSERT_TRUE(WriteText(drive, Gltf2Buffer("C:/Windows/win.ini")));
+    ASSERT_TRUE(WriteText(scheme, Gltf2Buffer("file:///etc/passwd")));
+
+    ExpectFileRejected(traversal, "asset directory", "secret.bin");
+    ExpectFileRejected(nestedEscape, "asset directory", "secret.bin");
+    ExpectFileRejected(backslash, "asset directory", "secret.bin");
+    ExpectFileRejected(absolute, "asset directory", "passwd");
+    ExpectFileRejected(drive, "asset directory", "win.ini");
+    ExpectFileRejected(scheme, "asset directory", "passwd");
+
+    const std::string imageOk = JoinPath(pkg, "image_ok.gltf");
+    const std::string imageBad = JoinPath(pkg, "image_bad.gltf");
+    ASSERT_TRUE(WriteText(imageOk, Gltf2Image("tex/ok.png")));
+    ASSERT_TRUE(WriteText(imageBad, Gltf2Image("../secret.png")));
+
+    {
+        Assimp::Importer imageImporter;
+        const aiScene *scene = imageImporter.ReadFile(imageOk, aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene) << imageImporter.GetErrorString();
+        ASSERT_GT(scene->mNumMaterials, 0u);
+        aiString texPath;
+        EXPECT_EQ(aiReturn_SUCCESS, scene->mMaterials[0]->GetTexture(aiTextureType_DIFFUSE, 0, &texPath));
+        EXPECT_STREQ("tex/ok.png", texPath.C_Str());
+    }
+    ExpectFileRejected(imageBad, "asset directory", "secret.png");
+
+    const std::string memoryExternal = Gltf2Buffer("triangle.bin");
+    const std::string memoryAbsolute = Gltf2Buffer("/etc/passwd");
+    const std::string memoryData = Gltf2Buffer(kDataUri36Zeros);
+    {
+        Assimp::Importer memoryImporter;
+        auto *io = new RecordingIOSystem();
+        memoryImporter.SetIOHandler(io);
+        const aiScene *scene = memoryImporter.ReadFileFromMemory(
+                memoryExternal.data(), memoryExternal.size(), aiProcess_ValidateDataStructure, "gltf");
+        EXPECT_EQ(nullptr, scene) << memoryImporter.GetErrorString();
+        const std::string error = memoryImporter.GetErrorString();
+        EXPECT_NE(std::string::npos, error.find("loading from memory")) << error;
+        EXPECT_TRUE(io->opened.empty());
+    }
+    {
+        Assimp::Importer memoryImporter;
+        auto *io = new RecordingIOSystem();
+        memoryImporter.SetIOHandler(io);
+        const aiScene *scene = memoryImporter.ReadFileFromMemory(
+                memoryAbsolute.data(), memoryAbsolute.size(), aiProcess_ValidateDataStructure, "gltf");
+        EXPECT_EQ(nullptr, scene) << memoryImporter.GetErrorString();
+        const std::string error = memoryImporter.GetErrorString();
+        EXPECT_NE(std::string::npos, error.find("loading from memory")) << error;
+        EXPECT_TRUE(io->opened.empty());
+    }
+    {
+        Assimp::Importer memoryImporter;
+        const aiScene *scene = memoryImporter.ReadFileFromMemory(
+                memoryData.data(), memoryData.size(), aiProcess_ValidateDataStructure, "gltf");
+        ASSERT_NE(nullptr, scene) << memoryImporter.GetErrorString();
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(3u, scene->mMeshes[0]->mNumVertices);
     }
 }

@@ -179,7 +179,8 @@ void AnimResolver::UpdateAnimRangeSetup() {
         case LWO::PrePostBehaviour_Oscillate: {
             const double start_time = delta - std::fmod(my_first - first, delta);
             std::vector<LWO::Key>::iterator n = std::find_if((*it).keys.begin(), (*it).keys.end(),
-                                                    [start_time](double t) { return start_time > t; }), m;
+                                                    [start_time](double t) { return start_time > t; });
+            std::vector<LWO::Key>::iterator m;
 
             size_t ofs = 0;
             if (n != (*it).keys.end()) {
@@ -211,13 +212,21 @@ void AnimResolver::UpdateAnimRangeSetup() {
             double cur_minus = delta;
             unsigned int tt = 1;
             for (const double tmp = delta * (num + 1); cur_minus <= tmp; cur_minus += delta, ++tt) {
-                m = (delta == tmp ? (*it).keys.begin() : n - (old_size + 1));
-                for (; m < n; --n) {
-                    (*n).time -= cur_minus;
-
-                    // offset repeat? add delta offset to key value
+                if (delta == tmp) {
+                    m = it->keys.begin();
+                } else {
+                    ptrdiff_t dist = std::distance((*it).keys.begin(), n);
+                    if (dist <= static_cast<ptrdiff_t>(old_size)) {
+                        // clamp to begin to avoid seeking before begin
+                        m = (*it).keys.begin();
+                    } else {
+                        m = n - (old_size + 1);
+                    }
+                }
+                for (auto it2 = m; it2 != n; ++it2) {
+                    it2->time -= cur_minus;
                     if ((*it).pre == LWO::PrePostBehaviour_OffsetRepeat) {
-                        (*n).value += tt * value_delta;
+                        it2->value += tt * value_delta;
                     }
                 }
             }

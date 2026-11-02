@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <map>
 #include <vector>
 
@@ -129,9 +128,7 @@ static bool IsEmbeddedTexture( const std::string &filename ) {
     return false;
 }
 // ------------------------------------------------------------------------------------------------
-D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
-        mRootStream(nullptr),
-        mZipArchive() {
+D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) {
     mZipArchive = new ZipArchiveIOSystem(pIOHandler, rFile);
     if (!mZipArchive->isOpen()) {
         throw DeadlyImportError("Failed to open file ", rFile, ".");
@@ -139,7 +136,6 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
 
     std::vector<std::string> fileList;
     mZipArchive->getFileList(fileList);
-
     for (auto &file : fileList) {
         if (file == D3MF::XmlTag::ROOT_RELATIONSHIPS_ARCHIVE) {
             if (!mZipArchive->Exists(file.c_str())) {
@@ -152,30 +148,30 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
                 continue;
             }
 
-            std::string rootFile = ReadPackageRootRelationship(fileStream);
-            if (!rootFile.empty() && rootFile[0] == '/') {
-                rootFile = rootFile.substr(1);
-                if (rootFile[0] == '/') {
-                    // deal with zip-bug
-                    rootFile = rootFile.substr(1);
-                }
-            }
+            std::string rootFile = NormalizePath(ReadPackageRootRelationship(fileStream));
 
             ASSIMP_LOG_VERBOSE_DEBUG(rootFile);
 
             mZipArchive->Close(fileStream);
 
+            mRootPath = rootFile;
             mRootStream = mZipArchive->Open(rootFile.c_str());
             ai_assert(mRootStream != nullptr);
             if (nullptr == mRootStream) {
                 throw DeadlyImportError("Cannot open root-file in archive : " + rootFile);
             }
-        } else if (file == D3MF::XmlTag::CONTENT_TYPES_ARCHIVE) {
+        } else if (file == XmlTag::CONTENT_TYPES_ARCHIVE) {
             ASSIMP_LOG_WARN("Ignored file of unsupported type CONTENT_TYPES_ARCHIVES", file);
         } else if (IsEmbeddedTexture(file)) {
             IOStream *fileStream = mZipArchive->Open(file.c_str());
             LoadEmbeddedTextures(fileStream, file);
             mZipArchive->Close(fileStream);
+        } else if (BaseImporter::GetExtension(file) == "model") {
+            // Production-extension model parts are opened on demand via OpenPart().
+            ASSIMP_LOG_VERBOSE_DEBUG("Referenced model part: ", file);
+        } else if (BaseImporter::GetExtension(file) == "rels") {
+            // Relationship parts of referenced model files; resolved via path attributes.
+            ASSIMP_LOG_VERBOSE_DEBUG("Relationship part: ", file);
         } else {
             ASSIMP_LOG_WARN("Ignored file of unknown type: ", file);
         }
@@ -183,12 +179,45 @@ D3MFOpcPackage::D3MFOpcPackage(IOSystem *pIOHandler, const std::string &rFile) :
 }
 
 D3MFOpcPackage::~D3MFOpcPackage() {
-    mZipArchive->Close(mRootStream);
-    delete mZipArchive;
+    if (mZipArchive != nullptr)  {
+        mZipArchive->Close(mRootStream);
+        delete mZipArchive;
+    }
 }
 
 IOStream *D3MFOpcPackage::RootStream() const {
     return mRootStream;
+}
+
+const std::string &D3MFOpcPackage::RootPath() const {
+    return mRootPath;
+}
+
+std::string D3MFOpcPackage::NormalizePath(const std::string &path) {
+    size_t pos = 0;
+    while (pos < path.size() && path[pos] == '/') {
+        ++pos;
+    }
+    return path.substr(pos);
+}
+
+IOStream *D3MFOpcPackage::OpenPart(const std::string &path) {
+    if (nullptr == mZipArchive) {
+        return nullptr;
+    }
+
+    const std::string normalized = NormalizePath(path);
+    if (normalized.empty() || !mZipArchive->Exists(normalized.c_str())) {
+        return nullptr;
+    }
+
+    return mZipArchive->Open(normalized.c_str());
+}
+
+void D3MFOpcPackage::CloseStream(IOStream *stream) {
+    if (nullptr != stream) {
+        mZipArchive->Close(stream);
+    }
 }
 
 const std::vector<aiTexture *> &D3MFOpcPackage::GetEmbeddedTextures() const {
@@ -230,7 +259,7 @@ void D3MFOpcPackage::LoadEmbeddedTextures(IOStream *fileStream, const std::strin
     }
 
     const size_t size = fileStream->FileSize();
-    if (0 == size) {
+    if (size == 0) {
         return;
     }
 
@@ -245,7 +274,7 @@ void D3MFOpcPackage::LoadEmbeddedTextures(IOStream *fileStream, const std::strin
     texture->achFormatHint[1] = 'n';
     texture->achFormatHint[2] = 'g';
     texture->achFormatHint[3] = '\0';
-    texture->pcData = (aiTexel*) data;
+    texture->pcData = reinterpret_cast<aiTexel *>(data);
     mEmbeddedTextures.emplace_back(texture);
 }
 

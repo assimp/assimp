@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <assimp/mesh.h>
 #include <assimp/material.h>
+#include <assimp/anim.h>
 #include <assimp/BaseImporter.h>
 
 #include <memory>
@@ -60,10 +61,17 @@ struct aiAnimation;
 
 namespace Assimp{
 
+// --------------------------------------------------------------------------------
+/// @class  B3DImporter
+/// @brief  Importer class for the B3D format.
+// --------------------------------------------------------------------------------
 class B3DImporter final : public BaseImporter{
 public:
+    /// @brief Constructor.
     B3DImporter() = default;
-    ~B3DImporter() override;
+
+    /// @brief Destructor.
+    ~B3DImporter() override = default;
     bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const override;
 
 protected:
@@ -71,7 +79,6 @@ protected:
     void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) override;
 
 private:
-
     int ReadByte();
     int ReadInt();
     float ReadFloat();
@@ -86,12 +93,18 @@ private:
     template<class T>
     T *to_array( const std::vector<T> &v );
 
-    struct Vertex{
-        aiVector3D vertex;
-        aiVector3D normal;
-        aiVector3D texcoords;
-        unsigned char bones[4];
-        float weights[4];
+    struct Vertex {
+        aiVector3D vertex{};
+        aiVector3D normal{};
+        aiVector3D texcoords{};
+        unsigned char bones[4]{};
+        float weights[4]{};
+    };
+
+    struct AnimKeys {
+        std::vector<aiVectorKey> positionKeys{};
+        std::vector<aiVectorKey> scalingKeys{};
+        std::vector<aiQuatKey> rotationKeys{};
     };
 
     AI_WONT_RETURN void Oops() AI_WONT_RETURN_SUFFIX;
@@ -104,27 +117,29 @@ private:
     void ReadTRIS( int v0 );
     void ReadMESH();
     void ReadBONE( int id );
-    void ReadKEYS( aiNodeAnim *nodeAnim );
+    void ReadKEYS( AnimKeys& keys );
     void ReadANIM();
 
     aiNode *ReadNODE( aiNode *parent );
 
     void ReadBB3D( aiScene *scene );
 
-    size_t _pos;
-    std::vector<unsigned char> _buf;
-    std::vector<size_t> _stack;
+    size_t mPos;
+    std::vector<unsigned char> mBuf;
+    std::vector<size_t> mStack;
 
-    std::vector<std::string> _textures;
-    std::vector<std::unique_ptr<aiMaterial> > _materials;
+    std::vector<std::string> mTextures;
+    std::vector<std::unique_ptr<aiMaterial> > mMaterials;
 
-    int _vflags,_tcsets,_tcsize;
-    std::vector<Vertex> _vertices;
+    int mVflags;
+    int mTcsets;
+    int mTcsize;
+    std::vector<Vertex> mVertices;
 
-    std::vector<aiNode*> _nodes;
-    std::vector<std::unique_ptr<aiMesh> > _meshes;
-    std::vector<std::unique_ptr<aiNodeAnim> > _nodeAnims;
-    std::vector<std::unique_ptr<aiAnimation> > _animations;
+    std::vector<aiNode*> mNodes;
+    std::vector<std::unique_ptr<aiMesh> > mMeshes;
+    std::vector<std::unique_ptr<aiNodeAnim> > mNodeAnims;
+    std::vector<std::unique_ptr<aiAnimation> > mAnimations;
 };
 
 }

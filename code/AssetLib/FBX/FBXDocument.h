@@ -865,14 +865,14 @@ public:
         return fullWeights;
     }
 
-    const std::unordered_set<const ShapeGeometry*>& GetShapeGeometries() const {
+    const std::vector<const ShapeGeometry*>& GetShapeGeometries() const {
         return shapeGeometries;
     }
 
 private:
     float percent;
     WeightArray fullWeights;
-    std::unordered_set<const ShapeGeometry*> shapeGeometries;
+    std::vector<const ShapeGeometry*> shapeGeometries;
 };
 
 /** DOM class for BlendShape deformers */
@@ -882,12 +882,12 @@ public:
 
     virtual ~BlendShape() = default;
 
-    const std::unordered_set<const BlendShapeChannel*>& BlendShapeChannels() const {
+    const std::vector<const BlendShapeChannel*>& BlendShapeChannels() const {
         return blendShapeChannels;
     }
 
 private:
-    std::unordered_set<const BlendShapeChannel*> blendShapeChannels;
+    std::vector<const BlendShapeChannel*> blendShapeChannels;
 };
 
 /** DOM class for skin deformer clusters (aka sub-deformers) */

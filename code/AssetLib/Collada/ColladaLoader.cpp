@@ -507,16 +507,20 @@ void ColladaLoader::BuildMeshesForNode(const ColladaParser &pParser, const Node 
             }
 
             if (table && !table->mMap.empty()) {
-                std::pair<Collada::Effect *, aiMaterial *> &mat = newMats[matIdx];
+                if (matIdx < newMats.size()) {
+                    std::pair<Collada::Effect *, aiMaterial *> &mat = newMats[matIdx];
 
-                // Iterate through all texture channels assigned to the effect and
-                // check whether we have mapping information for it.
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexDiffuse, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexAmbient, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexSpecular, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexEmissive, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexTransparent, *table);
-                ApplyVertexToEffectSemanticMapping(mat.first->mTexBump, *table);
+                    // Iterate through all texture channels assigned to the effect and
+                    // check whether we have mapping information for it.
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexDiffuse, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexAmbient, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexSpecular, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexEmissive, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexTransparent, *table);
+                    ApplyVertexToEffectSemanticMapping(mat.first->mTexBump, *table);
+                } else {
+                    ASSIMP_LOG_WARN("Collada: Ignoring material mapping for mesh \"", mid.mMeshOrController, "\". Material index ", matIdx, " is out of bounds (newMats.size()=", newMats.size(), ").");
+                }
             }
 
             // built lookup index of the Mesh-Submesh-Material combination
@@ -1028,8 +1032,8 @@ void ColladaLoader::StoreAnimations(aiScene *pScene, const ColladaParser &pParse
     std::string animName = pPrefix.empty() ? pSrcAnim->mName : pPrefix + "_" + pSrcAnim->mName;
 
     // create nested animations, if given
-    for (auto mSubAnim : pSrcAnim->mSubAnims) {
-        StoreAnimations(pScene, pParser, mSubAnim, animName);
+    for (auto &mSubAnim : pSrcAnim->mSubAnims) {
+        StoreAnimations(pScene, pParser, mSubAnim.get(), animName);
     }
 
     // create animation channels, if any

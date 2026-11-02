@@ -124,11 +124,11 @@ AI_FORCE_INLINE bool IsSpaceOrNewLine(char_t in) {
 /// @return true if valid.
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpaces(const char_t *in, const char_t **out, const char_t *end) {
-    while ((*in == (char_t)' ' || *in == (char_t)'\t') && in != end) {
+    while (in < end && (*in == (char_t)' ' || *in == (char_t)'\t')) {
         ++in;
     }
     *out = in;
-    return !IsLineEnd<char_t>(*in);
+    return ((in < end) && !IsLineEnd<char_t>(*in));
 }
 
 // ---------------------------------------------------------------------------------
@@ -154,16 +154,16 @@ AI_FORCE_INLINE bool SkipLine(const char_t *in, const char_t **out, const char_t
     }
 
     // files are opened in binary mode. Ergo there are both NL and CR
-    while ((*in == (char_t)'\r' || *in == (char_t)'\n') && in != end) {
+    while (in < end && (*in == (char_t)'\r' || *in == (char_t)'\n')) {
         ++in;
     }
     *out = in;
-    return *in != (char_t)'\0';
+    return in < end && *in != (char_t)'\0';
 }
 
 // ---------------------------------------------------------------------------------
 /// @brief Will skip a line in-situ.
-/// @param in     The in/out buffer.
+/// @param inout  The in/out buffer.
 /// @param end    The end of the buffer.
 /// @return true if valid.
 template <class char_t>
@@ -178,17 +178,17 @@ AI_FORCE_INLINE bool SkipLine(const char_t **inout, const char_t *end) {
 /// @return true if valid.
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpacesAndLineEnd(const char_t *in, const char_t **out, const char_t  *end) {
-    while ((*in == (char_t)' ' || *in == (char_t)'\t' || *in == (char_t)'\r' || *in == (char_t)'\n') && in != end) {
+    while (in < end && (*in == (char_t)' ' || *in == (char_t)'\t' || *in == (char_t)'\r' || *in == (char_t)'\n')) {
         ++in;
     }
     *out = in;
-    return *in != '\0';
+    return in < end && *in != '\0';
 }
 
 // ---------------------------------------------------------------------------------
 /// @brief  Returns true, if the character is a space or a line end.
-/// @param  in  The character to test.
-/// @param  out The buffer with the skipped data.
+/// @param  inout The in/out buffer.
+/// @param  end   The end of the buffer.
 /// @return true if valid.
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpacesAndLineEnd(const char_t **inout, const char_t *end) {
@@ -257,7 +257,12 @@ AI_FORCE_INLINE bool TokenMatch(char_t *&in, const char *token, unsigned int len
 /// @return true if token was found, false if not.
 AI_FORCE_INLINE bool TokenMatchI(const char *&in, const char *token, unsigned int len) {
     if (!ASSIMP_strincmp(token, in, len) && IsSpaceOrNewLine(in[len])) {
-        in += len + 1;
+        if (in[len] != '\0') {
+            in += len + 1;
+        } else {
+            // If EOF after the token make sure we don't go past end of buffer
+            in += len;
+        }
         return true;
     }
     return false;

@@ -6,7 +6,7 @@ The current version of Assimp that's being supported with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 6.0.2   | :white_check_mark: |
+| 6.0.5   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 

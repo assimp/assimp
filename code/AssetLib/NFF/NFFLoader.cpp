@@ -548,8 +548,12 @@ void NFFImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
                         // pass the validation step for the moment.
                         // TODO: fix naming of objects in the scene-graph later
                         if (objectName.length()) {
-                            ::strncpy(mesh->name, objectName.c_str(), objectName.size());
-                            ASSIMP_itoa10(&mesh->name[objectName.length()], 30, subMeshIdx++);
+                            const size_t copyLen = objectName.length() < (sizeof(mesh->name) - 1u) ? objectName.length() : (sizeof(mesh->name) - 1u);
+                            ::memcpy(mesh->name, objectName.c_str(), copyLen);
+                            mesh->name[copyLen] = '\0';
+                            if (copyLen < sizeof(mesh->name) - 1u) {
+                                ASSIMP_itoa10(&mesh->name[copyLen], static_cast<unsigned int>(sizeof(mesh->name) - copyLen), subMeshIdx++);
+                            }
                         }
 
                         // copy the shader to the mesh.
@@ -1056,8 +1060,9 @@ void NFFImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 
         // copy vertex positions
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];
-        ::memcpy(mesh->mVertices, &src.vertices[0],
-                sizeof(aiVector3D) * mesh->mNumVertices);
+        if (!src.vertices.empty()) {
+            ::memcpy(mesh->mVertices, &src.vertices[0], sizeof(aiVector3D) * mesh->mNumVertices);
+        }
 
         // NFF2: there could be vertex colors
         if (!src.colors.empty()) {

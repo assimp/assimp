@@ -87,7 +87,7 @@ protected:
      *  @return The created material
      *  @param matFlags Receives AI_IRRMESH_MAT_XX flags
      */
-    aiMaterial *ParseMaterial(pugi::xml_node &materialNode, unsigned int &matFlags);
+    std::unique_ptr<aiMaterial> ParseMaterial(pugi::xml_node &materialNode, unsigned int &matFlags);
 
     // -------------------------------------------------------------------
     /** Read a property of the specified type from the current XML element.

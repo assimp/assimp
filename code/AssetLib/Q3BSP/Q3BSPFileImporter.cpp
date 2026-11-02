@@ -189,9 +189,10 @@ void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene *scene,
 
     Q3BSPFileParser fileParser(mapName, &Archive);
     Q3BSPModel *pBSPModel = fileParser.getModel();
-    if (nullptr != pBSPModel) {
-        CreateDataFromImport(pBSPModel, scene, &Archive);
+    if (nullptr == pBSPModel) {
+        throw DeadlyImportError("Failed to parse Q3BSP map ", mapName, ".");
     }
+    CreateDataFromImport(pBSPModel, scene, &Archive);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -597,8 +598,7 @@ bool Q3BSPFileImporter::importTextureFromArchive(const Q3BSP::Q3BSPModel *model,
             // If it doesn't exist in the archive, it is probably just a reference to an external file.
             // We'll leave it up to the user to figure out which extension the file has.
             aiString name;
-            strncpy(name.data, pTexture->strName, sizeof name.data);
-            name.length = static_cast<ai_uint32>(strlen(name.data));
+            name.Set(pTexture->strName, sizeof(name.data));
             pMatHelper->AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
     }

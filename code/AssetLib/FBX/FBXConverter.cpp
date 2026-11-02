@@ -156,6 +156,13 @@ FBXConverter::FBXConverter(aiScene *out, const Document &doc, bool removeEmptyBo
     if (doc.Settings().readAllMaterials) {
         // unfortunately this means we have to evaluate all objects
         for (const ObjectMap::value_type &v : doc.Objects()) {
+            // id 0 is the synthetic Model::RootNode placeholder added by
+            // Document::ReadObjects(). Its element is the Objects scope itself,
+            // which carries no id/name/class-tag tokens, so it must not be
+            // evaluated as an object.
+            if (v.first == 0) {
+                continue;
+            }
 
             const Object *ob = v.second->Get();
             if (!ob) {
@@ -1306,6 +1313,14 @@ FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, const Model &mo
     const MatIndexArray &mindices = mesh.GetMaterialIndices();
     ai_assert(mindices.size());
 
+    const std::vector<unsigned int> &faces = mesh.GetFaceIndexCounts();
+    if (mindices.size() != faces.size()) {
+        FBXImporter::LogError("material index count (", mindices.size(),
+            ") does not match face count (", faces.size(),
+            "), ignoring mesh");
+        return std::vector<unsigned int>();
+    }
+
     std::set<MatIndexArray::value_type> had;
     std::vector<unsigned int> indices;
 
@@ -1342,11 +1357,25 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
             continue;
         }
         ++count_faces;
+
+        if (*itf > AI_MAX_FACE_INDICES) {
+            FBXImporter::LogError("ConvertMeshMultiMaterial: face index count ",
+                    *itf, " exceeds limit ", AI_MAX_FACE_INDICES,
+                    ". Rejecting malformed mesh.");
+            return static_cast<unsigned int>(mMeshes.size() - 1);
+        }
         count_vertices += *itf;
     }
 
     ai_assert(count_faces);
     ai_assert(count_vertices);
+
+    if (count_vertices > vertices.size()) {
+        FBXImporter::LogError("ConvertMeshMultiMaterial: face index counts sum to ",
+                count_vertices, " but mesh only has ", vertices.size(),
+                " vertices. Rejecting malformed mesh.");
+        return static_cast<unsigned int>(mMeshes.size() - 1);
+    }
 
     // mapping from output indices to DOM indexing, needed to resolve weights or blendshapes
     std::vector<unsigned int> reverseMapping;

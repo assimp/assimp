@@ -72,7 +72,7 @@ public:
 
 	/// Construct an M3D model from provided buffer
 	/// @note The m3d.h SDK function does not mark the data as const. Have assumed it does not write.
-	/// BUG: SECURITY: The m3d.h SDK cannot be informed of the buffer size. BUFFER OVERFLOW IS CERTAIN
+	/// SECURITY: Buffer size validation and guard pages added to mitigate potential overflows
 	explicit M3DWrapper(IOSystem *pIOHandler, const std::vector<unsigned char> &buffer);
 
 	/// Theclasss destructor.

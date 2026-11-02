@@ -1,0 +1,22 @@
+MD5Version 10
+commandline "crafted regression asset - triangle index overflow"
+
+numJoints 1
+numMeshes 1
+
+joints {
+"origin" -1 ( 0 0 0 ) ( 0 0 0 ) //
+}
+
+mesh {
+shader ""
+
+numverts 1
+vert 0 ( 0 0 ) 0 1
+
+numtris 1
+tri 4294967295 0 0 0
+
+numweights 1
+weight 0 0 1 ( 0 0 0 )
+}

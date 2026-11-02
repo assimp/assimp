@@ -252,6 +252,11 @@ public:
     }
 
     void SetCurrentPos(size_t pos) {
+        // Validate the offset before forming the pointer - pointer
+        // arithmetic outside the buffer is undefined behaviour.
+        if (pos > static_cast<size_t>(mEnd - mBuffer)) {
+            throw DeadlyImportError("End of file or read limit was reached");
+        }
         SetPtr(mBuffer + pos);
     }
 

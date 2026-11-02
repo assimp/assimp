@@ -124,7 +124,7 @@ namespace Assimp {
                 case EDT_Short:
                     return static_cast<ai_real>(val.iInt + (0xFFFF / 2)) / static_cast<ai_real>(0xFFFF);
                 case EDT_UInt:
-                    return static_cast<ai_real>(val.iUInt) / static_cast<ai_real>(0xFFFF);
+                    return static_cast<ai_real>(val.iUInt) / static_cast<ai_real>(0xFFFFFFFFu);
                 case EDT_Int:
                     return (static_cast<ai_real>(val.iInt) / static_cast<ai_real>(0xFF)) + 0.5f;
                 default:
@@ -624,7 +624,15 @@ namespace Assimp {
                     auto p = GetProperty(instElement->alProperties, iTextureCoord).avList.begin();
                     if ((iNum / 3) == 2) { // X Y coord
                         for (unsigned int a = 0; a < iNum; ++a, ++p) {
-                            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[a / 2];
+                            // The texture-coordinate list length is independent of the
+                            // vertex-index list length, so a / 2 may run past the face's
+                            // index array (which may even be absent). Bound it before use.
+                            const unsigned int faceIndexPos = a / 2;
+                            if (mGeneratedMesh->mFaces[pos].mIndices == nullptr ||
+                                    faceIndexPos >= mGeneratedMesh->mFaces[pos].mNumIndices) {
+                                continue;
+                            }
+                            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[faceIndexPos];
                             if (vindex < mGeneratedMesh->mNumVertices) {
                                 if (mGeneratedMesh->mTextureCoords[0] == nullptr) {
                                     mGeneratedMesh->mNumUVComponents[0] = 2;

@@ -90,10 +90,10 @@ struct mpred {
 #pragma GCC diagnostic pop
 #endif
 #endif
-typedef std::map<aiLogStream, Assimp::LogStream *, mpred> LogStreamMap;
+using LogStreamMap = std::map<aiLogStream, Assimp::LogStream *, mpred>;
 
 /** Stores the LogStream objects allocated by #aiGetPredefinedLogStream */
-typedef std::list<Assimp::LogStream *> PredefLogStreamMap;
+using PredefLogStreamMap = std::list<Assimp::LogStream *>;
 
 /** Local storage of all active log streams */
 static LogStreamMap gActiveLogStreams;
@@ -184,7 +184,7 @@ const aiScene *aiImportFileExWithProperties(const char *pFile, unsigned int pFla
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
     // create an Importer for this file
-    Assimp::Importer *imp = new Assimp::Importer();
+    auto *imp = new Importer();
 
     // copy properties
     if (props) {
@@ -195,7 +195,7 @@ const aiScene *aiImportFileExWithProperties(const char *pFile, unsigned int pFla
         pimpl->mStringProperties = pp->strings;
         pimpl->mMatrixProperties = pp->matrices;
     }
-    // setup a custom IO system if necessary
+    // set up a custom IO system if necessary
     if (pFS) {
         imp->SetIOHandler(new CIOSystemWrapper(pFS));
     }
@@ -205,8 +205,8 @@ const aiScene *aiImportFileExWithProperties(const char *pFile, unsigned int pFla
 
     // if succeeded, store the importer in the scene and keep it alive
     if (scene) {
-        ScenePrivateData *priv = const_cast<ScenePrivateData *>(ScenePriv(scene));
-        priv->mOrigImporter = imp;
+        auto *scene_private_data = const_cast<ScenePrivateData *>(ScenePriv(scene));
+        scene_private_data->mOrigImporter = imp;
     } else {
         // if failed, extract error code and destroy the import
         gLastErrorString = imp->GetErrorString();
@@ -247,11 +247,11 @@ const aiScene *aiImportFileFromMemoryWithProperties(
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
     // create an Importer for this file
-    Assimp::Importer *imp = new Assimp::Importer();
+    auto *imp = new Importer();
 
     // copy properties
     if (props) {
-        const PropertyMap *pp = reinterpret_cast<const PropertyMap *>(props);
+        const auto *pp = reinterpret_cast<const PropertyMap *>(props);
         ImporterPimpl *pimpl = imp->Pimpl();
         pimpl->mIntProperties = pp->ints;
         pimpl->mFloatProperties = pp->floats;
@@ -356,7 +356,7 @@ ASSIMP_API const aiScene *aiApplyCustomizedPostProcessing(const aiScene *scene,
 void CallbackToLogRedirector(const char *msg, char *dt) {
     ai_assert(nullptr != msg);
     ai_assert(nullptr != dt);
-    LogStream *stream = (LogStream *)dt;
+    auto *stream = reinterpret_cast<LogStream *>(dt);
     if (stream != nullptr) {
         stream->write(msg);
     }
@@ -378,7 +378,7 @@ ASSIMP_API aiLogStream aiGetPredefinedLogStream(aiDefaultLogStream pStream, cons
         sout.user = nullptr;
     } else {
         sout.callback = &CallbackToLogRedirector;
-        sout.user = (char *)DefaultStream;
+        sout.user = reinterpret_cast<char *>(DefaultStream);
     }
     gPredefinedStreams.push_back(DefaultStream);
     ASSIMP_END_EXCEPTION_REGION(aiLogStream);
@@ -419,7 +419,7 @@ ASSIMP_API aiReturn aiDetachLogStream(const aiLogStream *stream) {
     DefaultLogger::get()->detachStream(it->second);
     delete it->second;
 
-    if ((Assimp::LogStream *)stream->user == DefaultStream) {
+    if (reinterpret_cast<LogStream *>(stream->user) == DefaultStream) {
         DefaultStream = nullptr;
     }
 
@@ -433,7 +433,7 @@ ASSIMP_API aiReturn aiDetachLogStream(const aiLogStream *stream) {
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API void aiDetachAllLogStreams(void) {
+ASSIMP_API void aiDetachAllLogStreams() {
     ASSIMP_BEGIN_EXCEPTION_REGION();
 #ifndef ASSIMP_BUILD_SINGLETHREADED
     std::lock_guard<std::mutex> lock(gLogStreamMutex);
@@ -482,12 +482,13 @@ size_t aiGetImportFormatCount(void) {
 // ------------------------------------------------------------------------------------------------
 // Returns the error text of the last failed import process.
 aiBool aiIsExtensionSupported(const char *szExtension) {
-    ai_assert(nullptr != szExtension);
+    if (szExtension == nullptr) {
+        return AI_FALSE;
+    }
     aiBool candoit = AI_FALSE;
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
-    // FIXME: no need to create a temporary Importer instance just for that ..
-    Assimp::Importer tmp;
+    Importer tmp;
     candoit = tmp.IsExtensionSupported(std::string(szExtension)) ? AI_TRUE : AI_FALSE;
 
     ASSIMP_END_EXCEPTION_REGION(aiBool);
@@ -497,11 +498,13 @@ aiBool aiIsExtensionSupported(const char *szExtension) {
 // ------------------------------------------------------------------------------------------------
 // Get a list of all file extensions supported by ASSIMP
 void aiGetExtensionList(aiString *szOut) {
-    ai_assert(nullptr != szOut);
+    if (szOut == nullptr) {
+        return;
+    }
+
     ASSIMP_BEGIN_EXCEPTION_REGION();
 
-    // FIXME: no need to create a temporary Importer instance just for that ..
-    Assimp::Importer tmp;
+    Importer tmp;
     tmp.GetExtensionList(*szOut);
 
     ASSIMP_END_EXCEPTION_REGION(void);
@@ -561,6 +564,12 @@ ASSIMP_API void aiSetImportPropertyFloat(aiPropertyStore *p, const char *szName,
 // Importer::SetPropertyString
 ASSIMP_API void aiSetImportPropertyString(aiPropertyStore *p, const char *szName,
         const C_STRUCT aiString *st) {
+    if (p == nullptr) {
+        return;
+    }
+    if (szName == nullptr) {
+        return;
+    }
     if (!st) {
         return;
     }
@@ -574,12 +583,23 @@ ASSIMP_API void aiSetImportPropertyString(aiPropertyStore *p, const char *szName
 // Importer::SetPropertyMatrix
 ASSIMP_API void aiSetImportPropertyMatrix(aiPropertyStore *p, const char *szName,
         const C_STRUCT aiMatrix4x4 *mat) {
-    if (!mat) {
+    if (p == nullptr) {
         return;
     }
+
+    if (szName == nullptr) {
+        return;
+    }
+
+    if (mat == nullptr) {
+        return;
+    }
+
     ASSIMP_BEGIN_EXCEPTION_REGION();
-    PropertyMap *pp = reinterpret_cast<PropertyMap *>(p);
+
+    auto *pp = reinterpret_cast<PropertyMap *>(p);
     SetGenericProperty<aiMatrix4x4>(pp->matrices, szName, *mat);
+
     ASSIMP_END_EXCEPTION_REGION(void);
 }
 

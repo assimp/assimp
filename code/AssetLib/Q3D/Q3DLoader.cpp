@@ -531,7 +531,7 @@ outer:
                         if (!fnOK) {
                             const aiVector3D &pV1 = curMesh.verts[face.indices[0]];
                             const aiVector3D &pV2 = curMesh.verts[face.indices[1]];
-                            const aiVector3D &pV3 = curMesh.verts[face.indices.size() - 1];
+                            const aiVector3D &pV3 = curMesh.verts[face.indices[face.indices.size() - 1]];
                             faceNormal = ((pV2 - pV1) ^ (pV3 - pV1)).Normalize();
                             fnOK = true;
                         }

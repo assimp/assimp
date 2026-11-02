@@ -623,7 +623,7 @@ static unsigned int CountAnimatedComponents(unsigned int iFlags) {
     const unsigned int components = iFlags & 0x3Fu; // mask to the six component bits
 #if defined(__cpp_lib_bitops) && __cpp_lib_bitops >= 201907L
     return static_cast<unsigned int>(std::popcount(components));
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && !defined(_M_ARM64)
     return static_cast<unsigned int>(__popcnt(components));
 #elif defined(__GNUC__) || defined(__clang__)
     return static_cast<unsigned int>(__builtin_popcount(components));

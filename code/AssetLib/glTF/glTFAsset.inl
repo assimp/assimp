@@ -212,6 +212,7 @@ inline void Buffer::Read(Value &obj, Asset &r) {
             memcpy(this->mData.get(), dataURI.data, dataURI.dataLength);
         }
     } else { // Local file
+        r.CheckExternalUri(uri);
         if (byteLength > 0) {
             std::string dir = !r.mCurrentAssetDir.empty() ? (
                                                                     r.mCurrentAssetDir.back() == '/' ?
@@ -518,6 +519,7 @@ inline void Image::Read(Value &obj, Asset &r) {
                     mData.reset(ptr);
                 }
             } else {
+                r.CheckExternalUri(uristr);
                 this->uri = uristr;
             }
         }
@@ -1154,11 +1156,12 @@ inline void Asset::ReadBinaryHeader(IOStream &stream) {
 }
 
 inline void Asset::Load(const std::string &pFile, bool isBinary) {
+    mLoadFromMemory = (0 == strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH));
     mCurrentAssetDir.clear();
 
     /*int pos = std::max(int(pFile.rfind('/')), int(pFile.rfind('\\')));
     if (pos != int(std::string::npos)) mCurrentAssetDir = pFile.substr(0, pos + 1);*/
-    if (0 != strncmp(pFile.c_str(), AI_MEMORYIO_MAGIC_FILENAME, AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+    if (!mLoadFromMemory) {
         mCurrentAssetDir = getCurrentAssetDir(pFile);
     }
 
@@ -1266,6 +1269,10 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_materials_common);
 
 #undef CHECK_EXT
+}
+
+inline void Asset::CheckExternalUri(const char *uri) const {
+    glTFCommon::ValidateExternalUri(uri, mLoadFromMemory);
 }
 
 inline IOStream *Asset::OpenFile(const std::string &path, const char *mode, bool absolute) {

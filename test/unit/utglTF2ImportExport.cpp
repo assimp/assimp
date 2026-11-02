@@ -58,18 +58,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultIOSystem.h>
 
 #include <array>
-#include <cerrno>
+#include <filesystem>
 #include <fstream>
+#include <random>
 #include <sstream>
 #include <string>
+#include <system_error>
+#include <utility>
 #include <vector>
-#ifdef _WIN32
-#    include <direct.h>
-#    include <process.h>
-#else
-#    include <sys/stat.h>
-#    include <unistd.h>
-#endif
 
 #include <assimp/material.h>
 #include <assimp/GltfMaterial.h>
@@ -1258,6 +1254,7 @@ const unsigned char kTriangleBytes[] = {
 const char kDataUri36Zeros[] =
         "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
+// IOSystem that records every path the importer tries to open.
 class RecordingIOSystem final : public Assimp::IOSystem {
 public:
     std::vector<std::string> opened;
@@ -1277,14 +1274,7 @@ private:
     Assimp::DefaultIOSystem mInner;
 };
 
-int CurrentPid() {
-#ifdef _WIN32
-    return _getpid();
-#else
-    return static_cast<int>(::getpid());
-#endif
-}
-
+// Joins a directory and a file name with the platform separator.
 std::string JoinPath(const std::string &dir, const std::string &name) {
 #ifdef _WIN32
     const char sep = '\\';
@@ -1297,32 +1287,82 @@ std::string JoinPath(const std::string &dir, const std::string &name) {
     return dir + sep + name;
 }
 
+// Creates a directory (and missing parents) accessible only by the owner.
 bool EnsureDir(const std::string &path) {
-#ifdef _WIN32
-    if (::_mkdir(path.c_str()) != 0 && errno != EEXIST) {
+    std::error_code ec;
+    std::filesystem::create_directories(path, ec);
+    if (ec) {
         return false;
     }
-#else
-    if (::mkdir(path.c_str(), 0777) != 0 && errno != EEXIST) {
-        return false;
-    }
-#endif
-    return true;
+    std::filesystem::permissions(path, std::filesystem::perms::owner_all,
+            std::filesystem::perm_options::replace, ec);
+    return !ec;
 }
 
+// Creates a uniquely named owner-only directory under the system temp directory.
+std::string MakeTempDir(const std::string &prefix) {
+    std::error_code ec;
+    const std::filesystem::path base = std::filesystem::temp_directory_path(ec);
+    if (ec) {
+        return std::string();
+    }
+    std::random_device random;
+    for (int attempt = 0; attempt < 16; ++attempt) {
+        const std::filesystem::path dir = base / (prefix + std::to_string(random()));
+        if (std::filesystem::create_directory(dir, ec)) {
+            std::filesystem::permissions(dir, std::filesystem::perms::owner_all,
+                    std::filesystem::perm_options::replace, ec);
+            if (ec) {
+                std::filesystem::remove_all(dir, ec);
+                return std::string();
+            }
+            return dir.string();
+        }
+        if (ec) {
+            return std::string();
+        }
+    }
+    return std::string();
+}
+
+// Removes a temporary directory tree when the test scope ends, even after a failed assertion.
+struct TempDirGuard {
+    explicit TempDirGuard(std::string dir) : path(std::move(dir)) {}
+    ~TempDirGuard() {
+        std::error_code ec;
+        std::filesystem::remove_all(path, ec);
+    }
+    TempDirGuard(const TempDirGuard &) = delete;
+    TempDirGuard &operator=(const TempDirGuard &) = delete;
+
+    std::string path;
+};
+
+// Writes raw bytes to a file readable and writable only by the owner.
 bool WriteBytes(const std::string &path, const void *data, size_t length) {
-    std::ofstream out(path, std::ios::binary);
-    if (!out) {
-        return false;
+    {
+        std::ofstream out(path, std::ios::binary);
+        if (!out) {
+            return false;
+        }
+        out.write(static_cast<const char *>(data), static_cast<std::streamsize>(length));
+        if (!out) {
+            return false;
+        }
     }
-    out.write(static_cast<const char *>(data), static_cast<std::streamsize>(length));
-    return static_cast<bool>(out);
+    std::error_code ec;
+    std::filesystem::permissions(path,
+            std::filesystem::perms::owner_read | std::filesystem::perms::owner_write,
+            std::filesystem::perm_options::replace, ec);
+    return !ec;
 }
 
+// Writes a text file readable and writable only by the owner.
 bool WriteText(const std::string &path, const std::string &text) {
     return WriteBytes(path, text.data(), text.size());
 }
 
+// Escapes backslashes and quotes for embedding in a JSON string.
 std::string JsonEscape(const std::string &in) {
     std::string out;
     out.reserve(in.size());
@@ -1335,6 +1375,7 @@ std::string JsonEscape(const std::string &in) {
     return out;
 }
 
+// Builds a minimal glTF 2.0 triangle whose buffer uses the given URI.
 std::string Gltf2Buffer(const std::string &bufferUri) {
     std::ostringstream json;
     json << "{\n"
@@ -1351,6 +1392,7 @@ std::string Gltf2Buffer(const std::string &bufferUri) {
     return json.str();
 }
 
+// Builds a minimal glTF 2.0 triangle whose base color image uses the given URI.
 std::string Gltf2Image(const std::string &imageUri) {
     std::ostringstream json;
     json << "{\n"
@@ -1371,6 +1413,7 @@ std::string Gltf2Image(const std::string &imageUri) {
     return json.str();
 }
 
+// Returns true if any recorded open path contains the given fragment.
 bool OpenedContains(const RecordingIOSystem &io, const char *needle) {
     for (const std::string &path : io.opened) {
         if (path.find(needle) != std::string::npos) {
@@ -1380,6 +1423,7 @@ bool OpenedContains(const RecordingIOSystem &io, const char *needle) {
     return false;
 }
 
+// Expects the import to fail with the given error and without opening the forbidden file.
 void ExpectFileRejected(const std::string &path, const char *errorFragment, const char *forbidden) {
     Assimp::Importer importer;
     auto *io = new RecordingIOSystem();
@@ -1391,6 +1435,7 @@ void ExpectFileRejected(const std::string &path, const char *errorFragment, cons
     EXPECT_FALSE(OpenedContains(*io, forbidden)) << path;
 }
 
+// Expects the scene to hold the reference triangle.
 void ExpectVertices(const aiScene *scene) {
     ASSERT_NE(nullptr, scene);
     ASSERT_EQ(1u, scene->mNumMeshes);
@@ -1411,18 +1456,11 @@ TEST_F(utglTF2ImportExport, externalUriIsContained) {
     ASSERT_NE(nullptr, benign) << importer.GetErrorString();
     ASSERT_NO_FATAL_FAILURE(ExpectVertices(benign));
 
-#ifdef _WIN32
-    const char *tmp = std::getenv("TEMP");
-    if (tmp == nullptr || tmp[0] == '\0') {
-        tmp = ".";
-    }
-    const std::string root = JoinPath(tmp, "assimp-issue6933-" + std::to_string(CurrentPid()));
-#else
-    const std::string root = "/tmp/assimp-issue6933-" + std::to_string(CurrentPid());
-#endif
+    const std::string root = MakeTempDir("assimp-issue6933-");
+    ASSERT_FALSE(root.empty());
+    const TempDirGuard rootGuard(root);
     const std::string pkg = JoinPath(root, "pkg");
     const std::string sub = JoinPath(pkg, "sub");
-    ASSERT_TRUE(EnsureDir(root));
     ASSERT_TRUE(EnsureDir(pkg));
     ASSERT_TRUE(EnsureDir(sub));
 

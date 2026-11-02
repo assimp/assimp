@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
+#include <array>
 #include <cstring>
 #include <fstream>
 #include <iterator>
@@ -74,8 +75,8 @@ TEST_F(utOgreImportExport, importMeshWithWrappingIndexBufferSize) {
     ASSERT_GT(data.size(), indexCountOffset + sizeof(uint32_t));
 
     // 0x80000002 sixteen bit indices are 2^32 + 4 bytes, which wraps around to 4 bytes in 32-bit.
-    const unsigned char count[sizeof(uint32_t)] = { 0x02, 0x00, 0x00, 0x80 };
-    std::memcpy(&data[indexCountOffset], count, sizeof(count));
+    const std::array<unsigned char, sizeof(uint32_t)> count = { 0x02, 0x00, 0x00, 0x80 };
+    std::memcpy(&data[indexCountOffset], count.data(), count.size());
 
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "mesh");
@@ -90,8 +91,8 @@ TEST_F(utOgreImportExport, importMeshWithIndexBufferSizeBeyondFile) {
     ASSERT_GT(data.size(), indexCountOffset + sizeof(uint32_t));
 
     // No wraparound here, but about 4 GiB of index data can not be in a 62 KB file.
-    const unsigned char count[sizeof(uint32_t)] = { 0xFF, 0xFF, 0xFF, 0x7F };
-    std::memcpy(&data[indexCountOffset], count, sizeof(count));
+    const std::array<unsigned char, sizeof(uint32_t)> count = { 0xFF, 0xFF, 0xFF, 0x7F };
+    std::memcpy(&data[indexCountOffset], count.data(), count.size());
 
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "mesh");

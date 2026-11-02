@@ -193,7 +193,7 @@ Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream) {
     }
 
     // Owned until the import succeeded, so that a malformed file does not leak it.
-    std::unique_ptr<Mesh> mesh(new Mesh());
+    auto mesh = std::make_unique<Mesh>();
     while (!serializer.AtEnd()) {
         id = serializer.ReadHeader();
         switch (id) {
@@ -359,7 +359,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
     uint16_t id = 0;
 
     // Owned until it is added to the mesh, so that a malformed file does not leak it.
-    std::unique_ptr<SubMesh> submesh(new SubMesh());
+    auto submesh = std::make_unique<SubMesh>();
     submesh->materialRef = ReadLine();
     submesh->usesSharedVertexData = Read<bool>();
 
@@ -378,7 +378,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
         if (indexBytes > m_reader->GetRemainingSize()) {
             throw DeadlyImportError("Index buffer of M_SUBMESH is larger than the remaining data");
         }
-        const size_t numBytes = static_cast<size_t>(indexBytes);
+        const auto numBytes = static_cast<size_t>(indexBytes);
         uint8_t *indexBuffer = ReadBytes(numBytes);
         submesh->indexData->buffer = MemoryStreamPtr(new Assimp::MemoryIOStream(indexBuffer, numBytes, true));
 
@@ -430,7 +430,9 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
     NormalizeBoneWeights(submesh->vertexData);
 
     submesh->index = static_cast<unsigned int>(mesh->subMeshes.size());
-    mesh->subMeshes.push_back(submesh.release());
+    // Release only once the vector holds the pointer, push_back can throw.
+    mesh->subMeshes.push_back(submesh.get());
+    submesh.release();
 }
 
 void OgreBinarySerializer::NormalizeBoneWeights(VertexData *vertexData) const {

@@ -43,7 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
+
+#include <cstring>
+#include <fstream>
+#include <iterator>
+#include <string>
+#include <vector>
 
 using namespace Assimp;
 
@@ -58,4 +65,43 @@ public:
 
 TEST_F(utOgreImportExport, importerTest) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utOgreImportExport, importMeshWithWrappingIndexBufferSize) {
+    std::ifstream in(ASSIMP_TEST_MODELS_NONBSD_DIR "/Ogre/OgreSDK/razor.mesh", std::ios::binary);
+    std::vector<char> data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    constexpr size_t indexCountOffset = 0x4A03; // index count of the submesh
+    ASSERT_GT(data.size(), indexCountOffset + sizeof(uint32_t));
+
+    // 0x80000002 sixteen bit indices are 2^32 + 4 bytes, which wraps around to 4 bytes in 32-bit.
+    const unsigned char count[sizeof(uint32_t)] = { 0x02, 0x00, 0x00, 0x80 };
+    std::memcpy(&data[indexCountOffset], count, sizeof(count));
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "mesh");
+    ASSERT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("larger than the remaining data"));
+}
+
+TEST_F(utOgreImportExport, importMeshWithIndexBufferSizeBeyondFile) {
+    std::ifstream in(ASSIMP_TEST_MODELS_NONBSD_DIR "/Ogre/OgreSDK/razor.mesh", std::ios::binary);
+    std::vector<char> data((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    constexpr size_t indexCountOffset = 0x4A03; // index count of the submesh
+    ASSERT_GT(data.size(), indexCountOffset + sizeof(uint32_t));
+
+    // No wraparound here, but about 4 GiB of index data can not be in a 62 KB file.
+    const unsigned char count[sizeof(uint32_t)] = { 0xFF, 0xFF, 0xFF, 0x7F };
+    std::memcpy(&data[indexCountOffset], count, sizeof(count));
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "mesh");
+    ASSERT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("larger than the remaining data"));
+}
+
+TEST_F(utOgreImportExport, importBinaryMeshRazor) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/Ogre/OgreSDK/razor.mesh", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+    EXPECT_EQ(1u, scene->mNumMeshes);
 }

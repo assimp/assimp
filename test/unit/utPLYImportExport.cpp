@@ -282,3 +282,32 @@ TEST_F(utPLYImportExport, parseInvalidDoubleCustomProperty) {
     const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data), 0);
     EXPECT_EQ(nullptr, scene);
 }
+
+TEST_F(utPLYImportExport, uintVertexColorsAreNormalizedToUnitRange) {
+    // uint / uint32 color channels must be divided by 2^32-1, not by 0xFFFF
+    // (that divisor belongs to ushort). A full-range red channel must land at 1.
+    static const char data[] =
+            "ply\n"
+            "format ascii 1.0\n"
+            "element vertex 1\n"
+            "property float x\n"
+            "property float y\n"
+            "property float z\n"
+            "property uint red\n"
+            "property uint green\n"
+            "property uint blue\n"
+            "element face 0\n"
+            "end_header\n"
+            "0 0 0 4294967295 2147483648 0\n";
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data, sizeof(data) - 1, 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_NE(nullptr, scene->mMeshes[0]->mColors[0]);
+
+    const aiColor4D &c = scene->mMeshes[0]->mColors[0][0];
+    EXPECT_NEAR(1.0f, c.r, 1e-5f);
+    EXPECT_NEAR(0.5f, c.g, 1e-5f);
+    EXPECT_NEAR(0.0f, c.b, 1e-5f);
+}

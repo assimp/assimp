@@ -168,7 +168,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 }
 
 // ------------------------------------------------------------------------------------------------
-/*static*/ bool BaseImporter::SearchFileHeaderForToken(IOSystem *pIOHandler,
+bool BaseImporter::SearchFileHeaderForToken(IOSystem *pIOHandler,
         const std::string &pFile,
         const char **tokens,
         std::size_t numTokens,
@@ -242,7 +242,7 @@ void BaseImporter::GetExtensionList(std::set<std::string> &extensions) {
 
 // ------------------------------------------------------------------------------------------------
 // Simple check for file extension
-/*static*/ bool BaseImporter::SimpleExtensionCheck(const std::string &pFile,
+bool BaseImporter::SimpleExtensionCheck(const std::string &pFile,
         const char *ext0,
         const char *ext1,
         const char *ext2,
@@ -554,28 +554,28 @@ typedef std::list<LoadRequest>::iterator LoadReqIt;
 BatchLoader::BatchLoader(IOSystem *pIO, bool validate) {
     ai_assert(nullptr != pIO);
 
-    m_data = new BatchData(pIO, validate);
+    mData = new BatchData(pIO, validate);
 }
 
 // ------------------------------------------------------------------------------------------------
 BatchLoader::~BatchLoader() {
     // delete all scenes what have not been polled by the user
-    for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
-        if (!(*it).sceneClaimed) {
-            delete (*it).scene;
+    for (auto it = mData->requests.begin(); it != mData->requests.end(); ++it) {
+        if (!it->sceneClaimed) {
+            delete it->scene;
         }
     }
-    delete m_data;
+    delete mData;
 }
 
 // ------------------------------------------------------------------------------------------------
 void BatchLoader::setValidation(bool enabled) {
-    m_data->validate = enabled;
+    mData->validate = enabled;
 }
 
 // ------------------------------------------------------------------------------------------------
 bool BatchLoader::getValidation() const {
-    return m_data->validate;
+    return mData->validate;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -584,35 +584,35 @@ unsigned int BatchLoader::AddLoadRequest(const std::string &file,
     ai_assert(!file.empty());
 
     // check whether we have this loading request already
-    for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
+    for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
         // Call IOSystem's path comparison function here
-        if (m_data->pIOSystem->ComparePaths((*it).file, file)) {
+        if (mData->pIOSystem->ComparePaths(it->file, file)) {
             if (map) {
-                if (!((*it).map == *map)) {
+                if (!(it->map == *map)) {
                     continue;
                 }
-            } else if (!(*it).map.empty()) {
+            } else if (!it->map.empty()) {
                 continue;
             }
 
-            (*it).refCnt++;
-            return (*it).id;
+            it->refCnt++;
+            return it->id;
         }
     }
 
     // no, we don't have it. So add it to the queue ...
-    m_data->requests.emplace_back(file, steps, map, m_data->next_id);
-    return m_data->next_id++;
+    mData->requests.emplace_back(file, steps, map, mData->next_id);
+    return mData->next_id++;
 }
 
 // ------------------------------------------------------------------------------------------------
 aiScene *BatchLoader::GetImport(unsigned int which) {
-    for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
+    for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
         if ((*it).id == which && (*it).loaded) {
             aiScene *sc = (*it).scene;
             (*it).sceneClaimed = true;
             if (!(--(*it).refCnt)) {
-                m_data->requests.erase(it);
+                mData->requests.erase(it);
             }
             return sc;
         }
@@ -623,28 +623,27 @@ aiScene *BatchLoader::GetImport(unsigned int which) {
 // ------------------------------------------------------------------------------------------------
 void BatchLoader::LoadAll() {
     // no threaded implementation for the moment
-    for (LoadReqIt it = m_data->requests.begin(); it != m_data->requests.end(); ++it) {
+    for (LoadReqIt it = mData->requests.begin(); it != mData->requests.end(); ++it) {
         // force validation in debug builds
-        unsigned int pp = (*it).flags;
-        if (m_data->validate) {
+        unsigned int pp = it->flags;
+        if (mData->validate) {
             pp |= aiProcess_ValidateDataStructure;
         }
 
         // setup config properties if necessary
-        ImporterPimpl *pimpl = m_data->pImporter->Pimpl();
-        pimpl->mFloatProperties = (*it).map.floats;
-        pimpl->mIntProperties = (*it).map.ints;
-        pimpl->mStringProperties = (*it).map.strings;
-        pimpl->mMatrixProperties = (*it).map.matrices;
+        ImporterPimpl *pimpl = mData->pImporter->Pimpl();
+        pimpl->mFloatProperties = it->map.floats;
+        pimpl->mIntProperties = it->map.ints;
+        pimpl->mStringProperties = it->map.strings;
+        pimpl->mMatrixProperties = it->map.matrices;
 
         if (!DefaultLogger::isNullLogger()) {
             ASSIMP_LOG_INFO("%%% BEGIN EXTERNAL FILE %%%");
-            ASSIMP_LOG_INFO("File: ", (*it).file);
+            ASSIMP_LOG_INFO("File: ", it->file);
         }
-        m_data->pImporter->ReadFile((*it).file, pp);
-        (*it).scene = m_data->pImporter->GetOrphanedScene();
-        (*it).sceneClaimed = false;
-        (*it).loaded = true;
+        mData->pImporter->ReadFile(it->file, pp);
+        it->scene = mData->pImporter->GetOrphanedScene();
+        it->loaded = true;
 
         ASSIMP_LOG_INFO("%%% END EXTERNAL FILE %%%");
     }

@@ -52,28 +52,31 @@ struct aiString;
 namespace Assimp {
 
 namespace ObjFile {
-struct Model;
-struct Material;
+    struct Model;
+    struct Material;
 } // namespace ObjFile
 
-/**
- *  @class  ObjFileMtlImporter
- *  @brief  Loads the material description from a mtl file.
- */
-class ObjFileMtlImporter {
+// ------------------------------------------------------------------------------------------------
+/// @class  ObjFileMtlImporter
+/// @brief  Loads the material description from a mtl file.
+// ------------------------------------------------------------------------------------------------
+class ObjFileMtlImporter final {
 public:
     static constexpr size_t BUFFERSIZE = 2048;
     using DataArray = std::vector<char>;
     using DataArrayIt = std::vector<char>::iterator;
     using ConstDataArrayIt = std::vector<char>::const_iterator;
 
-    //! \brief  The class default constructor
-    ObjFileMtlImporter(std::vector<char> &buffer, const std::string &strAbsPath,
-            ObjFile::Model *pModel);
+    /// @brief  The class constructor.
+    /// @param [in] buffer      The file data
+    /// @param [in] strAbsPath  The absolute path to the material file.
+    /// @param [in] pModel      Pointer showing to the model instance.
+    ObjFileMtlImporter(std::vector<char> &buffer, const std::string &strAbsPath, ObjFile::Model *pModel);
 
-    //! \brief  The class destructor
+    /// @brief  The class destructor
     ~ObjFileMtlImporter() = default;
 
+    // No copying
     ObjFileMtlImporter(const ObjFileMtlImporter &rOther) = delete;
     ObjFileMtlImporter &operator=(const ObjFileMtlImporter &rOther) = delete;
 
@@ -102,18 +105,12 @@ private:
     void getTextureOption(bool &clamp, int &clampIndex, aiString *&out);
 
 private:
-    //! Absolute pathname
-    std::string m_strAbsPath;
-    //! Data iterator showing to the current position in data buffer
-    DataArrayIt m_DataIt;
-    //! Data iterator to end of buffer
-    DataArrayIt m_DataItEnd;
-    //! USed model instance
-    ObjFile::Model *m_pModel;
-    //! Current line in file
-    unsigned int m_uiLine;
-    //! Helper buffer
-    std::vector<char> m_buffer;
+    std::string mAbsPath{};             ///< Absolute pathname
+    DataArrayIt mDataIt{};              ///< Data iterator showing to the current position in data buffer
+    DataArrayIt mDataItEnd{};           ///< Data iterator to end of buffer
+    ObjFile::Model *mModel{nullptr};    ///< Used model instance
+    unsigned int mLine{0};              ///< Current line in file
+    std::vector<char> mBuffer{};        ///< Helper buffer
 };
 
 } // Namespace Assimp

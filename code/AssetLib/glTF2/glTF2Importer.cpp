@@ -180,13 +180,17 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
             // A change of coordinates is required to map glTF UV transformations into the space used by
             // Assimp. In glTF all UV origins are at 0,1 (top left of texture) in Assimp space. In Assimp
             // rotation occurs around the image center (0.5,0.5) where as in glTF rotation is around the
-            // texture origin. All three can be corrected for solely by a change of the translation since
-            // the transformations available are shape preserving. Note the importer already flips the V
-            // coordinate of the actual meshes during import.
-            const ai_real rcos(cos(-transform.mRotation));
-            const ai_real rsin(sin(-transform.mRotation));
-            transform.mTranslation.x = (static_cast<ai_real>(0.5) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
-            transform.mTranslation.y = ((static_cast<ai_real>(0.5) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];
+            // texture origin. Furthermore, Assimp's TextureTransformProcess applies translation BEFORE scaling
+            // and rotation, whereas glTF applies translation AFTER scaling and rotation.
+            // Note the importer already flips the V coordinate of the actual meshes during import.
+            const ai_real rcos(std::cos(-transform.mRotation));
+            const ai_real rsin(std::sin(-transform.mRotation));
+            const ai_real Sx = transform.mScaling.x != 0.0 ? transform.mScaling.x : 1.0;
+            const ai_real Sy = transform.mScaling.y != 0.0 ? transform.mScaling.y : 1.0;
+            const ai_real Vx = (prop.TextureTransformExt_t.offset[0] - static_cast<ai_real>(0.5)) / Sx;
+            const ai_real Vy = (prop.TextureTransformExt_t.offset[1] - static_cast<ai_real>(0.5)) / Sy;
+            transform.mTranslation.x = rcos * Vx - rsin * Vy + static_cast<ai_real>(0.5);
+            transform.mTranslation.y = -rsin * Vx - rcos * Vy - static_cast<ai_real>(0.5);
 
             mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
         }
@@ -397,6 +401,7 @@ void glTF2Importer::ImportMaterials(Asset &r) {
     const unsigned int numImportedMaterials = unsigned(r.materials.Size());
     ASSIMP_LOG_DEBUG("Importing ", numImportedMaterials, " materials");
     Material defaultMaterial;
+    defaultMaterial.name = AI_DEFAULT_MATERIAL_NAME;
 
     mScene->mNumMaterials = numImportedMaterials + 1;
     mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];
@@ -790,6 +795,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
+                    if (count < 2) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the LINE_LOOP/LINE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1]);
@@ -797,7 +806,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[i - 1], indexBuffer[i]);
                     }
                     if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[static_cast<int>(count) - 1], faces[0].mIndices[0]);
+                        // Use the first index directly: the first face is dropped when its
+                        // indices are out of range, which would leave faces[0].mIndices null.
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[count - 1], indexBuffer[0]);
                     }
                     break;
                 }
@@ -818,6 +829,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the TRIANGLE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < nFaces; ++i) {
@@ -833,6 +848,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the TRIANGLE_FAN mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1], indexBuffer[2]);
@@ -871,6 +890,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
+                    if (count < 2) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINE_LOOP/LINE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
@@ -896,6 +919,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < nFaces; ++i) {
@@ -911,6 +938,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLE_FAN mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);

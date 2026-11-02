@@ -104,17 +104,15 @@ const aiImporterDesc *LWOImporter::GetInfo() const {
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
-void LWOImporter::InternReadFile(const std::string &pFile,
-        aiScene *pScene,
-        IOSystem *pIOHandler) {
+void LWOImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
     // Check whether we can read from the file
     if (file == nullptr) {
         throw DeadlyImportError("Failed to open LWO file ", pFile, ".");
     }
-
-    if ((this->fileSize = (unsigned int)file->FileSize()) < 12) {
+    static constexpr size_t MinLWOSize = 12;
+    if ((this->fileSize = static_cast<unsigned int>(file->FileSize())) < MinLWOSize) {
         throw DeadlyImportError("LWO: The file is too small to contain the IFF header");
     }
 
@@ -124,7 +122,7 @@ void LWOImporter::InternReadFile(const std::string &pFile,
     mScene = pScene;
 
     // Determine the type of the file
-    uint32_t fileType;
+    uint32_t fileType{0};
     const char *sz = IFF::ReadHeader(&mBuffer[0], fileType);
     if (sz) {
         throw DeadlyImportError(sz);
@@ -263,8 +261,9 @@ void LWOImporter::InternReadFile(const std::string &pFile,
             }
             for (unsigned int j = 0; j < mSurfaces->size(); ++j) {
                 SortedRep &sorted = pSorted[j];
-                if (sorted.empty())
+                if (sorted.empty()) {
                     continue;
+                }
 
                 // generate the mesh
                 aiMesh *mesh = new aiMesh();
@@ -346,16 +345,33 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                                 break;
                             }
                             aiVector3D *&pp = pvUV[w];
-                            const aiVector2D &src = ((aiVector2D *)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
-                            pp->x = src.x;
-                            pp->y = src.y;
+                            // idx is clamped only against mTempPoints.size(); a VMAP channel is
+                            // sized once (at VMAP-parse time) and is not resized if a later PNTS
+                            // chunk grows the point list, so idx can exceed this channel's entry
+                            // count. Bound it here to avoid an out-of-bounds read.
+                            if (const LWO::VMapEntry &uvChan = layer.mUVChannels[vUVChannelIndices[w]];
+                                    uvChan.dims >= 2 && idx < uvChan.rawData.size() / uvChan.dims) {
+                                const size_t base = static_cast<size_t>(idx) * uvChan.dims;
+                                pp->x = uvChan.rawData[base];
+                                pp->y = uvChan.rawData[base + 1];
+                            } else {
+                                pp->x = 0.f;
+                                pp->y = 0.f;
+                            }
                             pp++;
                         }
 
                         // process normals (MODO extension)
                         if (nrm) {
-                            *nrm = ((aiVector3D *)&layer.mNormals.rawData[0])[idx];
-                            nrm->z *= -1.f;
+                            // Same stale-channel-size guard as above (see UV read).
+                            if (layer.mNormals.dims >= 3 && idx < layer.mNormals.rawData.size() / layer.mNormals.dims) {
+                                const size_t base = static_cast<size_t>(idx) * layer.mNormals.dims;
+                                nrm->x = layer.mNormals.rawData[base];
+                                nrm->y = layer.mNormals.rawData[base + 1];
+                                nrm->z = -layer.mNormals.rawData[base + 2];
+                            } else {
+                                *nrm = aiVector3D();
+                            }
                             ++nrm;
                         }
 
@@ -364,7 +380,17 @@ void LWOImporter::InternReadFile(const std::string &pFile,
                             if (UINT_MAX == vVColorIndices[w]) {
                                 break;
                             }
-                            *pvVC[w] = ((aiColor4D *)&layer.mVColorChannels[vVColorIndices[w]].rawData[0])[idx];
+                            // Same stale-channel-size guard as above (see UV read).
+                            if (const LWO::VMapEntry &vcChan = layer.mVColorChannels[vVColorIndices[w]];
+                                    vcChan.dims >= 3 && idx < vcChan.rawData.size() / vcChan.dims) {
+                                const size_t base = static_cast<size_t>(idx) * vcChan.dims;
+                                pvVC[w]->r = vcChan.rawData[base];
+                                pvVC[w]->g = vcChan.rawData[base + 1];
+                                pvVC[w]->b = vcChan.rawData[base + 2];
+                                pvVC[w]->a = (vcChan.dims >= 4) ? vcChan.rawData[base + 3] : 1.f;
+                            } else {
+                                *pvVC[w] = aiColor4D(0.f, 0.f, 0.f, 1.f);
+                            }
 
                             // If a RGB color map is explicitly requested delete the
                             // alpha channel - it could theoretically be != 1.
@@ -412,8 +438,9 @@ void LWOImporter::InternReadFile(const std::string &pFile,
         }
     }
 
-    if (apcNodes.empty() || apcMeshes.empty())
+    if (apcNodes.empty() || apcMeshes.empty()) {
         throw DeadlyImportError("LWO: No meshes loaded");
+    }
 
     // The RemoveRedundantMaterials step will clean this up later
     pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials = (unsigned int)mSurfaces->size()];
@@ -443,9 +470,9 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
     std::vector<aiVector3D> faceNormals;
 
     // ... in some cases that's already enough
-    if (!surface.mMaximumSmoothAngle)
+    if (!surface.mMaximumSmoothAngle) {
         out = mesh->mNormals;
-    else {
+    } else {
         faceNormals.resize(mesh->mNumVertices);
         out = &faceNormals[0];
     }
@@ -500,16 +527,15 @@ void LWOImporter::ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &
                 aiVector3D vNormals;
                  for (std::vector<unsigned int>::const_iterator a = poResult.begin(); a != poResult.end(); ++a) {
                     const aiVector3D &v = faceNormals[*a];
-                    if (v * faceNormals[idx] < fLimit)
+                    if (v * faceNormals[idx] < fLimit) {
                         continue;
+                    }
                     vNormals += v;
                 }
                 mesh->mNormals[idx] = vNormals.Normalize();
             }
         }
-    }
-    // faster code path in case there is no smooth angle
-    else {
+    } else { // faster code path in case there is no smooth angle
         std::vector<bool> vertexDone(mesh->mNumVertices, false);
         for (begin = mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it) {
             const aiFace &face = *begin;
@@ -652,13 +678,10 @@ void LWOImporter::ResolveTags() {
     // --- this function is used for both LWO2 and LWOB
     mMapping->resize(mTags->size(), UINT_MAX);
     for (unsigned int a = 0; a < mTags->size(); ++a) {
-
         const std::string &c = (*mTags)[a];
         for (unsigned int i = 0; i < mSurfaces->size(); ++i) {
-
             const std::string &d = (*mSurfaces)[i].mName;
             if (!ASSIMP_stricmp(c, d)) {
-
                 (*mMapping)[a] = i;
                 break;
             }
@@ -669,10 +692,8 @@ void LWOImporter::ResolveTags() {
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::ResolveClips() {
     for (unsigned int i = 0; i < mClips.size(); ++i) {
-
         Clip &clip = mClips[i];
         if (Clip::REF == clip.type) {
-
             if (clip.clipRef >= mClips.size()) {
                 ASSIMP_LOG_ERROR("LWO2: Clip referrer index is out of range");
                 clip.clipRef = 0;
@@ -682,9 +703,7 @@ void LWOImporter::ResolveClips() {
             if (Clip::REF == dest.type) {
                 ASSIMP_LOG_ERROR("LWO2: Clip references another clip reference");
                 clip.type = Clip::UNSUPPORTED;
-            }
-
-            else {
+            } else {
                 clip.path = dest.path;
                 clip.type = dest.type;
             }
@@ -719,8 +738,9 @@ void LWOImporter::LoadLWOTags(unsigned int size) {
         if (!(*szCur)) {
             const size_t len = (size_t)(szCur - szLast);
             // FIX: skip empty-sized tags
-            if (len)
+            if (len) {
                 mTags->push_back(std::string(szLast, len));
+            }
             szCur += (len & 0x1 ? 1 : 2);
             szLast = szCur;
         }
@@ -840,8 +860,9 @@ void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator &it,
                     face.mIndices[i] = mCurLayer->mTempPoints.empty() ? 0 : (unsigned int)(mCurLayer->mTempPoints.size() - 1);
                 }
             }
-        } else
+        } else {
             throw DeadlyImportError("LWO2: Encountered invalid face record with zero indices");
+        }
     }
 }
 
@@ -852,8 +873,9 @@ void LWOImporter::LoadLWO2PolygonTags(unsigned int length) {
     AI_LWO_VALIDATE_CHUNK_LENGTH(length, PTAG, 4);
     uint32_t type = GetU4();
 
-    if (type != AI_LWO_SURF && type != AI_LWO_SMGP)
+    if (type != AI_LWO_SURF && type != AI_LWO_SMGP) {
         return;
+    }
 
     while (mFileBuffer < end) {
         unsigned int i = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mFaceIDXOfs;

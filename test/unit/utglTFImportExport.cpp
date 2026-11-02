@@ -40,22 +40,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
+#include "UriTestHelpers.h"
 
-#include <assimp/DefaultIOSystem.h>
-#include <assimp/Importer.hpp>
-#include <assimp/commonMetaData.h>
-#include <assimp/material.h>
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
+
+#include <assimp/commonMetaData.h>
 #include <assimp/scene.h>
 
-#include <filesystem>
-#include <fstream>
-#include <random>
 #include <sstream>
 #include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
 
 using namespace Assimp;
 
@@ -121,132 +115,9 @@ TEST_F(utglTFImportExport, sceneMetadata) {
 }
 
 
+using namespace Assimp::UriTest;
+
 namespace {
-
-const unsigned char kTriangleBytes[] = {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x00, 0x00
-};
-
-const char kDataUri36Zeros[] =
-        "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-// IOSystem that records every path the importer tries to open.
-class RecordingIOSystem final : public Assimp::IOSystem {
-public:
-    std::vector<std::string> opened;
-
-    bool Exists(const char *pFile) const override { return mInner.Exists(pFile); }
-    char getOsSeparator() const override { return mInner.getOsSeparator(); }
-    IOStream *Open(const char *pFile, const char *pMode) override {
-        opened.emplace_back(pFile != nullptr ? pFile : "");
-        return mInner.Open(pFile, pMode);
-    }
-    void Close(IOStream *pFile) override { mInner.Close(pFile); }
-    bool ComparePaths(const char *one, const char *second) const override {
-        return mInner.ComparePaths(one, second);
-    }
-
-private:
-    Assimp::DefaultIOSystem mInner;
-};
-
-// Joins a directory and a file name with the platform separator.
-std::string JoinPath(const std::string &dir, const std::string &name) {
-#ifdef _WIN32
-    const char sep = '\\';
-#else
-    const char sep = '/';
-#endif
-    if (dir.empty() || dir.back() == '/' || dir.back() == '\\') {
-        return dir + name;
-    }
-    return dir + sep + name;
-}
-
-// Creates a directory (and missing parents) accessible only by the owner.
-bool EnsureDir(const std::string &path) {
-    std::error_code ec;
-    std::filesystem::create_directories(path, ec);
-    if (ec) {
-        return false;
-    }
-    std::filesystem::permissions(path, std::filesystem::perms::owner_all,
-            std::filesystem::perm_options::replace, ec);
-    return !ec;
-}
-
-// Creates a uniquely named owner-only directory under the system temp directory.
-std::string MakeTempDir(const std::string &prefix) {
-    std::error_code ec;
-    const std::filesystem::path base = std::filesystem::temp_directory_path(ec);
-    if (ec) {
-        return std::string();
-    }
-    std::random_device random;
-    for (int attempt = 0; attempt < 16; ++attempt) {
-        const std::filesystem::path dir = base / (prefix + std::to_string(random()));
-        if (std::filesystem::create_directory(dir, ec)) {
-            std::filesystem::permissions(dir, std::filesystem::perms::owner_all,
-                    std::filesystem::perm_options::replace, ec);
-            if (ec) {
-                std::filesystem::remove_all(dir, ec);
-                return std::string();
-            }
-            return dir.string();
-        }
-        if (ec) {
-            return std::string();
-        }
-    }
-    return std::string();
-}
-
-// Removes a temporary directory tree when the test scope ends, even after a failed assertion.
-struct TempDirGuard {
-    explicit TempDirGuard(std::string dir) : path(std::move(dir)) {}
-    ~TempDirGuard() {
-        std::error_code ec;
-        std::filesystem::remove_all(path, ec);
-    }
-    TempDirGuard(const TempDirGuard &) = delete;
-    TempDirGuard &operator=(const TempDirGuard &) = delete;
-
-    std::string path;
-};
-
-// Writes raw bytes to a file readable and writable only by the owner.
-bool WriteBytes(const std::string &path, const void *data, size_t length) {
-    {
-        std::ofstream out(path, std::ios::binary);
-        if (!out) {
-            return false;
-        }
-        out.write(static_cast<const char *>(data), static_cast<std::streamsize>(length));
-        if (!out) {
-            return false;
-        }
-    }
-    std::error_code ec;
-    std::filesystem::permissions(path,
-            std::filesystem::perms::owner_read | std::filesystem::perms::owner_write,
-            std::filesystem::perm_options::replace, ec);
-    return !ec;
-}
-
-// Escapes backslashes and quotes for embedding in a JSON string.
-std::string JsonEscape(const std::string &in) {
-    std::string out;
-    out.reserve(in.size());
-    for (char c : in) {
-        if (c == '\\' || c == '"') {
-            out.push_back('\\');
-        }
-        out.push_back(c);
-    }
-    return out;
-}
 
 // Builds a minimal glTF 1.0 triangle whose buffer uses the given URI.
 std::string Gltf1Buffer(const std::string &bufferUri) {
@@ -286,101 +157,17 @@ std::string Gltf1Image(const std::string &imageUri) {
     return json.str();
 }
 
-// Returns true if any recorded open path contains the given fragment.
-bool OpenedContains(const RecordingIOSystem &io, const char *needle) {
-    for (const std::string &path : io.opened) {
-        if (path.find(needle) != std::string::npos) {
-            return true;
-        }
-    }
-    return false;
-}
-
 } // namespace
 
 TEST_F(utglTFImportExport, externalUriIsContained) {
-    const std::string root = MakeTempDir("assimp-issue6933-gltf1-");
-    ASSERT_FALSE(root.empty());
-    const TempDirGuard rootGuard(root);
-    const std::string pkg = JoinPath(root, "pkg");
-    ASSERT_TRUE(EnsureDir(pkg));
+    const ScratchPackage scratch("assimp-issue6933-gltf1-");
+    ASSERT_TRUE(scratch.Populate());
 
-    const unsigned char secret[36] = {
-        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
-        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
-        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11
-    };
-    ASSERT_TRUE(WriteBytes(JoinPath(root, "secret.bin"), secret, sizeof(secret)));
-    ASSERT_TRUE(WriteBytes(JoinPath(pkg, "triangle.bin"), kTriangleBytes, sizeof(kTriangleBytes)));
+    ExpectFileLoads(scratch.Write("benign.gltf", Gltf1Buffer("triangle.bin")));
+    ExpectFileRejected(scratch.Write("traversal.gltf", Gltf1Buffer("../secret.bin")), nullptr, "secret.bin");
+    ExpectTextureUriKept(scratch.Write("image_ok.gltf", Gltf1Image("tex/ok.png")), "tex/ok.png");
+    ExpectFileRejected(scratch.Write("image_bad.gltf", Gltf1Image("../secret.png")), nullptr, "secret.png");
 
-    const std::string benignText = Gltf1Buffer("triangle.bin");
-    const std::string traversalText = Gltf1Buffer("../secret.bin");
-    const std::string imageOkText = Gltf1Image("tex/ok.png");
-    const std::string imageBadText = Gltf1Image("../secret.png");
-    const std::string benign = JoinPath(pkg, "benign.gltf");
-    const std::string traversal = JoinPath(pkg, "traversal.gltf");
-    const std::string imageOk = JoinPath(pkg, "image_ok.gltf");
-    const std::string imageBad = JoinPath(pkg, "image_bad.gltf");
-    ASSERT_TRUE(WriteBytes(benign, benignText.data(), benignText.size()));
-    ASSERT_TRUE(WriteBytes(traversal, traversalText.data(), traversalText.size()));
-    ASSERT_TRUE(WriteBytes(imageOk, imageOkText.data(), imageOkText.size()));
-    ASSERT_TRUE(WriteBytes(imageBad, imageBadText.data(), imageBadText.size()));
-
-    {
-        Assimp::Importer fileImporter;
-        const aiScene *scene = fileImporter.ReadFile(benign, aiProcess_ValidateDataStructure);
-        ASSERT_NE(nullptr, scene) << fileImporter.GetErrorString();
-        ASSERT_EQ(1u, scene->mNumMeshes);
-        EXPECT_EQ(3u, scene->mMeshes[0]->mNumVertices);
-        EXPECT_EQ(ai_real(1), scene->mMeshes[0]->mVertices[1].x);
-    }
-
-    {
-        Assimp::Importer fileImporter;
-        auto *io = new RecordingIOSystem();
-        fileImporter.SetIOHandler(io);
-        const aiScene *scene = fileImporter.ReadFile(traversal, aiProcess_ValidateDataStructure);
-        EXPECT_EQ(nullptr, scene) << fileImporter.GetErrorString();
-        EXPECT_FALSE(OpenedContains(*io, "secret.bin"));
-    }
-
-    {
-        Assimp::Importer fileImporter;
-        const aiScene *scene = fileImporter.ReadFile(imageOk, aiProcess_ValidateDataStructure);
-        ASSERT_NE(nullptr, scene) << fileImporter.GetErrorString();
-        ASSERT_GT(scene->mNumMaterials, 0u);
-        aiString texPath;
-        EXPECT_EQ(aiReturn_SUCCESS, scene->mMaterials[0]->GetTexture(aiTextureType_DIFFUSE, 0, &texPath));
-        EXPECT_STREQ("tex/ok.png", texPath.C_Str());
-    }
-
-    {
-        Assimp::Importer fileImporter;
-        auto *io = new RecordingIOSystem();
-        fileImporter.SetIOHandler(io);
-        const aiScene *scene = fileImporter.ReadFile(imageBad, aiProcess_ValidateDataStructure);
-        EXPECT_EQ(nullptr, scene) << fileImporter.GetErrorString();
-        EXPECT_FALSE(OpenedContains(*io, "secret.png"));
-    }
-
-    const std::string memoryExternal = Gltf1Buffer("/etc/passwd");
-    {
-        Assimp::Importer memoryImporter;
-        auto *io = new RecordingIOSystem();
-        memoryImporter.SetIOHandler(io);
-        const aiScene *scene = memoryImporter.ReadFileFromMemory(
-                memoryExternal.data(), memoryExternal.size(), aiProcess_ValidateDataStructure, "gltf");
-        EXPECT_EQ(nullptr, scene) << memoryImporter.GetErrorString();
-        EXPECT_TRUE(io->opened.empty());
-    }
-
-    const std::string memoryData = Gltf1Buffer(kDataUri36Zeros);
-    {
-        Assimp::Importer memoryImporter;
-        const aiScene *scene = memoryImporter.ReadFileFromMemory(
-                memoryData.data(), memoryData.size(), aiProcess_ValidateDataStructure, "gltf");
-        ASSERT_NE(nullptr, scene) << memoryImporter.GetErrorString();
-        ASSERT_EQ(1u, scene->mNumMeshes);
-        EXPECT_EQ(3u, scene->mMeshes[0]->mNumVertices);
-    }
+    ExpectMemoryRejected(Gltf1Buffer("/etc/passwd"), nullptr);
+    ExpectMemoryLoads(Gltf1Buffer(kDataUri36Zeros));
 }

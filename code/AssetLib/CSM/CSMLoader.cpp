@@ -191,6 +191,14 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     }
                 }
 
+                // A $points section always (re)starts its channels from the buffers
+                // sized just above. Reset each channel's key count so a second $points
+                // section cannot keep the (potentially large) count from the first one
+                // and index past a smaller re-allocated buffer (heap out-of-bounds write).
+                for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
+                    anim->mChannels[i]->mNumPositionKeys = 0;
+                }
+
                 // Track every channel's own buffer capacity. A single shared counter
                 // is not enough: a DROPOUT marker makes a channel skip a frame, so the
                 // channels' key counts drift apart and each buffer has to grow on its own.

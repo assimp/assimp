@@ -623,6 +623,9 @@ namespace Assimp {
                     // should be 6 coords
                     auto p = GetProperty(instElement->alProperties, iTextureCoord).avList.begin();
                     if ((iNum / 3) == 2) { // X Y coord
+                        if (iNum > mGeneratedMesh->mFaces[pos].mNumIndices * 2) {
+                            throw DeadlyImportError("Invalid .ply file: Too many texture coordinates for face");
+                        }
                         for (unsigned int a = 0; a < iNum; ++a, ++p) {
                             // The texture-coordinate list length is independent of the
                             // vertex-index list length, so a / 2 may run past the face's

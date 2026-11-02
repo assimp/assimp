@@ -902,9 +902,14 @@ void MDLImporter::CalculateUVCoordinates_MDL5() {
         if (!pcTex->mHeight) {
             const uint32_t *piPtr = (uint32_t *)pcTex->pcData;
 
-            piPtr += 3;
-            iHeight = (unsigned int)*piPtr++;
-            iWidth = (unsigned int)*piPtr;
+            // mWidth is the size of the data in bytes, make sure it
+            // holds the five DWORDs we read
+            iWidth = iHeight = 0;
+            if (pcTex->mWidth >= sizeof(uint32_t) * 5) {
+                piPtr += 3;
+                iHeight = (unsigned int)*piPtr++;
+                iWidth = (unsigned int)*piPtr;
+            }
             if (!iHeight || !iWidth) {
                 ASSIMP_LOG_WARN("Either the width or the height of the "
                                 "embedded DDS texture is zero. Unable to compute final texture "

@@ -319,8 +319,8 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
     );
 
     if (type == "LayerElementUV") {
-        if(index >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
-            FBXImporter::LogError("ignoring UV layer, maximum number of UV channels exceeded: ",
+        if(index < 0 || index >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+            FBXImporter::LogError("ignoring UV layer, invalid UV channel index: ",
                 index, " (limit is ", AI_MAX_NUMBER_OF_TEXTURECOORDS, ")" );
             return;
         }
@@ -397,8 +397,8 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
         );
     }
     else if (type == "LayerElementColor") {
-        if(index >= AI_MAX_NUMBER_OF_COLOR_SETS) {
-            FBXImporter::LogError("ignoring vertex color layer, maximum number of color sets exceeded: ",
+        if(index < 0 || index >= AI_MAX_NUMBER_OF_COLOR_SETS) {
+            FBXImporter::LogError("ignoring vertex color layer, invalid color set index: ",
                 index, " (limit is ", AI_MAX_NUMBER_OF_COLOR_SETS, ")" );
             return;
         }

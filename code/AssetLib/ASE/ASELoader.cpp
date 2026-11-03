@@ -39,7 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  ASELoader.cpp
+/**
+ *  @file  ASELoader.cpp
  *  @brief Implementation of the ASE importer class
  */
 
@@ -57,13 +58,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
+#include <assimp/fast_atof.h>
 
 #include <memory>
 
-// utilities
-#include <assimp/fast_atof.h>
-
 namespace Assimp {
+
 using namespace Assimp::ASE;
 
 static constexpr aiImporterDesc desc = {
@@ -78,13 +78,6 @@ static constexpr aiImporterDesc desc = {
     0,
     "ase ask"
 };
-
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-ASEImporter::ASEImporter() :
-        mParser(), mBuffer(), pcScene(), configRecomputeNormals(), noSkeletonMesh() {
-    // empty
-}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -102,12 +95,12 @@ const aiImporterDesc *ASEImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 // Setup configuration options
 void ASEImporter::SetupProperties(const Importer *pImp) {
-    configRecomputeNormals = (pImp->GetPropertyInteger(
+    mConfigRecomputeNormals = (pImp->GetPropertyInteger(
                                       AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS, 1) ?
                                       true :
                                       false);
 
-    noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, 0) != 0;
+    mNoSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES, 0) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -244,7 +237,7 @@ void ASEImporter::InternReadFile(const std::string &pFile,
     // ------------------------------------------------------------------
     if (!pScene->mNumMeshes) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
-        if (!noSkeletonMesh) {
+        if (!mNoSkeletonMesh) {
             SkeletonMeshBuilder skeleton(pScene);
         }
     }
@@ -1266,17 +1259,18 @@ void ASEImporter::BuildMaterialIndices() {
 // Generate normal vectors basing on smoothing groups
 bool ASEImporter::GenerateNormals(ASE::Mesh &mesh) {
 
-    if (!mesh.mNormals.empty() && !configRecomputeNormals) {
+    if (!mesh.mNormals.empty() && !mConfigRecomputeNormals) {
         // Check whether there are only uninitialized normals. If there are
         // some, skip all normals from the file and compute them on our own
-        for (std::vector<aiVector3D>::const_iterator qq = mesh.mNormals.begin(); qq != mesh.mNormals.end(); ++qq) {
-            if ((*qq).x || (*qq).y || (*qq).z) {
+        for (auto qq = mesh.mNormals.begin(); qq != mesh.mNormals.end(); ++qq) {
+            if (qq->x || qq->y || qq->z) {
                 return true;
             }
         }
     }
     // The array is reused.
     ComputeNormalsWithSmoothingsGroups<ASE::Face>(mesh);
+
     return false;
 }
 

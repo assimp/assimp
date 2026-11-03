@@ -761,6 +761,14 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
         size_t numBones = jointNames.mStrings.size();
         std::vector<std::vector<aiVertexWeight>> dstBones(numBones);
 
+        // reject malformed controllers whose weights reference a non-existent joint
+        for (const auto &weightPair : pSrcController->mWeights) {
+            if (weightPair.first >= numBones) {
+                throw DeadlyImportError("Collada: joint index ", weightPair.first,
+                    " is out of range for the controller joints (", numBones, ").");
+            }
+        }
+
         // build a temporary array of pointers to the start of each vertex's weights
         using IndexPairVector = std::vector<std::pair<size_t, size_t>>;
         std::vector<IndexPairVector::const_iterator> weightStartPerVertex;

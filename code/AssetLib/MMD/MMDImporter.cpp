@@ -153,9 +153,20 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
     }
 
     pScene->mNumMeshes = pModel->material_count;
-    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-    for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
+    // Value-initialize: if a mesh fails to import, the scene destructor
+    // still walks the whole array and would delete whatever the allocator
+    // handed back otherwise.
+    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes]();
+    int indexStart = 0;
+    for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
         const int indexCount = pModel->materials[i].index_count;
+
+        // The per-material index counts partition the shared vertex index
+        // array; a negative count or one that runs past the end of that
+        // array would make CreateMesh read out of bounds below.
+        if (indexCount < 0 || indexStart > pModel->index_count - indexCount) {
+            throw DeadlyImportError("MMD: material ", i, " has an invalid vertex index count");
+        }
 
         pScene->mMeshes[i] = CreateMesh(pModel, indexStart, indexCount);
         pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
@@ -187,7 +198,7 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
 
     // create materials
     pScene->mNumMaterials = pModel->material_count;
-    pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
+    pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials]();
     for (unsigned int i = 0; i < pScene->mNumMaterials; i++) {
         pScene->mMaterials[i] = CreateMaterial(&pModel->materials[i], pModel);
     }
@@ -206,7 +217,9 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
 // ------------------------------------------------------------------------------------------------
 aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
         const int indexStart, const int indexCount) {
-    aiMesh *pMesh = new aiMesh;
+    // Owned here until the caller receives the finished mesh: an invalid
+    // index below throws, and the partially built mesh has to be released.
+    std::unique_ptr<aiMesh> pMesh(new aiMesh);
 
     pMesh->mNumVertices = indexCount;
 
@@ -238,8 +251,13 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
 
     // fill in contents and create bones
     for (int index = 0; index < indexCount; index++) {
-        const pmx::PmxVertex *v =
-                &pModel->vertices[pModel->indices[indexStart + index]];
+        // Indices come straight from the file; anything outside the vertex
+        // table would read out of bounds when the vertex is copied below.
+        const int vertexIndex = pModel->indices[indexStart + index];
+        if (vertexIndex < 0 || vertexIndex >= pModel->vertex_count) {
+            throw DeadlyImportError("MMD: vertex index out of range in face list");
+        }
+        const pmx::PmxVertex *v = &pModel->vertices[vertexIndex];
         const float *position = v->position;
         pMesh->mVertices[index].Set(position[0], position[1], position[2]);
         const float *normal = v->normal;
@@ -315,13 +333,13 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
         bone_ptr_ptr[ii] = pBone;
     }
 
-    return pMesh;
+    return pMesh.release();
 }
 
 // ------------------------------------------------------------------------------------------------
 aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
         const pmx::PmxModel *pModel) {
-    aiMaterial *mat = new aiMaterial();
+    std::unique_ptr<aiMaterial> mat(new aiMaterial());
     aiString name(pMat->material_english_name);
     mat->AddProperty(&name, AI_MATKEY_NAME);
 
@@ -338,6 +356,9 @@ aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
     mat->AddProperty(&shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
 
     if (pMat->diffuse_texture_index >= 0) {
+        if (pMat->diffuse_texture_index >= pModel->texture_count) {
+            throw DeadlyImportError("MMD: material has an invalid diffuse texture index");
+        }
         aiString texture_path(pModel->textures[pMat->diffuse_texture_index]);
         mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
     }
@@ -346,7 +367,7 @@ aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
     mat->AddProperty(&mapping_uvwsrc, 1,
             AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE, 0));
 
-    return mat;
+    return mat.release();
 }
 
 // ------------------------------------------------------------------------------------------------

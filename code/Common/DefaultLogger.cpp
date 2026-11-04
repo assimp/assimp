@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/NullLogger.hpp>
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <iostream>
 #include <algorithm>
 

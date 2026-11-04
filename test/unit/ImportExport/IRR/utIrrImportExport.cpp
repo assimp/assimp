@@ -269,3 +269,27 @@ TEST_F(utIrrImportExport, importSkyboxUTF16) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_NONBSD_DIR "/IRR/skybox_UTF16LE.xml", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
 }
+
+TEST_F(utIrrImportExport, importIrrMeshMissingIndices) {
+    // indexCount promises three faces but the buffer only holds four indices
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRRMesh/invalid/missing_indices.irrmesh", 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    const aiMesh *mesh = scene->mMeshes[0];
+    ASSERT_EQ(1u, mesh->mNumFaces);
+    for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+        ASSERT_EQ(3u, mesh->mFaces[i].mNumIndices);
+        for (unsigned int j = 0; j < mesh->mFaces[i].mNumIndices; ++j) {
+            EXPECT_LT(mesh->mFaces[i].mIndices[j], mesh->mNumVertices);
+        }
+    }
+}
+
+TEST_F(utIrrImportExport, importIrrMeshMissingVertices) {
+    // The second buffer has indices but no vertices and must be skipped
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/IRRMesh/invalid/missing_vertices.irrmesh", 0);
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(1u, scene->mNumMeshes);
+}

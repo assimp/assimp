@@ -115,6 +115,13 @@ void CSMImporter::InternReadFile( const std::string& pFile,
     std::unique_ptr<aiAnimation> anim(new aiAnimation());
     int first = 0, last = 0x00ffffff;
 
+    // Track every channel's own buffer capacity. A single shared counter
+    // is not enough: a DROPOUT marker makes a channel skip a frame, so the
+    // channels' key counts drift apart and each buffer has to grow on its own.
+    // It lives outside the $points section because a buffer kept from an
+    // earlier $points section keeps its size.
+    std::vector<unsigned int> capacity;
+
     // now process the file and look out for '$' sections
     while (true) {
         SkipSpaces(&buffer, end);
@@ -175,6 +182,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
                 // If we know how many frames we'll read, we can preallocate some storage
                 unsigned int alloc = 100;
+                capacity.resize(anim->mNumChannels);
                 if (last != 0x00ffffff && last > first) {
                     // re-init if the file has last frame data
                     alloc = last-first;
@@ -182,19 +190,17 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
                         if (anim->mChannels[i]->mPositionKeys != nullptr) delete[] anim->mChannels[i]->mPositionKeys;
                         anim->mChannels[i]->mPositionKeys = new aiVectorKey[alloc];
+                        anim->mChannels[i]->mNumPositionKeys = 0;
+                        capacity[i] = alloc;
                     }
                 } else {
                     // default init
                     for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
                         if (anim->mChannels[i]->mPositionKeys != nullptr) continue;
                         anim->mChannels[i]->mPositionKeys = new aiVectorKey[alloc];
+                        capacity[i] = alloc;
                     }
                 }
-
-                // Track every channel's own buffer capacity. A single shared counter
-                // is not enough: a DROPOUT marker makes a channel skip a frame, so the
-                // channels' key counts drift apart and each buffer has to grow on its own.
-                std::vector<unsigned int> capacity(anim->mNumChannels, alloc);
 
                 // Now read all point data.
                 while (true) {

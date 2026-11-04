@@ -438,15 +438,13 @@ inline static unsigned int generateMeshId(unsigned int meshId, bool nor, bool uv
 // ------------------------------------------------------------------------------------------------
 bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 	TempMesh t;
-	uint32_t matId = 99999;
-	bool mesh_created = false;
 	std::unordered_map<unsigned int, TempMaterialMesh> bymat;
 	const unsigned int mesh_id = ReadIDAttr(node);
 	for (XmlNode &child : node.children()) {
 		const std::string &s = ai_stdStrToLower(child.name());
 
 		if (s == "mat") {
-			matId = ReadMaterial(child, scope);
+			ReadMaterial(child, scope);
 		} else if (s == "p") {
 			pugi::xml_attribute attr = child.attribute("ID");
 			if (attr.empty()) {
@@ -500,7 +498,6 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 			// Generate the temp mesh
 			TempMaterialMesh &mesh = bymat[currentMeshId];
 			mesh.matid = meshId;
-			mesh_created = true;
 
 			for (unsigned int i = 0; i < vcount; ++i) {
 				mesh.positions.push_back(tempFace[i].pos);
@@ -516,11 +513,6 @@ bool XGLImporter::ReadMesh(XmlNode &node, TempScope &scope) {
 
 			mesh.vcounts.push_back(vcount);
 		}
-	}
-
-	if (!mesh_created) {
-		TempMaterialMesh &mesh = bymat[mesh_id];
-		mesh.matid = matId;
 	}
 
 	// finally extract output meshes and add them to the scope

@@ -1,0 +1,14 @@
+<WORLD>
+<MESH>
+<MAT ID="0"><DIFF>1,0,0</DIFF></MAT>
+<P ID="0">0,0,0</P>
+<P ID="1">1,0,0</P>
+<P ID="2">0,1,0</P>
+<F><MATREF>0</MATREF><FV1><PREF>0</PREF></FV1><FV2><PREF>1</PREF></FV2><FV3><PREF>2</PREF></FV3></F>
+</MESH>
+<MESH>
+<MAT ID="7"><DIFF>0,1,0</DIFF></MAT>
+</MESH>
+<MESH>
+</MESH>
+</WORLD>

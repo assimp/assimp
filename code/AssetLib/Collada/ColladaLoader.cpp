@@ -1261,8 +1261,20 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
             }
         }
 
+        // Only build node-transform keys when at least one channel maps to a node
+        // transform. Channels that don't (mTransformIndex == SIZE_MAX, e.g. morph-weight
+        // channels handled separately below) must not drive the transform chain or emit a
+        // dummy node animation.
+        bool hasNodeTransformChannel = false;
+        for (const ChannelEntry &e : entries) {
+            if (e.mTransformIndex != SIZE_MAX && e.mTransformIndex < srcNode->mTransforms.size()) {
+                hasNodeTransformChannel = true;
+                break;
+            }
+        }
+
         std::vector<aiMatrix4x4> resultTrafos;
-        if (!entries.empty() && entries.front().mTimeAccessor->mCount > 0) {
+        if (hasNodeTransformChannel && !entries.empty() && entries.front().mTimeAccessor->mCount > 0) {
             // create a local transformation chain of the node's transforms
             std::vector<Collada::Transform> transforms = srcNode->mTransforms;
 
@@ -1271,6 +1283,22 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
             ai_real time = startTime;
             while (true) {
                 for (ChannelEntry & e : entries) {
+                    // Morph-weight channels (mTransformIndex == SIZE_MAX) do not map to a
+                    // node transform; they are handled separately below. A channel's values
+                    // are also copied into a fixed 16-float transform buffer (temp[16] below
+                    // and Collada::Transform::f[16]) at offset mSubElement. Skip unmapped
+                    // channels and reject oversized ones so we neither index the transform
+                    // list nor write past that buffer out of bounds.
+                    if (e.mTransformIndex == SIZE_MAX || e.mTransformIndex >= transforms.size()) {
+                        continue;
+                    }
+                    if (e.mValueAccessor->mSize > 16 ||
+                            e.mSubElement + e.mValueAccessor->mSize > 16) {
+                        throw DeadlyImportError("Collada: animation channel \"", e.mChannel->mTarget,
+                                "\" has too many values (", e.mValueAccessor->mSize,
+                                ") for the node transform.");
+                    }
+
                     // find the keyframe behind the current point in time
                     size_t pos = 0;
                     ai_real postTime = 0.0;
@@ -1332,7 +1360,7 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                     // https://github.com/assimp/assimp/issues/458
                     // Sub-sample axis-angle channels if the delta between two consecutive
                     // key-frame angles is >= 180 degrees.
-                    if (transforms[channelElement.mTransformIndex].mType == TF_ROTATE && channelElement.mSubElement == 3 && pos > 0 && pos < channelElement.mTimeAccessor->mCount) {
+                    if (channelElement.mTransformIndex < transforms.size() && transforms[channelElement.mTransformIndex].mType == TF_ROTATE && channelElement.mSubElement == 3 && pos > 0 && pos < channelElement.mTimeAccessor->mCount) {
                         const ai_real cur_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos, 0);
                         const ai_real last_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos - 1, 0);
                         const ai_real cur_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);

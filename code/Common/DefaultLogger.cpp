@@ -51,10 +51,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/ai_assert.h>
-#include <stdio.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/NullLogger.hpp>
+
+#include <stdio.h>
 #include <iostream>
+#include <algorithm>
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
 #include <mutex>

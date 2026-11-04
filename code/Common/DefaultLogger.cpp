@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2026, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -382,7 +380,7 @@ DefaultLogger::DefaultLogger(LogSeverity severity) :
 // ----------------------------------------------------------------------------------
 //  Destructor
 DefaultLogger::~DefaultLogger() {
-    for (StreamIt it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it) {
+    for (auto it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it) {
         // also frees the underlying stream, we are its owner.
         delete *it;
     }
@@ -398,7 +396,7 @@ void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev) 
 #endif
 
     // Check whether this is a repeated message
-    auto thisLen = ::strlen(message);
+    auto thisLen = std::strlen(message);
     if (thisLen == lastLen - 1 && !::strncmp(message, lastMsg, lastLen - 1)) {
         if (!noRepeatMsg) {
             noRepeatMsg = true;
@@ -410,16 +408,15 @@ void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev) 
         // truncate overlong messages instead of overrunning the buffer
         lastLen = std::min(thisLen, sizeof(lastMsg) - 2);
         ai_snprintf(lastMsg, sizeof(lastMsg), "%.*s\n", static_cast<int>(lastLen), message);
-
         message = lastMsg;
         noRepeatMsg = false;
         ++lastLen;
     }
-    for (ConstStreamIt it = m_StreamArray.begin();
-            it != m_StreamArray.end();
-            ++it) {
-        if (ErrorSev & (*it)->m_uiErrorSeverity)
+    
+    for (auto it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it) {
+        if (ErrorSev & (*it)->m_uiErrorSeverity) {
             (*it)->m_pStream->write(message);
+        }
     }
 }
 

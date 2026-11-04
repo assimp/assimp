@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/NullLogger.hpp>
 
-//#include <stdio.h>
 #include <iostream>
 #include <algorithm>
 
@@ -62,26 +61,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <mutex>
 #include <thread>
 std::mutex loggerMutex;
+#endif // ASSIMP_BUILD_SINGLETHREADED
+
+#if defined(__linux__)
+#  include <unistd.h>
+#  include <sys/syscall.h>
 #endif
 
 namespace Assimp {
 
 // ----------------------------------------------------------------------------------
 NullLogger DefaultLogger::s_pNullLogger;
+
 Logger *DefaultLogger::m_pLogger = &DefaultLogger::s_pNullLogger;
 
-static const unsigned int SeverityAll = Logger::Info | Logger::Err | Logger::Warn | Logger::Debugging;
+static constexpr unsigned int SeverityAll = Logger::Info | Logger::Err | Logger::Warn | Logger::Debugging;
 
 // ----------------------------------------------------------------------------------
 // Represents a log-stream + its error severity
 struct LogStreamInfo {
-    unsigned int m_uiErrorSeverity;
-    LogStream *m_pStream;
+    unsigned int m_uiErrorSeverity{0};
+    LogStream *m_pStream{nullptr};
 
     // Constructor
-    LogStreamInfo(unsigned int uiErrorSev, LogStream *pStream) :
-            m_uiErrorSeverity(uiErrorSev),
-            m_pStream(pStream) {
+    LogStreamInfo(unsigned int uiErrorSev, LogStream *pStream) : m_uiErrorSeverity(uiErrorSev), m_pStream(pStream) {
         // empty
     }
 
@@ -164,10 +167,10 @@ Logger *DefaultLogger::create(const char *name /*= "AssimpLog.txt"*/,
 
 // ----------------------------------------------------------------------------------
 void Logger::debug(const char *message) {
-
-    // SECURITY FIX: otherwise it's easy to produce overruns since
-    // sometimes importers will include data from the input file
-    // (i.e. node names) in their messages.
+    if (message == nullptr) {
+        return;
+    }
+  
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
         return OnDebug("<fixme: long message discarded>");
     }
@@ -176,8 +179,10 @@ void Logger::debug(const char *message) {
 
 // ----------------------------------------------------------------------------------
 void Logger::verboseDebug(const char *message) {
+    if (message == nullptr) {
+        return;
+    }
 
-    // SECURITY FIX: see above
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
         return OnVerboseDebug("<fixme: long message discarded>");
     }
@@ -186,8 +191,10 @@ void Logger::verboseDebug(const char *message) {
 
 // ----------------------------------------------------------------------------------
 void Logger::info(const char *message) {
+    if (message == nullptr) {
+        return;
+    }
 
-    // SECURITY FIX: see above
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
         return OnInfo("<fixme: long message discarded>");
     }
@@ -196,8 +203,10 @@ void Logger::info(const char *message) {
 
 // ----------------------------------------------------------------------------------
 void Logger::warn(const char *message) {
+    if (message == nullptr) {
+        return;
+    }
 
-    // SECURITY FIX: see above
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
         return OnWarn("<fixme: long message discarded>");
     }
@@ -206,7 +215,10 @@ void Logger::warn(const char *message) {
 
 // ----------------------------------------------------------------------------------
 void Logger::error(const char *message) {
-    // SECURITY FIX: see above
+    if (message == nullptr) {
+        return;
+    }
+
     if (strlen(message) > MAX_LOG_MESSAGE_LENGTH) {
         return OnError("<fixme: long message discarded>");
     }
@@ -222,8 +234,7 @@ void DefaultLogger::set(Logger *logger) {
 
     if (nullptr == logger) {
         m_pLogger = &s_pNullLogger;
-    }
-    else {
+    } else {
         m_pLogger = logger;
     }
 }
@@ -267,14 +278,15 @@ void DefaultLogger::OnDebug(const char *message) {
     WriteToStreams(msg, Logger::Debugging);
 }
 
+// ----------------------------------------------------------------------------------
 //  Verbose debug message
 void DefaultLogger::OnVerboseDebug(const char *message) {
     if (m_Severity < Logger::VERBOSE) {
         return;
     }
 
-    static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
-    char msg[Size];
+    static constexpr size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+    char msg[Size]{};
     ai_snprintf(msg, Size, "Debug, T%u: %s", GetThreadID(), message);
 
     WriteToStreams(msg, Logger::Debugging);
@@ -283,8 +295,8 @@ void DefaultLogger::OnVerboseDebug(const char *message) {
 // ----------------------------------------------------------------------------------
 //  Logs an info
 void DefaultLogger::OnInfo(const char *message) {
-    static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
-    char msg[Size];
+    static constexpr size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+    char msg[Size]{};
     ai_snprintf(msg, Size, "Info,  T%u: %s", GetThreadID(), message);
 
     WriteToStreams(msg, Logger::Info);
@@ -293,8 +305,8 @@ void DefaultLogger::OnInfo(const char *message) {
 // ----------------------------------------------------------------------------------
 //  Logs a warning
 void DefaultLogger::OnWarn(const char *message) {
-    static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
-    char msg[Size];
+    static constexpr size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+    char msg[Size]{};
     ai_snprintf(msg, Size, "Warn,  T%u: %s", GetThreadID(), message);
 
     WriteToStreams(msg, Logger::Warn);
@@ -303,8 +315,8 @@ void DefaultLogger::OnWarn(const char *message) {
 // ----------------------------------------------------------------------------------
 //  Logs an error
 void DefaultLogger::OnError(const char *message) {
-    static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
-    char msg[Size];
+    static constexpr size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+    char msg[Size]{};
     ai_snprintf(msg, Size, "Error, T%u: %s", GetThreadID(), message);
 
     WriteToStreams(msg, Logger::Err);
@@ -325,9 +337,7 @@ bool DefaultLogger::attachStream(LogStream *pStream, unsigned int severity) {
     std::lock_guard<std::mutex> lock(m_arrayMutex);
 #endif
 
-    for (StreamIt it = m_StreamArray.begin();
-            it != m_StreamArray.end();
-            ++it) {
+    for (auto it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it) {
         if ((*it)->m_pStream == pStream) {
             (*it)->m_uiErrorSeverity |= severity;
             return true;
@@ -355,7 +365,7 @@ bool DefaultLogger::detachStream(LogStream *pStream, unsigned int severity) {
 #endif
 
     bool res(false);
-    for (StreamIt it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it) {
+    for (auto it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it) {
         if ((*it)->m_pStream == pStream) {
             (*it)->m_uiErrorSeverity &= ~severity;
             if ((*it)->m_uiErrorSeverity == 0) {
@@ -374,8 +384,7 @@ bool DefaultLogger::detachStream(LogStream *pStream, unsigned int severity) {
 
 // ----------------------------------------------------------------------------------
 //  Constructor
-DefaultLogger::DefaultLogger(LogSeverity severity) :
-        Logger(severity), noRepeatMsg(false), lastLen(0) {
+DefaultLogger::DefaultLogger(LogSeverity severity) : Logger(severity), noRepeatMsg(false), lastLen(0) {
     lastMsg[0] = '\0';
 }
 
@@ -425,15 +434,14 @@ void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev) 
 // ----------------------------------------------------------------------------------
 //  Returns thread id, if not supported only a zero will be returned.
 unsigned int DefaultLogger::GetThreadID() {
-    // fixme: we can get this value via std::threads
-    // std::this_thread::get_id().hash() returns a (big) size_t, not sure if this is useful in this case.
+#if defined(__linux__)
+#  if defined(SYS_gettid)
+    return static_cast<std::uint64_t>(::syscall(SYS_gettid));
+#  endif
+#endif
 #ifdef WIN32
     return (unsigned int)::GetCurrentThreadId();
-#else
-    return 0; // not supported
 #endif
 }
-
-// ----------------------------------------------------------------------------------
 
 } // namespace Assimp

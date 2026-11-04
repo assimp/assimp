@@ -705,7 +705,7 @@ void ObjFileParser::getMaterialDesc() {
     if (!skip) {
         // Search for material (need to create a string for the map lookup)
         std::string strName(svName);
-        std::map<std::string, ObjFile::Material *>::iterator it = mModel->mMaterialMap.find(strName);
+        std::unordered_map<std::string, ObjFile::Material *>::const_iterator it = mModel->mMaterialMap.find(strName);
         if (it == mModel->mMaterialMap.end()) {
             // Not found, so we don't know anything about the material except for its name.
             // This may be the case if the material library is missing. We don't want to lose all

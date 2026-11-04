@@ -397,7 +397,7 @@ void ToggleUIState() {
             SWP_NOMOVE | SWP_NOZORDER);
 
         SetWindowText(GetDlgItem(g_hDlg,IDC_BLUBB),">>");
-        storeRegKey(false, "MultiSampling");
+        storeRegKey(false, "LastUIState");
     } else {
         SetWindowPos(g_hDlg,nullptr,0,0,sRect.right+214,sRect.bottom,
             SWP_NOMOVE | SWP_NOZORDER);

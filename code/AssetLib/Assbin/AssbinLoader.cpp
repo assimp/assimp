@@ -89,6 +89,10 @@ const aiImporterDesc *AssbinImporter::GetInfo() const {
 
 // -----------------------------------------------------------------------------------
 bool AssbinImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
+    if (pIOHandler == nullptr) {
+        return false;
+    }
+
     IOStream *in = pIOHandler->Open(pFile);
     if (nullptr == in) {
         return false;
@@ -115,6 +119,22 @@ T Read(IOStream *stream) {
         throw DeadlyImportError("Unexpected EOF");
     }
     return t;
+}
+
+// -----------------------------------------------------------------------------------
+void ReadBytes(IOStream *stream, void *out, size_t size, const char *what) {
+    if (stream == nullptr) {
+        throw DeadlyImportError("ASSBIN: Invalid stream");
+    }
+
+    if (size == 0) {
+        return;
+    }
+
+    const size_t res = stream->Read(out, 1, size);
+    if (res != size) {
+        throw DeadlyImportError("ASSBIN: Unexpected EOF reading ", what);
+    }
 }
 
 // -----------------------------------------------------------------------------------
@@ -159,10 +179,7 @@ aiString Read<aiString>(IOStream *stream) {
     }
     s.length = len;
     if (s.length > 0) {
-        const size_t bytesRead = stream->Read(s.data, sizeof(char), s.length);
-        if (bytesRead != s.length) {
-            throw DeadlyImportError("ASSBIN: Unexpected EOF reading string data");
-        }
+        ReadBytes(stream, s.data, s.length, "string data");
     }
     s.data[s.length] = '\0';
 
@@ -222,14 +239,21 @@ void ReadArray(IOStream *stream, T *out, unsigned int size) {
 // -----------------------------------------------------------------------------------
 template <typename T>
 void ReadBounds(IOStream *stream, T * /*p*/, unsigned int n) {
-    // not sure what to do here, the data isn't really useful.
+    if (stream == nullptr) {
+        throw DeadlyImportError("ASSBIN: Invalid stream");
+    }
     stream->Seek(sizeof(T) * n, aiOrigin_CUR);
 }
 
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *parent) {
-    if (Read<uint32_t>(stream) != ASSBIN_CHUNK_AINODE)
+    if (stream == nullptr) {
+        throw DeadlyImportError("ASSBIN: Invalid stream");
+    }
+
+    if (Read<uint32_t>(stream) != ASSBIN_CHUNK_AINODE) {
         throw DeadlyImportError("Magic chunk identifiers are wrong!");
+    }
     /*uint32_t size =*/Read<uint32_t>(stream);
 
     auto node = std::make_unique<aiNode>();
@@ -250,17 +274,17 @@ void AssbinImporter::ReadBinaryNode(IOStream *stream, aiNode **onode, aiNode *pa
         throw DeadlyImportError("Assbin: Too many metadata properties, would overflow");
     }
 
-    if (parent) {
+    if (parent != nullptr) {
         node->mParent = parent;
     }
 
-    if (numMeshes) {
+    if (numMeshes > 0) {
         node->mMeshes = new unsigned int[numMeshes];
         ReadArray(stream, node->mMeshes, numMeshes);
         node->mNumMeshes = numMeshes;
     }
 
-    if (numChildren) {
+    if (numChildren > 0) {
         node->mChildren = new aiNode *[numChildren]();
         for (unsigned int i = 0; i < numChildren; ++i) {
             ReadBinaryNode(stream, &node->mChildren[i], node.get());
@@ -460,7 +484,7 @@ void AssbinImporter::ReadBinaryMesh(IOStream *stream, aiMesh *mesh) {
 
     // write bones
     if (mesh->mNumBones) {
-        mesh->mBones = new C_STRUCT aiBone *[mesh->mNumBones];
+        mesh->mBones = new C_STRUCT aiBone *[mesh->mNumBones]();
         for (unsigned int a = 0; a < mesh->mNumBones; ++a) {
             mesh->mBones[a] = new aiBone();
             ReadBinaryBone(stream, mesh->mBones[a]);
@@ -502,7 +526,7 @@ void AssbinImporter::ReadBinaryMaterial(IOStream *stream, aiMaterial *mat) {
         if (mat->mProperties) {
             delete[] mat->mProperties;
         }
-        mat->mProperties = new aiMaterialProperty *[mat->mNumProperties];
+        mat->mProperties = new aiMaterialProperty *[mat->mNumProperties]();
         for (unsigned int i = 0; i < mat->mNumProperties; ++i) {
             mat->mProperties[i] = new aiMaterialProperty();
             ReadBinaryMaterialProperty(stream, mat->mProperties[i]);
@@ -575,7 +599,7 @@ void AssbinImporter::ReadBinaryAnim(IOStream *stream, aiAnimation *anim) {
     }
 
     if (anim->mNumChannels) {
-        anim->mChannels = new aiNodeAnim *[anim->mNumChannels];
+        anim->mChannels = new aiNodeAnim *[anim->mNumChannels]();
         for (unsigned int a = 0; a < anim->mNumChannels; ++a) {
             anim->mChannels[a] = new aiNodeAnim();
             ReadBinaryNodeAnim(stream, anim->mChannels[a]);
@@ -592,7 +616,7 @@ void AssbinImporter::ReadBinaryTexture(IOStream *stream, aiTexture *tex) {
 
     tex->mWidth = Read<unsigned int>(stream);
     tex->mHeight = Read<unsigned int>(stream);
-    stream->Read(tex->achFormatHint, sizeof(char), HINTMAXTEXTURELEN - 1);
+    ReadBytes(stream, tex->achFormatHint, HINTMAXTEXTURELEN - 1, "texture format hint");
 
     if (!shortened) {
         if (!tex->mHeight) {
@@ -791,7 +815,6 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         }
 
         std::vector<unsigned char> uncompressedData(uncompressedSize);
-
         const int res = uncompress(uncompressedData.data(), &uncompressedSize, compressedData.data(), (uLong)len);
         if (res != Z_OK) {
             throw DeadlyImportError("Zlib decompression failed.");
@@ -804,5 +827,4 @@ void AssbinImporter::InternReadFile(const std::string &pFile, aiScene *pScene, I
         ReadBinaryScene(stream.get(), pScene);
     }
 }
-
 #endif // !! ASSIMP_BUILD_NO_ASSBIN_IMPORTER

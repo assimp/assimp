@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Base64.hpp>
+#include <assimp/MathFunctions.h>
 #include <rapidjson/document.h>
 #include <rapidjson/schema.h>
 #include <rapidjson/stringbuffer.h>
@@ -836,7 +837,14 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
     }
 
     const unsigned int indexSize = int(ComponentTypeSize(indicesType));
-    uint8_t *indicesEnd = pIndices + count * indexSize;
+    
+    // Safely compute count * indexSize to prevent integer overflow
+    size_t indicesDataSize;
+    if (!Assimp::Math::SafeMultiply(count, static_cast<size_t>(indexSize), indicesDataSize)) {
+        throw DeadlyImportError("Invalid sparse accessor. Integer overflow in indices size calculation.");
+    }
+    
+    uint8_t *indicesEnd = pIndices + indicesDataSize;
 
     if ((uint64_t)indicesEnd > (uint64_t)pIndices + indicesTailDataSize) {
         throw DeadlyImportError("Invalid sparse accessor. Indices outside allocated memory.");
@@ -844,6 +852,16 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
 
     size_t valuesTailDataSize;
     uint8_t* pValues = values->GetPointerAndTailSize(valuesByteOffset, valuesTailDataSize);
+
+    // Safely compute elementSize * count to prevent integer overflow
+    size_t requiredValuesSize;
+    if (!Assimp::Math::SafeMultiply(static_cast<size_t>(elementSize), count, requiredValuesSize)) {
+        throw DeadlyImportError("Invalid sparse accessor. Integer overflow in values size calculation.");
+    }
+    
+    if (requiredValuesSize > valuesTailDataSize) {
+        throw DeadlyImportError("Invalid sparse accessor. Values outside allocated memory.");
+    }
 
     // GUARD 2: Block memory copying if values data stream fails to resolve
     if (!pValues) {
@@ -870,13 +888,17 @@ inline void Accessor::Sparse::PatchData(unsigned int elementSize) {
             throw DeadlyImportError("Unsupported component type in index.");
         }
 
-        offset *= elementSize;
+        // Safely compute offset * elementSize to prevent integer overflow
+        size_t byteOffset_{0};
+        if (!Assimp::Math::SafeMultiply(offset, static_cast<size_t>(elementSize), byteOffset_)) {
+            throw DeadlyImportError("Invalid sparse accessor. Integer overflow in byte offset calculation.");
+        }
 
-        if (offset + elementSize > data.size()) {
+        if ((byteOffset_ + elementSize) > data.size()) {
             throw DeadlyImportError("Invalid sparse accessor. Byte offset for patching points outside allocated memory.");
         }
 
-        std::memcpy(data.data() + offset, pValues, elementSize);
+        std::memcpy(data.data() + byteOffset_, pValues, elementSize);
 
         pValues += elementSize;
         pIndices += indexSize;

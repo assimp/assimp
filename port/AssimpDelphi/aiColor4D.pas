@@ -2,9 +2,7 @@ unit aiColor4D;
 
 interface
 
-const AI_MAX_NUMBER_OF_COLOR_SETS = $04;
-
-type TaiColor4D = packed record
+type TaiColor4D = record
    r, g, b, a: single;
 end;
 type PaiColor4D = ^TaiColor4D;

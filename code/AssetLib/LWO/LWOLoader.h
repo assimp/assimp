@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LWOFileData.h"
 #include <assimp/BaseImporter.h>
+#include <assimp/Exceptional.h>
 #include <assimp/material.h>
 #include <assimp/DefaultLogger.hpp>
 
@@ -71,28 +72,10 @@ using namespace LWO;
 // ---------------------------------------------------------------------------
 class LWOImporter final : public BaseImporter {
 public:
-    /**
-     * @brief The class constructor.
-     */
     LWOImporter() = default;
-
-    /**
-     * @brief The class destructor.
-     */
     ~LWOImporter() override = default;
-
-    // -------------------------------------------------------------------
-    /** Returns whether the class can handle the format of the given file.
-     * See BaseImporter::CanRead() for details.
-     */
     bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
             bool checkSig) const override;
-
-    // -------------------------------------------------------------------
-    /** Called prior to ReadFile().
-    * The function is a request to the importer to update its configuration
-    * basing on the Importer's configuration property list.
-    */
     void SetupProperties(const Importer *pImp) override;
 
 protected:
@@ -109,18 +92,15 @@ protected:
 
 private:
     // -------------------------------------------------------------------
-    /** Loads a LWO file in the older LWOB format (LW < 6)
-     */
+    /// Loads a LWO file in the older LWOB format (LW < 6)
     void LoadLWOBFile();
 
     // -------------------------------------------------------------------
-    /** Loads a LWO file in the newer LWO2 format (LW >= 6)
-     */
+    /// Loads a LWO file in the newer LWO2 format (LW >= 6)
     void LoadLWO2File();
 
     // -------------------------------------------------------------------
-    /** Parsing functions used for all file format versions
-    */
+    /// Parsing functions used for all file format versions
     void GetS0(std::string &out, unsigned int max);
     float GetF4();
     float GetF8();
@@ -130,39 +110,34 @@ private:
     uint8_t GetU1();
 
     // -------------------------------------------------------------------
-    /** Loads a surface chunk from an LWOB file
-     *  @param size Maximum size to be read, in bytes.
-     */
+    /// Loads a surface chunk from an LWOB file
+    /// @param size Maximum size to be read, in bytes.
     void LoadLWOBSurface(unsigned int size);
 
     // -------------------------------------------------------------------
-    /** Loads a surface chunk from an LWO2 file
-     *  @param size Maximum size to be read, in bytes.
-     */
+    /// Loads a surface chunk from an LWO2 file
+    ///  @param size Maximum size to be read, in bytes.
     void LoadLWO2Surface(unsigned int size);
     void LoadLWO3Surface(unsigned int size);
 
     // -------------------------------------------------------------------
-    /** Loads a texture block from a LWO2 file.
-     *  @param size Maximum size to be read, in bytes.
-     *  @param head Header of the SUF.BLOK header
-     */
+    /// Loads a texture block from a LWO2 file.
+    /// @param size Maximum size to be read, in bytes.
+    /// @param head Header of the SUF.BLOK header
     void LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader *head,
             unsigned int size);
 
     // -------------------------------------------------------------------
-    /** Loads a shader block from a LWO2 file.
-     *  @param size Maximum size to be read, in bytes.
-     *  @param head Header of the SUF.BLOK header
-     */
+    /// Loads a shader block from a LWO2 file.
+    /// @param size Maximum size to be read, in bytes.
+    /// @param head Header of the SUF.BLOK header
     void LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader *head,
             unsigned int size);
 
     // -------------------------------------------------------------------
-    /** Loads an image map from a LWO2 file
-     *  @param size Maximum size to be read, in bytes.
-     *  @param tex Texture object to be filled
-     */
+    /// Loads an image map from a LWO2 file
+    /// @param size Maximum size to be read, in bytes.
+    /// @param tex Texture object to be filled
     void LoadLWO2ImageMap(unsigned int size, LWO::Texture &tex);
     void LoadLWO2Gradient(unsigned int size, LWO::Texture &tex);
     void LoadLWO2Procedural(unsigned int size, LWO::Texture &tex);
@@ -171,48 +146,41 @@ private:
     void LoadLWO2TextureHeader(unsigned int size, LWO::Texture &tex);
 
     // -------------------------------------------------------------------
-    /** Loads the LWO tag list from the file
-     *  @param size Maximum size to be read, in bytes.
-     */
+    /// Loads the LWO tag list from the file
+    /// @param size Maximum size to be read, in bytes.
     void LoadLWOTags(unsigned int size);
 
     // -------------------------------------------------------------------
-    /** Load polygons from a POLS chunk
-     *  @param length Size of the chunk
-    */
+    /// Load polygons from a POLS chunk
+    /// @param length Size of the chunk
     void LoadLWO2Polygons(unsigned int length);
     void LoadLWOBPolygons(unsigned int length);
 
     // -------------------------------------------------------------------
-    /** Load polygon tags from a PTAG chunk
-     *  @param length Size of the chunk
-    */
+    /// Load polygon tags from a PTAG chunk
+    /// @param length Size of the chunk
     void LoadLWO2PolygonTags(unsigned int length);
 
     // -------------------------------------------------------------------
-    /** Load a vertex map from a VMAP/VMAD chunk
-     *  @param length Size of the chunk
-     *  @param perPoly Operate on per-polygon base?
-    */
+    /// Load a vertex map from a VMAP/VMAD chunk
+    /// @param length Size of the chunk
+    /// @param perPoly Operate on per-polygon base?
     void LoadLWO2VertexMap(unsigned int length, bool perPoly);
 
     // -------------------------------------------------------------------
-    /** Load polygons from a PNTS chunk
-     *  @param length Size of the chunk
-    */
+    /// Load polygons from a PNTS chunk
+    /// @param length Size of the chunk
     void LoadLWOPoints(unsigned int length);
 
     // -------------------------------------------------------------------
-    /** Load a clip from a CLIP chunk
-     *  @param length Size of the chunk
-    */
+    /// Load a clip from a CLIP chunk
+    /// @param length Size of the chunk
     void LoadLWO2Clip(unsigned int length);
     void LoadLWO3Clip(unsigned int length);
 
     // -------------------------------------------------------------------
-    /** Load an envelope from an EVL chunk
-     *  @param length Size of the chunk
-    */
+    /// Load an envelope from an EVL chunk
+    /// @param length Size of the chunk
     void LoadLWO2Envelope(unsigned int length);
     void LoadLWO3Envelope(unsigned int length);
 
@@ -226,8 +194,7 @@ private:
     void LoadNodeData(unsigned int length);
 
     // -------------------------------------------------------------------
-    /** Count vertices and faces in a LWOB/LWO2 file
-    */
+    /// Count vertices and faces in a LWOB/LWO2 file
     void CountVertsAndFacesLWO2(unsigned int &verts,
             unsigned int &faces,
             uint16_t *&cursor,
@@ -241,8 +208,7 @@ private:
             unsigned int max = UINT_MAX);
 
     // -------------------------------------------------------------------
-    /** Read vertices and faces in a LWOB/LWO2 file
-    */
+    /// Read vertices and faces in a LWOB/LWO2 file
     void CopyFaceIndicesLWO2(LWO::FaceList::iterator &it,
             uint16_t *&cursor,
             const uint16_t *const end);
@@ -254,45 +220,36 @@ private:
             unsigned int max = UINT_MAX);
 
     // -------------------------------------------------------------------
-    /** Resolve the tag and surface lists that have been loaded.
-    *   Generates the mMapping table.
-    */
+    /// Resolve the tag and surface lists that have been loaded.
+    /// Generates the mMapping table.
     void ResolveTags();
 
     // -------------------------------------------------------------------
-    /** Resolve the clip list that has been loaded.
-    *   Replaces clip references with real clips.
-    */
+    /// Resolve the clip list that has been loaded.
+    /// Replaces clip references with real clips.
     void ResolveClips();
 
     // -------------------------------------------------------------------
-    /** Add a texture list to an output material description.
-     *
-     *  @param pcMat Output material
-     *  @param in Input texture list
-     *  @param type Type identifier of the texture list
-    */
+    /// Add a texture list to an output material description.
+    /// @param pcMat Output material
+    /// @param in Input texture list
+    /// @param type Type identifier of the texture list
     bool HandleTextures(aiMaterial *pcMat, const TextureList &in,
             aiTextureType type);
 
     // -------------------------------------------------------------------
-    /** Adjust a texture path
-    */
+    /// Adjust a texture path
     void AdjustTexturePath(std::string &out);
 
     // -------------------------------------------------------------------
-    /** Convert a LWO surface description to an ASSIMP material
-    */
+    /// Convert a LWO surface description to an ASSIMP material
     void ConvertMaterial(const LWO::Surface &surf, aiMaterial *pcMat);
 
     // -------------------------------------------------------------------
-    /** Get a list of all UV/VC channels required by a specific surface.
-     *
-     *  @param surf Working surface
-     *  @param layer Working layer
-     *  @param out Output list. The members are indices into the
-     *    UV/VC channel lists of the layer
-    */
+    /// Get a list of all UV/VC channels required by a specific surface.
+    /// @param surf Working surface
+    /// @param layer Working layer
+    /// @param out Output list. The members are indices into the UV/VC channel lists of the layer
     void FindUVChannels(/*const*/ LWO::Surface &surf,
             LWO::SortedRep &sorted,
             /*const*/ LWO::Layer &layer,
@@ -309,57 +266,47 @@ private:
             unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS]);
 
     // -------------------------------------------------------------------
-    /** Generate the final node graph
-     *  Unused nodes are deleted.
-     *  @param apcNodes Flat list of nodes
-    */
+    /// Generate the final node graph
+    /// Unused nodes are deleted.
+    /// @param apcNodes Flat list of nodes
     void GenerateNodeGraph(std::map<uint16_t, aiNode *> &apcNodes);
 
     // -------------------------------------------------------------------
-    /** Add children to a node
-     *  @param node Node to become a father
-     *  @param parent Index of the node
-     *  @param apcNodes Flat list of nodes - used nodes are set to nullptr.
-    */
-    void AddChildren(aiNode *node, uint16_t parent,
-            std::vector<aiNode *> &apcNodes);
+    /// Add children to a node
+    /// @param node Node to become a father
+    /// @param parent Index of the node
+    /// @param apcNodes Flat list of nodes - used nodes are set to nullptr.
+    void AddChildren(aiNode *node, uint16_t parent, std::vector<aiNode *> &apcNodes);
 
     // -------------------------------------------------------------------
-    /** Read a variable sized integer
-     *  @param inout Input and output buffer
-    */
+    /// Read a variable sized integer
+    /// @param inout Input and output buffer
     int ReadVSizedIntLWO2(uint8_t *&inout);
 
     // -------------------------------------------------------------------
-    /** Assign a value from a VMAP to a vertex and all vertices
-     *  attached to it.
-     *  @param base VMAP destination data
-     *  @param numRead Number of float's to be read
-     *  @param idx Absolute index of the first vertex
-     *  @param data Value of the VMAP to be assigned - read numRead
-     *    floats from this array.
-    */
+    /// Assign a value from a VMAP to a vertex and all vertices attached to it.
+    /// @param base VMAP destination data
+    /// @param numRead Number of float's to be read
+    /// @param idx Absolute index of the first vertex
+    /// @param data Value of the VMAP to be assigned - read numRead
+    ///        floats from this array.
     void DoRecursiveVMAPAssignment(VMapEntry *base, unsigned int numRead,
             unsigned int idx, float *data);
 
     // -------------------------------------------------------------------
-    /** Compute normal vectors for a mesh
-     *  @param mesh Input mesh
-     *  @param smoothingGroups Smoothing-groups-per-face array
-     *  @param surface Surface for the mesh
-    */
+    /// Compute normal vectors for a mesh
+    /// @param mesh Input mesh
+    /// @param smoothingGroups Smoothing-groups-per-face array
+    /// @param surface Surface for the mesh
     void ComputeNormals(aiMesh *mesh, const std::vector<unsigned int> &smoothingGroups,
             const LWO::Surface &surface);
 
     // -------------------------------------------------------------------
-    /** Setup a new texture after the corresponding chunk was
-     *  encountered in the file.
-     *  @param list Texture list
-     *  @param size Maximum number of bytes to be read
-     *  @return Pointer to new texture
-    */
-    LWO::Texture *SetupNewTextureLWOB(LWO::TextureList &list,
-            unsigned int size);
+    /// Setup a new texture after the corresponding chunk was encountered in the file.
+    /// @param list Texture list
+    /// @param size Maximum number of bytes to be read
+    /// @return Pointer to new texture
+    LWO::Texture *SetupNewTextureLWOB(LWO::TextureList &list, unsigned int size);
 
 private:
     /// true if the file is a LWO2 file
@@ -453,24 +400,24 @@ inline uint8_t LWOImporter::GetU1() {
 
 // ------------------------------------------------------------------------------------------------
 inline int LWOImporter::ReadVSizedIntLWO2(uint8_t *&inout) {
+    // A variable-sized index is 2 bytes long, or 4 bytes when the first byte
+    // is 0xFF. Guard every byte read against the end of the file buffer so a
+    // truncated or malformed chunk cannot trigger an out-of-bounds read.
+    auto readByte = [&]() -> int {
+        if (inout >= mFileBufferEnd) {
+            throw DeadlyImportError("LWO2: Unexpected end of file while reading a variable-sized index");
+        }
+        return *inout++;
+    };
+
     int i;
-    int c = *inout;
-    inout++;
-    if (c != 0xFF) {
+    if (int c = readByte(); c != 0xFF) {
         i = c << 8;
-        c = *inout;
-        inout++;
-        i |= c;
+        i |= readByte();
     } else {
-        c = *inout;
-        inout++;
-        i = c << 16;
-        c = *inout;
-        inout++;
-        i |= c << 8;
-        c = *inout;
-        inout++;
-        i |= c;
+        i = readByte() << 16;
+        i |= readByte() << 8;
+        i |= readByte();
     }
     return i;
 }

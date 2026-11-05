@@ -99,6 +99,10 @@ void ProcessFaceEdgesAndVertices(const NDOImporter::Object& obj,
 {
     unsigned int cur_edge = start_edge;
     do {
+        if (cur_edge >= obj.edges.size()) {
+            ASSIMP_LOG_WARN("NDOImporter: cur_edge is out of bounds, skipping invalid access.");
+            break;
+        }
         unsigned int next_edge, next_vert;
         if (key == obj.edges[cur_edge].edge[3]) {
             next_edge = obj.edges[cur_edge].edge[5];
@@ -108,8 +112,8 @@ void ProcessFaceEdgesAndVertices(const NDOImporter::Object& obj,
             next_edge = obj.edges[cur_edge].edge[4];
             next_vert = obj.edges[cur_edge].edge[0];
         }
-        indices.push_back( static_cast<unsigned int>(vertices.size()) );
         if (next_vert < obj.vertices.size()) {
+            indices.push_back(static_cast<unsigned int>(vertices.size()));
             vertices.push_back(obj.vertices[ next_vert ].val);
         }
         else {

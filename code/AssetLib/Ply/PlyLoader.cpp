@@ -124,7 +124,7 @@ namespace Assimp {
                 case EDT_Short:
                     return static_cast<ai_real>(val.iInt + (0xFFFF / 2)) / static_cast<ai_real>(0xFFFF);
                 case EDT_UInt:
-                    return static_cast<ai_real>(val.iUInt) / static_cast<ai_real>(0xFFFF);
+                    return static_cast<ai_real>(val.iUInt) / static_cast<ai_real>(0xFFFFFFFFu);
                 case EDT_Int:
                     return (static_cast<ai_real>(val.iInt) / static_cast<ai_real>(0xFF)) + 0.5f;
                 default:
@@ -623,12 +623,19 @@ namespace Assimp {
                     // should be 6 coords
                     auto p = GetProperty(instElement->alProperties, iTextureCoord).avList.begin();
                     if ((iNum / 3) == 2) { // X Y coord
+                        if (iNum > mGeneratedMesh->mFaces[pos].mNumIndices * 2) {
+                            throw DeadlyImportError("Invalid .ply file: Too many texture coordinates for face");
+                        }
                         for (unsigned int a = 0; a < iNum; ++a, ++p) {
-                            const unsigned int idx = a / 2;
-                            if (idx >= mGeneratedMesh->mFaces[pos].mNumIndices) {
-                                break;
+                            // The texture-coordinate list length is independent of the
+                            // vertex-index list length, so a / 2 may run past the face's
+                            // index array (which may even be absent). Bound it before use.
+                            const unsigned int faceIndexPos = a / 2;
+                            if (mGeneratedMesh->mFaces[pos].mIndices == nullptr ||
+                                    faceIndexPos >= mGeneratedMesh->mFaces[pos].mNumIndices) {
+                                continue;
                             }
-                            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[idx];
+                            unsigned int vindex = mGeneratedMesh->mFaces[pos].mIndices[faceIndexPos];
                             if (vindex < mGeneratedMesh->mNumVertices) {
                                 if (mGeneratedMesh->mTextureCoords[0] == nullptr) {
                                     mGeneratedMesh->mNumUVComponents[0] = 2;
@@ -897,6 +904,9 @@ namespace Assimp {
             if (!defaultTexture.empty()) {
                 const aiString name(defaultTexture.c_str());
                 pcHelper->AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE, 0);
+            } else {
+                const aiString name(AI_DEFAULT_MATERIAL_NAME);
+                pcHelper->AddProperty(&name, AI_MATKEY_NAME);
             }
 
             // set to wireframe, so when using this material info we can switch to points rendering

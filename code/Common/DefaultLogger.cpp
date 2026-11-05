@@ -437,11 +437,14 @@ unsigned int DefaultLogger::GetThreadID() {
 #if defined(__linux__)
 #  if defined(SYS_gettid)
     return static_cast<unsigned int>(::syscall(SYS_gettid));
+#  else
+    return 0;
 #  endif
-#endif
-#ifdef WIN32
+#elif defined(WIN32)
     return static_cast<unsigned int>(::GetCurrentThreadId());
-#endif
+#else
+    return 0;
+  #endif
 }
 
 } // namespace Assimp

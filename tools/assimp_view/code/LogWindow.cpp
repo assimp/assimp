@@ -162,7 +162,7 @@ void CLogWindow::Save() {
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
         g_hDlg, GetModuleHandle(nullptr),
-        "Log files\0*.txt", nullptr, 0, 1,
+        "Log files\0*.txt\0", nullptr, 0, 1,
         szFileName, MAX_PATH, nullptr, 0, nullptr,
         "Save log to file",
         OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,

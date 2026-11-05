@@ -436,11 +436,11 @@ void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev) 
 unsigned int DefaultLogger::GetThreadID() {
 #if defined(__linux__)
 #  if defined(SYS_gettid)
-    return static_cast<std::uint64_t>(::syscall(SYS_gettid));
+    return static_cast<unsigned int>(::syscall(SYS_gettid));
 #  endif
 #endif
 #ifdef WIN32
-    return (unsigned int)::GetCurrentThreadId();
+    return static_cast<unsigned int>(::GetCurrentThreadId());
 #endif
 }
 

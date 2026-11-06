@@ -1090,7 +1090,11 @@ size_t Accessor::ExtractData(T *&outData, const std::vector<unsigned int> *remap
         throw DeadlyImportError("GLTF: count ", count, " > maxCount ", maxCount, " in ", getContextForErrorMessages(id, name));
     }
 
-    outData = new T[usedCount];
+    if (elemSize < targetElemSize) {
+        outData = new T[usedCount]();
+    } else {
+        outData = new T[usedCount];
+    }
 
     if (remappingIndices != nullptr) {
         for (size_t i = 0; i < usedCount; ++i) {

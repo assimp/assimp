@@ -1,0 +1,47 @@
+#include <gtest/gtest.h>
+#include <assimp/scene.h>
+#include <cstring>
+#include <limits>
+
+#include "../../port/jassimp/jassimp-native/src/jassimp_overflow.h"
+
+TEST(JassimpOverflowTest, RejectsTriangleFaceBufferSizeOverflow)
+{
+    aiMesh mesh;
+    std::memset(&mesh, 0, sizeof(mesh));
+    mesh.mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+
+    const size_t bytesPerFace = 3u * sizeof(unsigned int);
+    mesh.mNumFaces = static_cast<unsigned int>(std::numeric_limits<int>::max() / bytesPerFace) + 1u;
+
+    size_t faceBufferSize = 0;
+    EXPECT_FALSE(jassimp::computeFaceBufferSize(&mesh, faceBufferSize));
+}
+
+TEST(JassimpOverflowTest, RejectsNonTriangleFaceIndexCountOverflow)
+{
+    aiMesh mesh;
+    std::memset(&mesh, 0, sizeof(mesh));
+    mesh.mPrimitiveTypes = aiPrimitiveType_POLYGON;
+    mesh.mNumFaces = 1;
+
+    aiFace *face = new aiFace[1];
+    std::memset(face, 0, sizeof(aiFace));
+    face[0].mNumIndices = std::numeric_limits<unsigned int>::max();
+    mesh.mFaces = face;
+
+    size_t faceBufferSize = 0;
+    EXPECT_FALSE(jassimp::computeFaceBufferSize(&mesh, faceBufferSize));
+}
+
+TEST(JassimpOverflowTest, SafeMultiplyRejectsSizeOverflow)
+{
+    size_t result = 0;
+    EXPECT_FALSE(jassimp::safeMultiplySize(std::numeric_limits<size_t>::max(), 2u, result));
+}
+
+TEST(JassimpOverflowTest, FitsInJavaIntRejectsValuesAboveIntMax)
+{
+    EXPECT_FALSE(jassimp::fitsInJavaInt(static_cast<size_t>(std::numeric_limits<int>::max()) + 1ull));
+    EXPECT_TRUE(jassimp::fitsInJavaInt(static_cast<size_t>(std::numeric_limits<int>::max())));
+}

@@ -1314,7 +1314,7 @@ void glTF2Exporter::ExportMeshes() {
         if (aim->mNumFaces > 0) {
             unsigned int nIndicesPerFace = aim->mFaces[0].mNumIndices;
             unsigned int nIndices = aim->mNumFaces * nIndicesPerFace;
-            if (aim->mNumVertices <= std::numeric_limits<unsigned short>::max() + 1u) {
+            if (aim->mNumVertices <= std::numeric_limits<unsigned short>::max()) {
                 std::vector<IndicesShortType> indices;
                 indices.resize(nIndices);
                 for (size_t i = 0; i < aim->mNumFaces; ++i) {

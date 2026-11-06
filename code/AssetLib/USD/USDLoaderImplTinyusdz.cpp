@@ -367,13 +367,36 @@ void USDImporterImplTinyusdz::meshes(
         pScene->mMeshes[meshIdx] = new aiMesh();
         pScene->mMeshes[meshIdx]->mName.Set(render_scene.meshes[meshIdx].prim_name);
         ss.str("");
-        ss << "   mesh[" << meshIdx << "]: " << render_scene.meshes[meshIdx].joint_and_weights.jointIndices.size() << " jointIndices, " << render_scene.meshes[meshIdx].joint_and_weights.jointWeights.size() << " jointWeights, elementSize: " << render_scene.meshes[meshIdx].joint_and_weights.elementSize;
+        ss << "    mesh[" << meshIdx << "]:";
+        TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+        ss.str("");
+        ss << "        joints: " << render_scene.meshes[meshIdx].joint_and_weights.jointIndices.size() << " jointIndices, " << render_scene.meshes[meshIdx].joint_and_weights.jointWeights.size() << " jointWeights, elementSize: " << render_scene.meshes[meshIdx].joint_and_weights.elementSize;
         TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         ss.str("");
         ss << "        skel_id: " << render_scene.meshes[meshIdx].skel_id;
         TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
         if (render_scene.meshes[meshIdx].material_id > -1) {
             pScene->mMeshes[meshIdx]->mMaterialIndex = render_scene.meshes[meshIdx].material_id;
+        } else {
+            if (render_scene.meshes[meshIdx].material_subsetMap.size() > 0) {
+                for (const auto &subset : render_scene.meshes[meshIdx].material_subsetMap) {
+                    if (subset.second.material_id > -1) {
+                        pScene->mMeshes[meshIdx]->mMaterialIndex = subset.second.material_id;
+                        ss.str("");
+                        ss << "        meshes(): mesh[" << meshIdx << "] material_id now " << subset.second.material_id;
+                        TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+                        break;
+                    } else {
+                        ss.str("");
+                        ss << "        meshes(): mesh[" << meshIdx << "]: NOTICE: skipping invalid material_id " << subset.second.material_id << "...";
+                        TINYUSDZLOGW(TAG, "%s", ss.str().c_str());
+                    }
+                }
+            } else {
+                ss.str("");
+                ss << "        meshes(): NOTICE: mesh[" << meshIdx << "] material_id " << render_scene.meshes[meshIdx].material_id << "!!!";
+                TINYUSDZLOGE(TAG, "%s", ss.str().c_str());
+            }
         }
         verticesForMesh(render_scene, pScene, meshIdx, nameWExt);
         facesForMesh(render_scene, pScene, meshIdx, nameWExt);
@@ -569,7 +592,7 @@ void USDImporterImplTinyusdz::materials(
 
         aiString materialName;
         materialName.Set(material.name);
-        mat->AddProperty(materialName, AI_MATKEY_NAME);
+        mat->AddProperty(&materialName, AI_MATKEY_NAME);
 
         mat->AddProperty(
                 reinterpret_cast<const aiColor3D *>(material.surfaceShader.diffuseColor.value.data()),
@@ -680,12 +703,13 @@ static aiTexture *ownedEmbeddedTextureFor(const RenderScene &render_scene, const
     if (tex->mHeight == 0) {
         pos = embTexName.find_last_of('.');
         strncpy(tex->achFormatHint, embTexName.substr(pos + 1).c_str(), 3);
+        tex->achFormatHint[3] = '\0';  // Ensure null termination
         const size_t imageBytesCount{ render_scene.buffers[image.buffer_id].data.size() };
         tex->pcData = (aiTexel *)new char[imageBytesCount];
         memcpy(tex->pcData, &render_scene.buffers[image.buffer_id].data[0], imageBytesCount);
     } else {
         std::string formatHint{ "rgba8888" };
-        strncpy(tex->achFormatHint, formatHint.c_str(), 8);
+        ai_snprintf(tex->achFormatHint, HINTMAXTEXTURELEN, "%s", formatHint.c_str());
         const size_t imageTexelsCount{ tex->mWidth * tex->mHeight };
         tex->pcData = (aiTexel *)new char[imageTexelsCount * image.channels];
         const float *floatPtr = reinterpret_cast<const float *>(&render_scene.buffers[image.buffer_id].data[0]);

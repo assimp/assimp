@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D profile='Immersive' version='3.0'>
+  <Scene>
+    <Shape>
+      <IndexedFaceSet colorPerVertex='true' coordIndex='0 1 2' colorIndex='0 0 0 0 0 0'>
+        <Coordinate point='0 0 0 1 0 0 0 1 0'/>
+        <Color color='1 0 0'/>
+      </IndexedFaceSet>
+    </Shape>
+  </Scene>
+</X3D>

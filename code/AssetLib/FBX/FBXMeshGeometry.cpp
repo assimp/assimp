@@ -133,7 +133,9 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
     // preserve the mapping from fbx indices to *this* indexing.
     unsigned int count = 0;
     for(int index : tempFaces) {
-        const int absi = index < 0 ? (-index - 1) : index;
+        // A negative index marks the last vertex of a polygon, whose index is
+        // -index - 1. ~index computes it without overflowing for INT_MIN.
+        const int absi = index < 0 ? ~index : index;
         if(static_cast<size_t>(absi) >= vertex_count) {
             DOMError("polygon vertex index out of range",&PolygonVertexIndex);
         }
@@ -159,7 +161,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 
     cursor = 0;
     for(int index : tempFaces) {
-        const int absi = index < 0 ? (-index - 1) : index;
+        const int absi = index < 0 ? ~index : index;
         m_mappings[m_mapping_offsets[absi] + m_mapping_counts[absi]++] = cursor++;
     }
 
@@ -168,7 +170,11 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
     // if settings.readAllLayers is false:
     //  * read only the layer with index 0, but warn about any further layers
     for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
-        const TokenList& tokens = (*it).second->Tokens();
+		const TokenList& tokens = (*it).second->Tokens();
+
+        if (tokens.empty()) {
+            DOMError("expected Layer index token", &element);
+        }
 
         const char* err;
         const int index = ParseTokenAsInt(*tokens[0], err);

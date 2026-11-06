@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 
+#include <array>
 #include <memory>
 #include <unordered_map>
 
@@ -72,12 +73,11 @@ using namespace glTF2;
 using namespace glTFCommon;
 
 namespace {
-
-// generate bi-tangents from normals and tangents according to spec
-struct Tangent {
-    aiVector3D xyz;
-    ai_real w;
-};
+    // generate bi-tangents from normals and tangents according to spec
+    struct Tangent {
+        aiVector3D xyz;
+        ai_real w;
+    };
 } // namespace
 
 //
@@ -180,13 +180,17 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
             // A change of coordinates is required to map glTF UV transformations into the space used by
             // Assimp. In glTF all UV origins are at 0,1 (top left of texture) in Assimp space. In Assimp
             // rotation occurs around the image center (0.5,0.5) where as in glTF rotation is around the
-            // texture origin. All three can be corrected for solely by a change of the translation since
-            // the transformations available are shape preserving. Note the importer already flips the V
-            // coordinate of the actual meshes during import.
-            const ai_real rcos(cos(-transform.mRotation));
-            const ai_real rsin(sin(-transform.mRotation));
-            transform.mTranslation.x = (static_cast<ai_real>(0.5) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
-            transform.mTranslation.y = ((static_cast<ai_real>(0.5) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];
+            // texture origin. Furthermore, Assimp's TextureTransformProcess applies translation BEFORE scaling
+            // and rotation, whereas glTF applies translation AFTER scaling and rotation.
+            // Note the importer already flips the V coordinate of the actual meshes during import.
+            const ai_real rcos(std::cos(-transform.mRotation));
+            const ai_real rsin(std::sin(-transform.mRotation));
+            const ai_real Sx = transform.mScaling.x != 0.0 ? transform.mScaling.x : 1.0;
+            const ai_real Sy = transform.mScaling.y != 0.0 ? transform.mScaling.y : 1.0;
+            const ai_real Vx = (prop.TextureTransformExt_t.offset[0] - static_cast<ai_real>(0.5)) / Sx;
+            const ai_real Vy = (prop.TextureTransformExt_t.offset[1] - static_cast<ai_real>(0.5)) / Sy;
+            transform.mTranslation.x = rcos * Vx - rsin * Vy + static_cast<ai_real>(0.5);
+            transform.mTranslation.y = -rsin * Vx - rcos * Vy - static_cast<ai_real>(0.5);
 
             mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
         }
@@ -397,6 +401,7 @@ void glTF2Importer::ImportMaterials(Asset &r) {
     const unsigned int numImportedMaterials = unsigned(r.materials.Size());
     ASSIMP_LOG_DEBUG("Importing ", numImportedMaterials, " materials");
     Material defaultMaterial;
+    defaultMaterial.name = AI_DEFAULT_MATERIAL_NAME;
 
     mScene->mNumMaterials = numImportedMaterials + 1;
     mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];
@@ -470,6 +475,49 @@ aiColor4D *GetVertexColorsForType(Ref<Accessor> input, std::vector<unsigned int>
     }
     delete[] colors;
     return output;
+}
+
+template <typename T>
+aiQuaternion *GetQuaternionsForType(Ref<Accessor> input) {
+    constexpr float max = std::numeric_limits<T>::max();
+    std::array<T, 4> *quats;
+    input->ExtractData(quats);
+    std::unique_ptr<std::array<T, 4>[]> quatsPtr(quats);
+    auto output = std::make_unique<aiQuaternion[]>(input->count);
+    if constexpr (std::is_signed_v<T>) {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = aiQuaternion(
+                    std::max(quats[i][0] / max, -1.0F), std::max(quats[i][1] / max, -1.0F),
+                    std::max(quats[i][2] / max, -1.0F), std::max(quats[i][3] / max, -1.0F));
+        }
+    } else {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = aiQuaternion(
+                    quats[i][0] / max, quats[i][1] / max,
+                    quats[i][2] / max, quats[i][3] / max);
+        }
+    }
+    return output.release();
+}
+
+template <typename T>
+float *GetMorphWeightsForType(Ref<Accessor> input) {
+    constexpr float max = std::numeric_limits<T>::max();
+    T *weights;
+    input->ExtractData(weights);
+    std::unique_ptr<T[]> weightsPtr(weights);
+    auto output = std::make_unique<float[]>(input->count);
+    if constexpr (std::is_signed_v<T>) {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = std::max(weights[i] / max, -1.0F);
+        }
+    }
+    else {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = weights[i] / max;
+        }
+    }
+    return output.release();
 }
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
@@ -715,9 +763,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
             }
 
-            aiFace *faces = nullptr;
-            aiFace *facePtr = nullptr;
-            size_t nFaces = 0;
+            aiFace *faces{nullptr};
+            aiFace *facePtr{nullptr};
+            size_t nFaces{0};
 
             if (useIndexBuffer) {
                 size_t count = indexBuffer.size();
@@ -747,6 +795,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
+                    if (count < 2) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the LINE_LOOP/LINE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1]);
@@ -754,7 +806,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[i - 1], indexBuffer[i]);
                     }
                     if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[static_cast<int>(count) - 1], faces[0].mIndices[0]);
+                        // Use the first index directly: the first face is dropped when its
+                        // indices are out of range, which would leave faces[0].mIndices null.
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[count - 1], indexBuffer[0]);
                     }
                     break;
                 }
@@ -775,6 +829,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the TRIANGLE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < nFaces; ++i) {
@@ -790,6 +848,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the TRIANGLE_FAN mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1], indexBuffer[2]);
@@ -828,6 +890,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
+                    if (count < 2) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINE_LOOP/LINE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
@@ -853,6 +919,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < nFaces; ++i) {
@@ -868,6 +938,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLE_FAN mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);
@@ -1032,7 +1106,6 @@ static void GetNodeTransform(aiMatrix4x4 &matrix, const glTF2::Node &node) {
 }
 
 static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std::vector<aiVertexWeight>> &map, std::vector<unsigned int>* vertexRemappingTablePtr) {
-
     Mesh::Primitive::Attributes &attr = primitive.attributes;
     if (attr.weight.empty() || attr.joint.empty()) {
         return;
@@ -1301,18 +1374,12 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 }
 
 struct AnimationSamplers {
-    AnimationSamplers() :
-            translation(nullptr),
-            rotation(nullptr),
-            scale(nullptr),
-            weight(nullptr) {
-        // empty
-    }
+    AnimationSamplers() = default;
 
-    Animation::Sampler *translation;
-    Animation::Sampler *rotation;
-    Animation::Sampler *scale;
-    Animation::Sampler *weight;
+    Animation::Sampler *translation = nullptr;
+    Animation::Sampler *rotation = nullptr;
+    Animation::Sampler *scale = nullptr;
+    Animation::Sampler *weight = nullptr;
 };
 
 struct vec4f {
@@ -1389,7 +1456,29 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             float *times = nullptr;
             samplers.rotation->input->ExtractData(times);
             aiQuaternion *values = nullptr;
-            samplers.rotation->output->ExtractData(values);
+            if (samplers.rotation->output->normalized) {
+                switch (samplers.rotation->output->componentType) {
+                case ComponentType_BYTE:
+                    values = GetQuaternionsForType<int8_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_UNSIGNED_BYTE:
+                    values = GetQuaternionsForType<uint8_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_SHORT:
+                    values = GetQuaternionsForType<int16_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_UNSIGNED_SHORT:
+                    values = GetQuaternionsForType<uint16_t>(samplers.rotation->output);
+                    break;
+                default:
+                    throw DeadlyImportError("GLTF: Invalid component type for normalized quaternion ", ai_to_string(samplers.rotation->output->componentType));
+                }
+            } else if (samplers.rotation->output->componentType == ComponentType_FLOAT) {
+                samplers.rotation->output->ExtractData(values);
+            } else {
+                throw DeadlyImportError("GLTF: Invalid component type for quaternion ", ai_to_string(samplers.rotation->output->componentType));
+            }
+
             const bool isCubic = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE);
             const aiAnimInterpolation interpType = MapInterpolation(samplers.rotation->interpolation);
             const unsigned int numLogicalKeys = static_cast<unsigned int>(samplers.rotation->input->count);
@@ -1493,7 +1582,31 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSample
             float *times = nullptr;
             samplers.weight->input->ExtractData(times);
             float *values = nullptr;
-            samplers.weight->output->ExtractData(values);
+
+            if (samplers.weight->output->normalized) {
+                switch (samplers.weight->output->componentType) {
+                case ComponentType_BYTE:
+                    values = GetMorphWeightsForType<int8_t>(samplers.weight->output);
+                    break;
+                case ComponentType_UNSIGNED_BYTE:
+                    values = GetMorphWeightsForType<uint8_t>(samplers.weight->output);
+                    break;
+                case ComponentType_SHORT:
+                    values = GetMorphWeightsForType<int16_t>(samplers.weight->output);
+                    break;
+                case ComponentType_UNSIGNED_SHORT:
+                    values = GetMorphWeightsForType<uint16_t>(samplers.weight->output);
+                    break;
+                default:
+                    throw DeadlyImportError("GLTF: Invalid component type for normalized morph weights ", ai_to_string(samplers.weight->output->componentType));
+                }
+
+            } else if (samplers.weight->output->componentType == ComponentType_FLOAT) {
+                samplers.weight->output->ExtractData(values);
+            } else {
+                throw DeadlyImportError("GLTF: Invalid component type for morph weights ", ai_to_string(samplers.weight->output->componentType));
+            }
+           
             anim->mNumKeys = static_cast<uint32_t>(samplers.weight->input->count);
 
             // for Interpolation_CUBICSPLINE can have more outputs
@@ -1612,10 +1725,17 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
             int j = 0;
             for (auto &iter : samplers) {
                 if ((nullptr != iter.second.rotation) || (nullptr != iter.second.scale) || (nullptr != iter.second.translation)) {
-                    ai_anim->mChannels[j] = CreateNodeAnim(r, r.nodes[iter.first], iter.second);
+                    Ref<Node> targetNode = r.nodes.Get(iter.first);
+                    Node *nodePtr = targetNode ? targetNode.operator->() : nullptr;
+                    if (!nodePtr) {
+                        ASSIMP_LOG_WARN("Animation ", anim.name, ": Invalid target node index ", iter.first, ". Skipping channel.");
+                        continue;
+                    }
+                    ai_anim->mChannels[j] = CreateNodeAnim(r, *nodePtr, iter.second);
                     ++j;
                 }
             }
+            ai_anim->mNumChannels = j;
         }
 
         ai_anim->mNumMorphMeshChannels = numMorphMeshChannels;
@@ -1625,10 +1745,17 @@ void glTF2Importer::ImportAnimations(glTF2::Asset &r) {
             int j = 0;
             for (auto &iter : samplers) {
                 if (nullptr != iter.second.weight) {
-                    ai_anim->mMorphMeshChannels[j] = CreateMeshMorphAnim(r, r.nodes[iter.first], iter.second);
+                    Ref<Node> targetNode = r.nodes.Get(iter.first);
+                    Node *nodePtr = targetNode ? targetNode.operator->() : nullptr;
+                    if (!nodePtr) {
+                        ASSIMP_LOG_WARN("Animation ", anim.name, ": Invalid target node index ", iter.first, ". Skipping morph channel.");
+                        continue;
+                    }
+                    ai_anim->mMorphMeshChannels[j] = CreateMeshMorphAnim(r, *nodePtr, iter.second);
                     ++j;
                 }
             }
+            ai_anim->mNumMorphMeshChannels = j;
         }
 
         // Use the latest key-frame for the duration of the animation
@@ -1715,13 +1842,17 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         void *data = img.StealData();
 
         tex->mFilename = img.name;
+        if (img.name.empty() && img.bufferView) {
+            tex->mFilename = img.bufferView->name;
+        }
         tex->mWidth = static_cast<unsigned int>(length);
         tex->mHeight = 0;
         tex->pcData = reinterpret_cast<aiTexel *>(data);
 
         if (!img.mimeType.empty()) {
-            const char *ext = strchr(img.mimeType.c_str(), '/') + 1;
-            if (ext) {
+            const char *slash = strchr(img.mimeType.c_str(), '/');
+            if (slash != nullptr) {
+                const char *ext = slash + 1;
                 if (strncmp(ext, "jpeg", 4) == 0) {
                     ext = "jpg";
                 } else if (strcmp(ext, "ktx2") == 0) { // basisu: ktx remains

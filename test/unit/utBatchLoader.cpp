@@ -43,6 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include "Common/Importer.h"
 #include "TestIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/MemoryIOWrapper.h>
+#include <assimp/scene.h>
 
 using namespace ::Assimp;
 
@@ -78,4 +81,28 @@ TEST_F( BatchLoaderTest, validateAccessTest ) {
 
     BatchLoader loader2( m_io, true );
     EXPECT_TRUE( loader2.getValidation() );
+}
+
+TEST_F(BatchLoaderTest, polledSceneOwnershipIsTransferred) {
+    static const char obj[] =
+            "o triangle\n"
+            "v 0 0 0\n"
+            "v 1 0 0\n"
+            "v 0 1 0\n"
+            "f 1 2 3\n";
+
+    DefaultIOSystem fileSystem;
+    MemoryIOSystem memoryIO(reinterpret_cast<const uint8_t *>(obj), sizeof(obj) - 1, &fileSystem);
+
+    BatchLoader loader(&memoryIO);
+    const std::string path = AI_MEMORYIO_MAGIC_FILENAME ".obj";
+    const unsigned int request = loader.AddLoadRequest(path);
+    EXPECT_EQ(request, loader.AddLoadRequest(path));
+
+    loader.LoadAll();
+    aiScene *scene = loader.GetImport(request);
+    ASSERT_NE(nullptr, scene);
+
+    // One duplicate request remains, but ownership transferred on the first poll.
+    delete scene;
 }

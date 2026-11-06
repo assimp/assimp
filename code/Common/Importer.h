@@ -233,9 +233,7 @@ public:
      *  @param which LRWC returned by AddLoadRequest().
      *  @return nullptr if there is no scene with this file name
      *  in the queue of the scene hasn't been loaded yet. */
-    aiScene* GetImport(
-        unsigned int which
-        );
+    aiScene* GetImport(unsigned int which);
 
     // -------------------------------------------------------------------
     /** Waits until all scenes have been loaded. This returns
@@ -244,7 +242,7 @@ public:
 
 private:
     // No need to have that in the public API ...
-    BatchData *m_data;
+    BatchData *mData;
 };
 
 } // Namespace Assimp

@@ -64,3 +64,12 @@ TEST_F(utCSMImportExport, importMalformedZeroFrameRange) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/CSM/malformed_zero_framerange.csm", 0);
     EXPECT_NE(nullptr, scene);
 }
+
+TEST_F(utCSMImportExport, importDropoutBufferOverflow) {
+    // A DROPOUT marker makes one channel skip a sample, so its key count lags
+    // behind the others. The $points growth logic used to reallocate every
+    // channel off a shared counter and wrote past the lagging channel's buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/CSM/invalid/DropoutBufferOverflow.csm", 0);
+    EXPECT_NE(nullptr, scene);
+}

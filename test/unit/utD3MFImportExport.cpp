@@ -46,6 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 
+#include <cstdio>
+#include <string>
+
 #include "AssetLib/3MF/D3MFExporter.h"
 
 class utD3MFImporterExporter : public AbstractImportExportBase {
@@ -124,6 +127,22 @@ TEST_F(utD3MFImporterExporter, roundtrip3MFtoMemTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile("test.3mf", 0);
     EXPECT_NE(nullptr, scene));*/
+}
+
+TEST_F(utD3MFImporterExporter, exportSkipsNonTriangleFaces) {
+    // A line face carries two indices, and the exporter used to read three from
+    // every face.
+    const std::string obj = "v 0 0 0\nv 1 0 0\nl 1 2\n";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(obj.data(), obj.size(), 0, "obj");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(2u, scene->mMeshes[0]->mFaces[0].mNumIndices);
+
+    // The 3MF exporter writes its archive straight to disk, not through the IOSystem.
+    Assimp::Exporter exporter;
+    EXPECT_EQ(AI_SUCCESS, exporter.Export(scene, "3mf", "non_triangle_faces.3mf"));
+    std::remove("non_triangle_faces.3mf");
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT

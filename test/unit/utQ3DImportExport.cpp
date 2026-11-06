@@ -59,3 +59,21 @@ public:
 TEST_F(utQ3DImportExport, importTest) {
     EXPECT_TRUE(importerTest());
 }
+
+TEST_F(utQ3DImportExport, importMalformedNormalIndex) {
+    // a face references a vertex index that is valid for the position list but
+    // out of range for the shorter normal list; the importer must not read
+    // past curMesh.normals
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3D/malformed_normal_index.q3o", 0);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utQ3DImportExport, importMalformedFaceIndexCount) {
+    // a face declares more indices than the mesh has vertices; the face-normal
+    // fallback must index verts with the (clamped) last face index, not with the
+    // raw index count, otherwise it reads past curMesh.verts
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3D/malformed_face_index.q3o", 0);
+    EXPECT_NE(nullptr, scene);
+}

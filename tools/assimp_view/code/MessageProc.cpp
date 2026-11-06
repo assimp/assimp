@@ -397,7 +397,7 @@ void ToggleUIState() {
             SWP_NOMOVE | SWP_NOZORDER);
 
         SetWindowText(GetDlgItem(g_hDlg,IDC_BLUBB),">>");
-        storeRegKey(false, "MultiSampling");
+        storeRegKey(false, "LastUIState");
     } else {
         SetWindowPos(g_hDlg,nullptr,0,0,sRect.right+214,sRect.bottom,
             SWP_NOMOVE | SWP_NOZORDER);
@@ -430,7 +430,7 @@ void LoadBGTexture() {
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
         g_hDlg,GetModuleHandle(nullptr),
-        "Textures\0*.png;*.dds;*.tga;*.bmp;*.tif;*.ppm;*.ppx;*.jpg;*.jpeg;*.exr\0*.*\0",
+        "Textures\0*.png;*.dds;*.tga;*.bmp;*.tif;*.ppm;*.ppx;*.jpg;*.jpeg;*.exr\0All files\0*.*\0",
         nullptr, 0, 1,
         szFileName, MAX_PATH, nullptr, 0, nullptr,
         "Open texture as background",
@@ -542,7 +542,7 @@ void LoadSkybox() {
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
         g_hDlg,GetModuleHandle(nullptr),
-        "Skyboxes\0*.dds\0*.*\0", nullptr, 0, 1,
+        "Skyboxes\0*.dds\0All files\0*.*\0", nullptr, 0, 1,
         szFileName, MAX_PATH, nullptr, 0, nullptr,
         "Open skybox as background",
         OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
@@ -591,7 +591,7 @@ void SaveScreenshot() {
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
         g_hDlg,GetModuleHandle(nullptr),
-        "PNG Images\0*.png", nullptr, 0, 1,
+        "PNG Images\0*.png\0", nullptr, 0, 1,
         szFileName, MAX_PATH, nullptr, 0, nullptr,
         "Save Screenshot to file",
         OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,

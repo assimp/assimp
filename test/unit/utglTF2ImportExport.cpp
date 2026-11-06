@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
+#include "UriTestHelpers.h"
 #include "Tools/TestTools.h"
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #   include "AssetLib/glTF2/glTF2AssetWriter.h"
@@ -1231,4 +1232,76 @@ TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
                     << expected.file << " key " << i;
         }
     }
+}
+
+
+using namespace Assimp::UriTest;
+
+namespace {
+
+// Builds a minimal glTF 2.0 triangle whose buffer uses the given URI.
+std::string Gltf2Buffer(const std::string &bufferUri) {
+    std::ostringstream json;
+    json << "{\n"
+            "  \"asset\": {\"version\": \"2.0\"},\n"
+            "  \"scene\": 0,\n"
+            "  \"scenes\": [{\"nodes\": [0]}],\n"
+            "  \"nodes\": [{\"mesh\": 0}],\n"
+            "  \"meshes\": [{\"primitives\": [{\"attributes\": {\"POSITION\": 0}}]}],\n"
+            "  \"accessors\": [{\"bufferView\": 0, \"componentType\": 5126, \"count\": 3, \"type\": \"VEC3\"}],\n"
+            "  \"bufferViews\": [{\"buffer\": 0, \"byteLength\": 36}],\n"
+            "  \"buffers\": [{\"uri\": \""
+         << JsonEscape(bufferUri) << "\", \"byteLength\": 36}]\n"
+            "}\n";
+    return json.str();
+}
+
+// Builds a minimal glTF 2.0 triangle whose base color image uses the given URI.
+std::string Gltf2Image(const std::string &imageUri) {
+    std::ostringstream json;
+    json << "{\n"
+            "  \"asset\": {\"version\": \"2.0\"},\n"
+            "  \"scene\": 0,\n"
+            "  \"scenes\": [{\"nodes\": [0]}],\n"
+            "  \"nodes\": [{\"mesh\": 0}],\n"
+            "  \"meshes\": [{\"primitives\": [{\"attributes\": {\"POSITION\": 0}, \"material\": 0}]}],\n"
+            "  \"materials\": [{\"pbrMetallicRoughness\": {\"baseColorTexture\": {\"index\": 0}}}],\n"
+            "  \"textures\": [{\"source\": 0}],\n"
+            "  \"images\": [{\"uri\": \""
+         << JsonEscape(imageUri) << "\"}],\n"
+            "  \"accessors\": [{\"bufferView\": 0, \"componentType\": 5126, \"count\": 3, \"type\": \"VEC3\"}],\n"
+            "  \"bufferViews\": [{\"buffer\": 0, \"byteLength\": 36}],\n"
+            "  \"buffers\": [{\"uri\": \""
+         << kDataUri36Zeros << "\", \"byteLength\": 36}]\n"
+            "}\n";
+    return json.str();
+}
+
+} // namespace
+
+TEST_F(utglTF2ImportExport, externalUriIsContained) {
+    ExpectFileLoads(ASSIMP_TEST_MODELS_DIR "/glTF2/issue_6933/triangle.gltf");
+
+    const ScratchPackage scratch("assimp-issue6933-");
+    ASSERT_TRUE(scratch.Populate());
+    const std::string sub = JoinPath(scratch.pkg, "sub");
+    ASSERT_TRUE(EnsureDir(sub));
+    ASSERT_TRUE(WriteBytes(JoinPath(sub, "triangle.bin"), kTriangleBytes, sizeof(kTriangleBytes)));
+
+    ExpectFileLoads(scratch.Write("dotslash.gltf", Gltf2Buffer("./triangle.bin")));
+    ExpectFileLoads(scratch.Write("nested.gltf", Gltf2Buffer("sub/triangle.bin")));
+
+    ExpectFileRejected(scratch.Write("traversal.gltf", Gltf2Buffer("../secret.bin")), "asset directory", "secret.bin");
+    ExpectFileRejected(scratch.Write("nested_escape.gltf", Gltf2Buffer("sub/../../secret.bin")), "asset directory", "secret.bin");
+    ExpectFileRejected(scratch.Write("backslash.gltf", Gltf2Buffer("..\\secret.bin")), "asset directory", "secret.bin");
+    ExpectFileRejected(scratch.Write("absolute.gltf", Gltf2Buffer("/etc/passwd")), "asset directory", "passwd");
+    ExpectFileRejected(scratch.Write("drive.gltf", Gltf2Buffer("C:/Windows/win.ini")), "asset directory", "win.ini");
+    ExpectFileRejected(scratch.Write("scheme.gltf", Gltf2Buffer("file:///etc/passwd")), "asset directory", "passwd");
+
+    ExpectTextureUriKept(scratch.Write("image_ok.gltf", Gltf2Image("tex/ok.png")), "tex/ok.png");
+    ExpectFileRejected(scratch.Write("image_bad.gltf", Gltf2Image("../secret.png")), "asset directory", "secret.png");
+
+    ExpectMemoryRejected(Gltf2Buffer("triangle.bin"), "loading from memory");
+    ExpectMemoryRejected(Gltf2Buffer("/etc/passwd"), "loading from memory");
+    ExpectMemoryLoads(Gltf2Buffer(kDataUri36Zeros));
 }

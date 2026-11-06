@@ -91,6 +91,7 @@ SET( COMMON
   unit/UTLogStream.h
   unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
+  unit/UriTestHelpers.h
   unit/TestModelFactory.h
   unit/utTypes.cpp
   unit/utVersion.cpp

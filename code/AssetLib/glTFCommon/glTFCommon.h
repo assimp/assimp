@@ -210,6 +210,11 @@ inline std::string getCurrentAssetDir(const std::string &pFile) {
 #    pragma warning(pop)
 #endif // _MSC_VER
 
+//! Throws if an external buffer or image URI must not be opened.
+//! Absolute paths and ".." segments are rejected. When \a fromMemory is true
+//! every external reference is rejected; data URIs are handled by the caller.
+void ValidateExternalUri(const char *uri, bool fromMemory);
+
 namespace Util {
 
 void EncodeBase64(const uint8_t *in, size_t inLength, std::string &out);

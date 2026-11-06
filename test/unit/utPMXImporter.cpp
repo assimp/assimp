@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "AssetLib/MMD/MMDImporter.h"
 #include "assimp/postprocess.h"
+#include "assimp/material.h"
+#include "assimp/scene.h"
 
 #include <assimp/Importer.hpp>
 
@@ -59,4 +61,19 @@ public:
 
 TEST_F( utPMXImporter, importTest ) {
     EXPECT_TRUE( importerTest() );
+}
+
+// A material's diffuse texture index is read straight from the file and was only checked
+// against the "no texture" sentinel, so an index past the texture table read a std::string
+// object out of bounds and copied bytes from its garbage data pointer into the material.
+// The import has to succeed with the texture reference dropped instead.
+TEST_F( utPMXImporter, importPMXOutOfRangeDiffuseTextureIndex ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/MMD/invalid/OobTextureIndex.pmx", aiProcess_ValidateDataStructure );
+
+    ASSERT_NE( nullptr, scene );
+    ASSERT_EQ( 1u, scene->mNumMaterials );
+
+    aiString path;
+    EXPECT_NE( AI_SUCCESS, scene->mMaterials[ 0 ]->GetTexture( aiTextureType_DIFFUSE, 0, &path ) );
 }

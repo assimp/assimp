@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/mesh.h>
 #include <assimp/types.h>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include "Common/Maybe.h"
 
@@ -242,9 +242,9 @@ struct Mesh {
 /// @brief  Data structure to store all obj-specific model data
 // ------------------------------------------------------------------------------------------------
 struct Model {
-    using GroupMap = std::map<std::string, std::vector<unsigned int> *>;
-    using GroupMapIt = std::map<std::string, std::vector<unsigned int> *>::iterator;
-    using ConstGroupMapIt = std::map<std::string, std::vector<unsigned int> *>::const_iterator;
+    using GroupMap = std::unordered_map<std::string, std::vector<unsigned int> *>;
+    using GroupMapIt = std::unordered_map<std::string, std::vector<unsigned int> *>::iterator;
+    using ConstGroupMapIt = std::unordered_map<std::string, std::vector<unsigned int> *>::const_iterator;
 
     std::string mModelName{};                               ///< Model name
     std::vector<Object *> mObjects{};                       ///< List ob assigned objects
@@ -262,7 +262,7 @@ struct Model {
     unsigned int mTextureCoordDim{0};                       ///< Maximum dimension of texture coordinates
     Mesh *mCurrentMesh{nullptr};                            ///< Current mesh instance
     std::vector<Mesh *> mMeshes{};                          ///< Vector with stored meshes
-    std::map<std::string, Material*> mMaterialMap{};        ///< Material map
+    std::unordered_map<std::string, Material*> mMaterialMap{};        ///< Material map
 
     /// @brief  The default class constructor
     Model() = default;

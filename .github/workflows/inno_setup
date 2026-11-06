@@ -9,14 +9,14 @@ jobs:
     name: Build the Inno Setup Installer
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: lukka/get-cmake@latest
       - uses: ilammy/msvc-dev-cmd@v1
 
 
       - name: Cache DX SDK
         id: dxcache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: '${{ github.workspace }}/DX_SDK'
           key: ${{ runner.os }}-DX_SDK
@@ -33,7 +33,7 @@ jobs:
         run: echo "::set-output name=args::-DASSIMP_BUILD_ASSIMP_TOOLS=1 -DASSIMP_BUILD_ASSIMP_VIEW=1 -DASSIMP_BUILD_ZLIB=1"
 
       - name: configure and build
-        uses: lukka/run-cmake@v3
+        uses: lukka/run-cmake@v10
         env:
           DXSDK_DIR: '${{ github.workspace }}/DX_SDK'
 
@@ -45,7 +45,7 @@ jobs:
           buildDirectory: '${{ github.workspace }}/build/'
 
       - name: Compile .ISS to .EXE Installer
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.9
         with:
           path: packaging/windows-innosetup/script_x64.iss
           options: /O+

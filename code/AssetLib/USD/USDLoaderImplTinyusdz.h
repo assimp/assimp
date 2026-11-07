@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_USD_BETA)
 namespace lightusd = tinyusdz;
-#endif //#if defined(ASSIMP_BUILD_USD_BETA)
+#endif //#if !defined(ASSIMP_BUILD_USD_BETA)
 
 namespace Assimp {
 

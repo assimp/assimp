@@ -85,6 +85,14 @@ namespace Assimp {
             const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene);
 
+#if defined(ASSIMP_BUILD_USD_BETA)
+    void animationChannel(
+        const lightusd::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        aiAnimation *newAiAnimation,
+        const int channelIndex);
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
+
     void meshes(
             const lightusd::tydra::RenderScene &render_scene,
             aiScene *pScene,

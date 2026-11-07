@@ -385,31 +385,46 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
         newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
         for (int channelIndex = 0; channelIndex < animation.num_channels(); ++channelIndex) {
 //            auto &animationChannel = animation.channels[channelIndex];
-            auto newAiNodeAnim = new aiNodeAnim();
-            newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
-            newAiAnimation->mDuration = 0;
-
-            std::vector<aiVectorKey> positionKeys;
-            std::vector<aiQuatKey> rotationKeys;
-            std::vector<aiVectorKey> scalingKeys;
-
-            // TODO: add switch on channel type (rot/scale/translate/weights etc)
-
-            newAiNodeAnim->mNumPositionKeys = unsigned(positionKeys.size());
-            newAiNodeAnim->mPositionKeys = new aiVectorKey[newAiNodeAnim->mNumPositionKeys];
-            std::move(positionKeys.begin(), positionKeys.end(), newAiNodeAnim->mPositionKeys);
-
-            newAiNodeAnim->mNumRotationKeys = unsigned(rotationKeys.size());
-            newAiNodeAnim->mRotationKeys = new aiQuatKey[newAiNodeAnim->mNumRotationKeys];
-            std::move(rotationKeys.begin(), rotationKeys.end(), newAiNodeAnim->mRotationKeys);
-
-            newAiNodeAnim->mNumScalingKeys = unsigned(scalingKeys.size());
-            newAiNodeAnim->mScalingKeys = new aiVectorKey[newAiNodeAnim->mNumScalingKeys];
-            std::move(scalingKeys.begin(), scalingKeys.end(), newAiNodeAnim->mScalingKeys);
+            animationChannel(
+                    render_scene,
+                    pScene,
+                    newAiAnimation,
+                    channelIndex
+            );
         }
     }
 #endif // #if !defined(ASSIMP_BUILD_USD_BETA)
 }
+
+#if defined(ASSIMP_BUILD_USD_BETA)
+void USDImporterImplTinyusdz::animationChannel(
+        const lightusd::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        aiAnimation *newAiAnimation,
+        const int channelIndex) {
+    auto newAiNodeAnim = new aiNodeAnim();
+    newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
+    newAiAnimation->mDuration = 0;
+
+    std::vector<aiVectorKey> positionKeys;
+    std::vector<aiQuatKey> rotationKeys;
+    std::vector<aiVectorKey> scalingKeys;
+
+    // TODO: add switch on channel type (rot/scale/translate/weights etc)
+
+    newAiNodeAnim->mNumPositionKeys = unsigned(positionKeys.size());
+    newAiNodeAnim->mPositionKeys = new aiVectorKey[newAiNodeAnim->mNumPositionKeys];
+    std::move(positionKeys.begin(), positionKeys.end(), newAiNodeAnim->mPositionKeys);
+
+    newAiNodeAnim->mNumRotationKeys = unsigned(rotationKeys.size());
+    newAiNodeAnim->mRotationKeys = new aiQuatKey[newAiNodeAnim->mNumRotationKeys];
+    std::move(rotationKeys.begin(), rotationKeys.end(), newAiNodeAnim->mRotationKeys);
+
+    newAiNodeAnim->mNumScalingKeys = unsigned(scalingKeys.size());
+    newAiNodeAnim->mScalingKeys = new aiVectorKey[newAiNodeAnim->mNumScalingKeys];
+    std::move(scalingKeys.begin(), scalingKeys.end(), newAiNodeAnim->mScalingKeys);
+}
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
 
 void USDImporterImplTinyusdz::meshes(
         const lightusd::tydra::RenderScene &render_scene,

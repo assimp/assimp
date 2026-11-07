@@ -482,7 +482,7 @@ void ObjFileMtlImporter::createMaterial() {
 
     name = ai_trim(name);
 
-    std::map<std::string, ObjFile::Material *>::iterator it = mModel->mMaterialMap.find(name);
+    std::unordered_map<std::string, ObjFile::Material *>::iterator it = mModel->mMaterialMap.find(name);
     if (mModel->mMaterialMap.end() == it) {
         // New Material created
         mModel->mCurrentMaterial = new ObjFile::Material();

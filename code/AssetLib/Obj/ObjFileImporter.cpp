@@ -580,7 +580,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
     pScene->mMaterials = new aiMaterial *[numMaterials];
     for (unsigned int matIndex = 0; matIndex < numMaterials; matIndex++) {
         // Store material name
-        std::map<std::string, ObjFile::Material *>::const_iterator it;
+        std::unordered_map<std::string, ObjFile::Material *>::const_iterator it;
         it = pModel->mMaterialMap.find(pModel->mMaterialLib[matIndex]);
 
         // No material found, use the default material

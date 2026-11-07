@@ -1000,19 +1000,25 @@ ELSE() # IF (ASSIMP_BUILD_VRML_IMPORTER)
 ENDIF() # IF (ASSIMP_BUILD_VRML_IMPORTER)
 
 # USD/USDA/USDC/USDZ support
-# tinyusdz
+# tinyusdz (rebranded as "lightusd" late 2026)
 IF (ASSIMP_BUILD_USD_IMPORTER)
     if (ASSIMP_BUILD_USD_VERBOSE_LOGS)
         ADD_DEFINITIONS( -DASSIMP_USD_VERBOSE_LOGS)
     endif ()
 
+    message("****")
     # Note: ALWAYS specify a git commit hash (or tag) instead of a branch name; using a branch
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
     #       in flux
-    # "dev" branch, 14 Mar 2025
-    set(TINYUSDZ_GIT_TAG "6050eef932f7d2788656d63297aa488fb0961ed1")
-    message("****")
-    message("\n\n**** Cloning tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
+    if (ASSIMP_USD_BETA)
+        # "main" branch, 15 Sep 2026 (after tinyusdz -> lightusd "rebrand")
+        set(TINYUSDZ_GIT_TAG "1fdd60a6171724b5ce0e6716c25b2bba1aed7ad3")
+        message("\n\n**** Cloning latest tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
+    else () # if (ASSIMP_USD_BETA)
+        # "dev" branch, 14 Mar 2025
+        set(TINYUSDZ_GIT_TAG "6050eef932f7d2788656d63297aa488fb0961ed1")
+        message("\n\n**** Cloning legacy tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
+    endif () # if (ASSIMP_USD_BETA)
 
     # Patch required to build arm32 on android
     set(TINYUSDZ_PATCHFILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/tinyusdz/patches/tinyusdz.patch")
@@ -1061,12 +1067,7 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
             ${Tinyusdz_SRC_ABSPATH}/stage.cc
             ${Tinyusdz_SRC_ABSPATH}/str-util.cc
             ${Tinyusdz_SRC_ABSPATH}/tiny-format.cc
-            ${Tinyusdz_SRC_ABSPATH}/tinyusdz.cc
             ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval.cc
-            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed.cc
-            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable.cc
-            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable-fallback.cc
-            ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-fallback.cc
             ${Tinyusdz_SRC_ABSPATH}/tydra/facial.cc
             ${Tinyusdz_SRC_ABSPATH}/tydra/prim-apply.cc
             ${Tinyusdz_SRC_ABSPATH}/tydra/render-data.cc
@@ -1086,6 +1087,133 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
             ${Tinyusdz_SRC_ABSPATH}/xform.cc
     )
 
+    if (ASSIMP_USD_BETA)
+        set(Tinyusdz_SRCS ${Tinyusdz_SRCS}
+                ${Tinyusdz_SRC_ABSPATH}/ascii-parser-basetype-inst.cc
+                ${Tinyusdz_SRC_ABSPATH}/ascii-parser-entry.cc
+                ${Tinyusdz_SRC_ABSPATH}/ascii-parser-props.cc
+                ${Tinyusdz_SRC_ABSPATH}/color-transform.cc
+                ${Tinyusdz_SRC_ABSPATH}/composition-reconstruct.cc
+                ${Tinyusdz_SRC_ABSPATH}/core/instance-key.cc
+                ${Tinyusdz_SRC_ABSPATH}/core/path-expression.cc
+                ${Tinyusdz_SRC_ABSPATH}/core/path-expression-eval.cc
+                ${Tinyusdz_SRC_ABSPATH}/crate-reader-arrays.cc
+                ${Tinyusdz_SRC_ABSPATH}/crate-reader-paths.cc
+                ${Tinyusdz_SRC_ABSPATH}/crate-reader-timesamples.cc
+                ${Tinyusdz_SRC_ABSPATH}/crate-reader-values.cc
+                ${Tinyusdz_SRC_ABSPATH}/crate-writer.cc
+                ${Tinyusdz_SRC_ABSPATH}/crate-writer-inline.cc
+                ${Tinyusdz_SRC_ABSPATH}/crate-writer-values.cc
+                ${Tinyusdz_SRC_ABSPATH}/enum-handlers.cc
+                ${Tinyusdz_SRC_ABSPATH}/hash-util.cc
+                ${Tinyusdz_SRC_ABSPATH}/layer.cc
+                ${Tinyusdz_SRC_ABSPATH}/lightusd.cc
+                ${Tinyusdz_SRC_ABSPATH}/parser-timing.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-ar.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-enum.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-geom.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-light.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-media.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-meta.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-physics.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-shader.cc
+                ${Tinyusdz_SRC_ABSPATH}/pprint-skel.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct2.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct3.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-ar.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-geom.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-geom2.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-geom3.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-lightprim.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-media.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-physics.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-physics2.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-physics3.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-physics4.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-shader.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-shader2.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-shader3.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-shader4.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-reconstruct-vol.cc
+                ${Tinyusdz_SRC_ABSPATH}/prim-types-schema.cc
+                ${Tinyusdz_SRC_ABSPATH}/sconv-ar.cc
+                ${Tinyusdz_SRC_ABSPATH}/sconv-geom.cc
+                ${Tinyusdz_SRC_ABSPATH}/sconv-layer.cc
+                ${Tinyusdz_SRC_ABSPATH}/sconv-light.cc
+                ${Tinyusdz_SRC_ABSPATH}/sconv-media.cc
+                ${Tinyusdz_SRC_ABSPATH}/sconv-physics.cc
+                ${Tinyusdz_SRC_ABSPATH}/sconv-shader.cc
+                ${Tinyusdz_SRC_ABSPATH}/sconv-skel.cc
+                ${Tinyusdz_SRC_ABSPATH}/imageproc/simd.cc
+                ${Tinyusdz_SRC_ABSPATH}/spline-binary.cc
+                ${Tinyusdz_SRC_ABSPATH}/stage-converter.cc
+                ${Tinyusdz_SRC_ABSPATH}/timesamples.cc
+                ${Tinyusdz_SRC_ABSPATH}/timesamples-eval.cc
+                ${Tinyusdz_SRC_ABSPATH}/timesamples-pprint.cc
+                ${Tinyusdz_SRC_ABSPATH}/tiny-string.cc
+                ${Tinyusdz_SRC_ABSPATH}/tsd/tsd-bilinear.cc
+                ${Tinyusdz_SRC_ABSPATH}/tsd/tsd-catmark.cc
+                ${Tinyusdz_SRC_ABSPATH}/tsd/tsd-fvar.cc
+                ${Tinyusdz_SRC_ABSPATH}/tsd/tsd-lightusd.cc
+                ${Tinyusdz_SRC_ABSPATH}/tsd/tsd-loop.cc
+                ${Tinyusdz_SRC_ABSPATH}/tsd/tsd-refine.cc
+                ${Tinyusdz_SRC_ABSPATH}/tsd/tsd-topology.cc
+                ${Tinyusdz_SRC_ABSPATH}/tsd/tsd-validate.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-all.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-inst-array.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-inst-scalar.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/bone-util.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/color-management.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/common-utils.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/materialx-to-json.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/raytracing-scene-converter.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/next/render-converter.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-anim.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-instancer.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-material.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-material-mtlx.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-mesh.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-pprint.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-mesh-tangent.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/texture-util.cc
+                ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-1.cc
+                ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-2.cc
+                ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-3.cc
+                ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-4.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdc-reader-prim.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdc-reader-prim-parse.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdc-reader-prim-reconstruct-1.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdc-reader-prim-reconstruct-2.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdc-reader-prim-reconstruct-3.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdc-reader-prim-reconstruct-4.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdc-reader-property.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdc-reader-reconstruct.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdGeom-accessors.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-role-a.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-role-b.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-scalar-a.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-scalar-b.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-vec-a.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-vec-b.cc
+                ${Tinyusdz_SRC_ABSPATH}/usdVol.cc
+                ${Tinyusdz_SRC_ABSPATH}/value-eval-util.cc
+                ${Tinyusdz_SRC_ABSPATH}/value-pprint-dispatch.cc
+                ${Tinyusdz_SRC_ABSPATH}/value-pprint-prim.cc
+                ${Tinyusdz_SRC_ABSPATH}/value-types-cast.cc
+                ${Tinyusdz_SRC_ABSPATH}/value-types-lerp.cc
+                ${Tinyusdz_SRC_ABSPATH}/value-types-matrix.cc
+                ${Tinyusdz_SRC_ABSPATH}/value-types-typename.cc
+        )
+    else () # if (ASSIMP_USD_BETA)
+        set(Tinyusdz_SRCS ${Tinyusdz_SRCS}
+                ${Tinyusdz_SRC_ABSPATH}/tinyusdz.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-animatable-fallback.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/attribute-eval-typed-fallback.cc
+        )
+    endif () # if (ASSIMP_USD_BETA)
+
     set(Tinyusdz_DEP_SOURCES
             ${Tinyusdz_SRC_ABSPATH}/external/fpng.cpp
             #${Tinyusdz_SRC_ABSPATH}/external/staticstruct.cc
@@ -1097,6 +1225,35 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
             ${Tinyusdz_SRC_ABSPATH}/lz4-compression.cc
             ${Tinyusdz_SRC_ABSPATH}/lz4/lz4.c
     )
+
+    if (ASSIMP_USD_BETA)
+        set(Tinyusdz_DEP_SOURCES ${Tinyusdz_DEP_SOURCES}
+                ${Tinyusdz_SRC_ABSPATH}/external/mikktspace/mikktspace.c
+                ${Tinyusdz_SRC_ABSPATH}/external/miniz.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_io.c
+        )
+        # For convenience of users following best practices and treating
+        # warnings-as-errors, surgically prevent known warnings from breaking build
+        if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+            set_source_files_properties(
+                    ${Tinyusdz_SRC_ABSPATH}/lightusd.cc
+                    PROPERTIES COMPILE_OPTIONS "-Wno-error=unused-const-variable")
+            set_source_files_properties(
+                    ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_io.c
+                    PROPERTIES COMPILE_OPTIONS "-Wno-error=unused-function;-Wno-error=unused-variable")
+        endif () # if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        if (CMAKE_C_COMPILER_ID MATCHES "Clang")
+            set_source_files_properties(
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-accessors.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-role-a.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-role-b.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-scalar-a.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-scalar-b.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-vec-a.cc
+                    ${Tinyusdz_SRC_ABSPATH}/usdGeom-primvar-inst-vec-b.cc
+                    PROPERTIES COMPILE_OPTIONS "-Wno-error=user-defined-warnings")
+        endif () # if (CMAKE_C_COMPILER_ID MATCHES "Clang")
+    endif () # if (ASSIMP_USD_BETA)
 
     set(tinyusdz_INCLUDE_DIRS "${Tinyusdz_SRC_ABSPATH}")
     INCLUDE_DIRECTORIES(${tinyusdz_INCLUDE_DIRS})
@@ -1353,7 +1510,7 @@ SET( assimp_src
   ${ASSIMP_EXPORTER_SRCS}
 
   ${FBX_COMMON_SRCS}
-  
+
   # Third-party libraries
   ${unzip_compile_SRCS}
   ${Poly2Tri_SRCS}

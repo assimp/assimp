@@ -1340,7 +1340,7 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM /*lParam*/)
         OPENFILENAME sFilename1 = {
             sizeof(OPENFILENAME),
             g_hDlg,GetModuleHandle(nullptr),
-            "Textures\0*.png;*.dds;*.tga;*.bmp;*.tif;*.ppm;*.ppx;*.jpg;*.jpeg;*.exr\0*.*\0",
+            "Textures\0*.png;*.dds;*.tga;*.bmp;*.tif;*.ppm;*.ppx;*.jpg;*.jpeg;*.exr\0All files\0*.*\0",
             nullptr, 0, 1,
             szFileName, MAX_PATH, nullptr, 0, nullptr,
             "Replace this texture",
@@ -1375,7 +1375,7 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM /*lParam*/)
         OPENFILENAME sFilename1 = {
             sizeof(OPENFILENAME),
             g_hDlg,GetModuleHandle(nullptr),
-            "Textures\0*.png;*.dds;*.bmp;*.tif;*.pfm;*.jpg;*.jpeg;*.hdr\0*.*\0", nullptr, 0, 1,
+            "Textures\0*.png;*.dds;*.bmp;*.tif;*.pfm;*.jpg;*.jpeg;*.hdr\0All files\0*.*\0", nullptr, 0, 1,
             szFileName, MAX_PATH, nullptr, 0, nullptr,
             "Export texture to file",
             OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,

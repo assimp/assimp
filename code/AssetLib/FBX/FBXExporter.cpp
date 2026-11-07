@@ -221,8 +221,9 @@ void FBXExporter::WriteAsciiHeader()
     // basically just a comment at the top of the file
     std::stringstream head;
     head << "; FBX " << EXPORT_VERSION_STR << " project file\n";
-    head << "; Created by the Open Asset Import Library (Assimp)\n";
-    head << "; http://assimp.org\n";
+    head << "; File produced by Open Asset Import Library (https://www.assimp.org)\n";
+    head << "; (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
+         << aiGetVersionRevision() << ")\n";
     head << "; -------------------------------------------------\n";
     const std::string ascii_header = head.str();
     outfile->Write(ascii_header.c_str(), ascii_header.size(), 1);
@@ -1298,6 +1299,12 @@ void FBXExporter::WriteObjects () {
           // uvs, if any
           for (size_t uvi = 0; uvi < m->GetNumUVChannels(); uvi++) {
             const auto nc = m->mNumUVComponents[uvi];
+            if (nc == 0) {
+                // a UV channel without components carries no data; skipping it
+                // also avoids the division by zero below
+                ASSIMP_LOG_WARN("UV channel ", uvi, " in mesh ", mi, " has 0 components. Skipping.");
+                continue;
+            }
             if (nc > 2) {
                 // FBX only supports 2-channel UV maps...
                 // or at least i'm not sure how to indicate a different number

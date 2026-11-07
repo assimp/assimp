@@ -239,9 +239,17 @@ void TextureTransformStep::Execute( aiScene* pScene) {
                         info.mapV = *((aiTextureMapMode*)prop2->mData);
                     }
                     else if ( !::strcmp( prop2->mKey.data, "$tex.uvtrafo"))  {
-                        // ValidateDS should check this
-                        ai_assert(prop2->mDataLength >= 20);
-                        ::memcpy(&info.mTranslation.x,prop2->mData,sizeof(float)*5);
+                        if (prop2->mDataLength >= sizeof(aiUVTransform)) {
+                            // Copy into a complete aiUVTransform: writing the five components
+                            // through &info.mTranslation.x would run past that member.
+                            aiUVTransform trafo;
+                            ::memcpy(&trafo, prop2->mData, sizeof(trafo));
+                            info.mTranslation = trafo.mTranslation;
+                            info.mScaling = trafo.mScaling;
+                            info.mRotation = trafo.mRotation;
+                        } else {
+                            ASSIMP_LOG_WARN("Ignoring uv transformation property with insufficient data");
+                        }
 
                         // Directly remove this property from the list
                         mat->mNumProperties--;

@@ -153,6 +153,10 @@ OPTION ( ASSIMP_BUILD_TESTS
   "If the test suite for Assimp is built in addition to the library."
   ON
 )
+OPTION ( ASSIMP_INSTALL_TESTS
+  "If the test suite for Assimp should be installed."
+  OFF
+)
 OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
   OFF
@@ -807,7 +811,17 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # The viewer for windows only
   IF (WIN32)
     FIND_PACKAGE(DirectX)
-    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" ${DirectX_FOUND} )
+    # The viewer needs the legacy D3DX9 library, which is not available for every
+    # architecture (e.g. ARM64), so only enable it by default when it was found.
+    IF ( DirectX_FOUND AND DirectX_D3DX9_LIBRARY )
+      SET ( ASSIMP_VIEW_DEFAULT ON )
+    ELSE ()
+      SET ( ASSIMP_VIEW_DEFAULT OFF )
+    ENDIF ()
+    OPTION ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" ${ASSIMP_VIEW_DEFAULT} )
+    IF ( ASSIMP_BUILD_ASSIMP_VIEW AND NOT ASSIMP_VIEW_DEFAULT )
+      MESSAGE( FATAL_ERROR "ASSIMP_BUILD_ASSIMP_VIEW requires the legacy DirectX SDK (d3d9 and d3dx9), which was not found for this architecture. Set ASSIMP_BUILD_ASSIMP_VIEW=OFF." )
+    ENDIF ()
     IF ( ASSIMP_BUILD_ASSIMP_VIEW )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ()
@@ -900,7 +914,10 @@ IF ( ASSIMP_INSTALL )
 ENDIF()
 
 if(WIN32)
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  if (CMAKE_CXX_COMPILER_ARCHITECTURE_ID MATCHES "^[Aa][Rr][Mm]64")
+    SET(BIN_DIR "${PROJECT_SOURCE_DIR}/binarm64/")
+    SET(LIB_DIR "${PROJECT_SOURCE_DIR}/libarm64/")
+  elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
     SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin64/")
     SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib64/")
   else()
@@ -944,7 +961,6 @@ if(WIN32)
       ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.exp		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.exp VERBATIM)
       ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk VERBATIM)
       ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.lib		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.lib VERBATIM)
-      ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb VERBATIM)
       ADD_CUSTOM_COMMAND(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb VERBATIM)
     ENDIF()
   ENDIF()

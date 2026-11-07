@@ -441,10 +441,10 @@ struct aiMetadata {
     }
 
     /// Return metadata entry for analyzing it by user.
-    /// \param [in] pIndex - index of the entry.
-    /// \param [out] pKey - pointer to the key value.
-    /// \param [out] pEntry - pointer to the entry: type and value.
-    /// \return false - if pIndex is out of range, else - true.
+    /// \param [in] index - index of the entry.
+    /// \param [out] key - pointer to the key value.
+    /// \param [out] entry - pointer to the entry: type and value.
+    /// \return false - if index is out of range, else - true.
     inline bool Get(size_t index, const aiString *&key, const aiMetadataEntry *&entry) const {
         if (index >= mNumProperties) {
             return false;
@@ -457,7 +457,7 @@ struct aiMetadata {
     }
 
     /// Check whether there is a metadata entry for the given key.
-    /// \param [in] Key - the key value value to check for.
+    /// \param [in] key - the key value value to check for.
     inline bool HasKey(const char *key) const {
         if (nullptr == key) {
             return false;

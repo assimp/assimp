@@ -351,13 +351,12 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
             ++channelIndex;
         }
     }
-#else
-#if defined(ASSIMP_BUILD_USD_BETA)
+#else // #if !defined(ASSIMP_BUILD_USD_BETA)
     // TODO: restore animation functionality
     // Don't want to populate animations at all; dummy values will
     // cause model import to fail entirely
     return;
-#endif //#if defined(ASSIMP_BUILD_USD_BETA)
+
     if (render_scene.animations.empty()) {
         return;
     }

@@ -909,13 +909,14 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output) 
     }
     else if (!line.indices.size() && !line.counts.size()) {
         // a poly-line - so there are no indices yet.
+        // a polyline is a connected chain of segments, so segment i joins vertex i to vertex i+1.
         size_t guess = line.positions.size() + (line.flags & DXF_POLYLINE_FLAG_CLOSED ? 1 : 0);
-        line.indices.reserve(guess);
+        line.indices.reserve(guess*2);
 
-        line.counts.reserve(guess/2);
-        for (unsigned int i = 0; i < line.positions.size()/2; ++i) {
-            line.indices.push_back(i*2);
-            line.indices.push_back(i*2+1);
+        line.counts.reserve(guess);
+        for (unsigned int i = 0; i + 1 < line.positions.size(); ++i) {
+            line.indices.push_back(i);
+            line.indices.push_back(i+1);
             line.counts.push_back(2);
         }
 
@@ -1004,6 +1005,14 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
 
     if (line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH && !(flags & DXF_VERTEX_FLAG_PART_OF_POLYFACE)) {
         ASSIMP_LOG_WARN("DXF: expected vertex to be part of a polyface but the 0x128 flag isn't set");
+    }
+    
+    // A triangular polyface is commonly written as a closed quad, repeating either
+    // the first corner (a,b,c,a) or the last one (a,b,c,c) in group code 74. Left
+    // as a 4-corner face it triangulates into the real triangle plus a zero-area
+    // sliver, so collapse it back to a single triangle here.
+    while (cnti > 3 && (indices[cnti-1] == indices[0] || indices[cnti-1] == indices[cnti-2])) {
+        --cnti;
     }
 
     if (cnti) {

@@ -163,7 +163,7 @@ AI_FORCE_INLINE bool SkipLine(const char_t *in, const char_t **out, const char_t
 
 // ---------------------------------------------------------------------------------
 /// @brief Will skip a line in-situ.
-/// @param in     The in/out buffer.
+/// @param inout  The in/out buffer.
 /// @param end    The end of the buffer.
 /// @return true if valid.
 template <class char_t>
@@ -187,8 +187,8 @@ AI_FORCE_INLINE bool SkipSpacesAndLineEnd(const char_t *in, const char_t **out, 
 
 // ---------------------------------------------------------------------------------
 /// @brief  Returns true, if the character is a space or a line end.
-/// @param  in  The character to test.
-/// @param  out The buffer with the skipped data.
+/// @param  inout The in/out buffer.
+/// @param  end   The end of the buffer.
 /// @return true if valid.
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpacesAndLineEnd(const char_t **inout, const char_t *end) {

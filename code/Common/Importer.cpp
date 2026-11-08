@@ -546,7 +546,9 @@ void WriteLogOpening(const std::string& file) {
            << "ppc32"
 #elif defined(__powerpc64__)
            << "ppc64"
-#elif defined(__arm__)
+#elif defined(_M_ARM64) || defined(__aarch64__)
+           << "arm64"
+#elif defined(_M_ARM) || defined(__arm__)
            << "arm"
 #else
            << "<unknown architecture>"

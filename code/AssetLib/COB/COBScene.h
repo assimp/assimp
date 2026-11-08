@@ -55,23 +55,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp::COB {
 
 // ------------------
-/** Represents a single vertex index in a face */
+/// Represents a single vertex index in a face
 struct VertexIndex {
-    // intentionally uninitialized
-    unsigned int pos_idx,uv_idx;
+    unsigned int pos_idx{};
+    unsigned int uv_idx{};
 };
 
 // ------------------
-/** COB Face data structure */
+/// COB Face data structure
 struct Face {
-    // intentionally uninitialized
-    unsigned int material;
-    unsigned int flags;
-    std::vector<VertexIndex> indices;
+    unsigned int material{};
+    unsigned int flags{};
+    std::vector<VertexIndex> indices{};
 };
 
 // ------------------
-/** COB chunk header information */
+/// COB chunk header information
 constexpr unsigned int NO_SIZE = UINT_MAX;
 
 struct ChunkInfo {
@@ -93,7 +92,7 @@ struct ChunkInfo {
 };
 
 // ------------------
-/** A node in the scenegraph */
+/// A node in the scenegraph
 struct Node : ChunkInfo {
     enum Type {
         TYPE_INVALID = -1,
@@ -125,7 +124,7 @@ struct Node : ChunkInfo {
 };
 
 // ------------------
-/** COB Mesh data structure */
+/// COB Mesh data structure
 struct Mesh final : Node {
     using ChunkInfo::operator=;
     enum DrawFlags {
@@ -158,7 +157,7 @@ struct Mesh final : Node {
 };
 
 // ------------------
-/** COB Group data structure */
+/// COB Group data structure
 struct Group final : Node {
     using ChunkInfo::operator=;
     
@@ -168,7 +167,7 @@ struct Group final : Node {
 };
 
 // ------------------
-/** COB Bone data structure */
+///** COB Bone data structure
 struct Bone final : Node {
     using ChunkInfo::operator=;
     
@@ -178,7 +177,7 @@ struct Bone final : Node {
 };
 
 // ------------------
-/** COB Light data structure */
+///** COB Light data structure
 struct Light final : Node {
     enum LightType {
         SPOT,
@@ -200,7 +199,7 @@ struct Light final : Node {
 };
 
 // ------------------
-/** COB Camera data structure */
+/// COB Camera data structure
 struct Camera final : Node {
     using ChunkInfo::operator=;
 
@@ -210,14 +209,14 @@ struct Camera final : Node {
 };
 
 // ------------------
-/** COB Texture data structure */
+/// COB Texture data structure
 struct Texture {
     std::string path;
     aiUVTransform transform;
 };
 
 // ------------------
-/** COB Material data structure */
+/// COB Material data structure
 struct Material : ChunkInfo {
     using ChunkInfo::operator=;
 
@@ -252,7 +251,7 @@ struct Material : ChunkInfo {
 };
 
 // ------------------
-/** Embedded bitmap, for instance for the thumbnail image */
+/// Embedded bitmap, for instance for the thumbnail image
 struct Bitmap : ChunkInfo {
     Bitmap() = default;
 

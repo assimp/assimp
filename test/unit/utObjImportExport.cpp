@@ -543,36 +543,42 @@ TEST_F(utObjImportExport, issue2355_mtl_texture_prefix) {
 TEST_F(utObjImportExport, face_index_too_large_for_int_is_rejected) {
     // 4294967297 used to overflow int while parsing and silently wrap to a
     // valid vertex index. The out-of-range index must now fail the import.
-    static const char *curObjModel =
+    static constexpr char curObjModel[] =
             "v 0 0 0\n"
             "v 1 0 0\n"
             "v 0 1 0\n"
             "f 1 2 4294967297\n";
 
     Assimp::Importer myImporter;
-    const aiScene *scene = myImporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), 0);
+    const aiScene *scene = myImporter.ReadFileFromMemory(curObjModel, sizeof(curObjModel) - 1, 0);
     EXPECT_EQ(nullptr, scene);
 }
 
 TEST_F(utObjImportExport, scientific_notation_underflow_and_zero_mantissa) {
     // 1e-39 used to read as 0 because 10^39 overflowed float before the divide,
     // and 0e400 used to read as NaN because 0 * inf is NaN.
-    static const char *curObjModel =
+    static constexpr char curObjModel[] =
             "v 1e-39 0 0\n"
             "v 0e400 0 0\n"
             "v 1e-400 0 0\n"
             "v 2.5e3 0 0\n"
-            "f 1 2 3 4\n";
+            "v 1e-320 0 0\n"
+            "f 1 2 3 4 5\n";
 
     Assimp::Importer myImporter;
-    const aiScene *scene = myImporter.ReadFileFromMemory(curObjModel, strlen(curObjModel), 0);
+    const aiScene *scene = myImporter.ReadFileFromMemory(curObjModel, sizeof(curObjModel) - 1, 0);
     ASSERT_NE(nullptr, scene);
     ASSERT_EQ(1U, scene->mNumMeshes);
     const aiMesh *mesh = scene->mMeshes[0];
-    ASSERT_EQ(4U, mesh->mNumVertices);
+    ASSERT_EQ(5U, mesh->mNumVertices);
 
-    EXPECT_NEAR(1e-39f, mesh->mVertices[0].x, 1e-41f);
-    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[1].x);
-    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[2].x);
-    EXPECT_FLOAT_EQ(2500.0f, mesh->mVertices[3].x);
+    EXPECT_NEAR(static_cast<ai_real>(1e-39), mesh->mVertices[0].x, static_cast<ai_real>(1e-41));
+    EXPECT_FLOAT_EQ(0.0f, static_cast<float>(mesh->mVertices[1].x));
+    EXPECT_FLOAT_EQ(0.0f, static_cast<float>(mesh->mVertices[2].x));
+    EXPECT_FLOAT_EQ(2500.0f, static_cast<float>(mesh->mVertices[3].x));
+#ifdef ASSIMP_DOUBLE_PRECISION
+    EXPECT_GT(mesh->mVertices[4].x, 0.0);
+#else
+    EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[4].x);
+#endif
 }

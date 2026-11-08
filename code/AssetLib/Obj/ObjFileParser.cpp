@@ -250,12 +250,18 @@ ai_real ObjFileParser::parseFloatDirect() {
         // Scale in double and convert to ai_real once. Converting 10^39 to
         // float first gives inf, so 1e-39 used to read as 0. A zero mantissa is
         // skipped because 0 * inf is NaN (0e400 used to read as NaN).
-        if (result != 0.0f) {
-            if (exponent > 0) {
-                result = static_cast<ai_real>(result * pow(10.0, exponent));
-            } else if (exponent < 0) {
-                result = static_cast<ai_real>(result / pow(10.0, -exponent));
+        if (result != 0.0f && exponent != 0) {
+            double scaled = static_cast<double>(result);
+            while (exponent > 300) {
+                scaled *= 1e300;
+                exponent -= 300;
             }
+            while (exponent < -300) {
+                scaled *= 1e-300;
+                exponent += 300;
+            }
+            scaled *= pow(10.0, exponent);
+            result = static_cast<ai_real>(scaled);
         }
     }
 

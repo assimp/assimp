@@ -1173,8 +1173,8 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-material.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-material-mtlx.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-mesh.cc
-                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-pprint.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-mesh-tangent.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-pprint.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/texture-util.cc
                 ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-1.cc
                 ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-2.cc

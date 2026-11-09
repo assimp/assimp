@@ -124,7 +124,7 @@ namespace Assimp {
                 case EDT_Short:
                     return static_cast<ai_real>(val.iInt + (0xFFFF / 2)) / static_cast<ai_real>(0xFFFF);
                 case EDT_UInt:
-                    return static_cast<ai_real>(val.iUInt) / static_cast<ai_real>(0xFFFF);
+                    return static_cast<ai_real>(val.iUInt) / static_cast<ai_real>(0xFFFFFFFFu);
                 case EDT_Int:
                     return (static_cast<ai_real>(val.iInt) / static_cast<ai_real>(0xFF)) + 0.5f;
                 default:
@@ -623,6 +623,9 @@ namespace Assimp {
                     // should be 6 coords
                     auto p = GetProperty(instElement->alProperties, iTextureCoord).avList.begin();
                     if ((iNum / 3) == 2) { // X Y coord
+                        if (iNum > mGeneratedMesh->mFaces[pos].mNumIndices * 2) {
+                            throw DeadlyImportError("Invalid .ply file: Too many texture coordinates for face");
+                        }
                         for (unsigned int a = 0; a < iNum; ++a, ++p) {
                             // The texture-coordinate list length is independent of the
                             // vertex-index list length, so a / 2 may run past the face's

@@ -41,10 +41,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnitTestPCH.h"
 
-#include <assimp/Importer.hpp>
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/MemoryIOWrapper.h>
 #include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
+
+#include <cstring>
+#include <string>
 
 using namespace Assimp;
+
+namespace {
+
+// Serves the .uc file from memory, the _d.3d and _a.3d files come from disk.
+class UcFromMemoryIOSystem : public IOSystem {
+public:
+    explicit UcFromMemoryIOSystem(const char *uc) :
+            mUc(uc) {}
+
+    bool Exists(const char *file) const override {
+        return mFiles.Exists(file);
+    }
+
+    char getOsSeparator() const override {
+        return mFiles.getOsSeparator();
+    }
+
+    IOStream *Open(const char *file, const char *mode = "rb") override {
+        const size_t len = strlen(file);
+        if (len > 3 && !strcmp(file + len - 3, ".uc")) {
+            return new MemoryIOStream(reinterpret_cast<const uint8_t *>(mUc.data()), mUc.size());
+        }
+        return mFiles.Open(file, mode);
+    }
+
+    void Close(IOStream *file) override {
+        delete file;
+    }
+
+private:
+    DefaultIOSystem mFiles;
+    std::string mUc;
+};
+
+} // namespace
 
 TEST(ut3DImportExport, importBoxA) {
     Assimp::Importer importer;
@@ -66,6 +106,22 @@ TEST(ut3DImportExport, importBoxUC) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(ut3DImportExport, importUCDirectiveAtEndOfFile) {
+    // Each .uc ends on a directive line.
+    const char *const ucFiles[] = {
+        "#exec TEXTURE IMPORT NAME=Jtex1 FILE=texture1.pcx",
+        "#exec MESHMAP SETTEXTURE MESHMAP=box NUM=1",
+        "#exec MESHMAP SCALE MESHMAP=box X=0.1 Y=0.1 Z=0.2",
+        "#exec MESHMAP SCALE",
+        "#exec MESHMAP SCALE MESHMAP=box X=0.1 Y=0.1 Z=0.2\n",
+    };
+    for (const char *uc : ucFiles) {
+        Assimp::Importer importer;
+        importer.SetIOHandler(new UcFromMemoryIOSystem(uc));
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3D/box.uc", aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene) << uc;
+    }
+}
 
 TEST(ut3DImportExport, importMarRifle) {
     Assimp::Importer importer;

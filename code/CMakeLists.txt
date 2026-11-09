@@ -1011,8 +1011,8 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     #       name can lead to non-deterministic (unpredictable) results since the code is potentially
     #       in flux
     if (ASSIMP_USD_BETA)
-        # "main" branch, 15 Sep 2026 (after tinyusdz -> lightusd "rebrand")
-        set(TINYUSDZ_GIT_TAG "1fdd60a6171724b5ce0e6716c25b2bba1aed7ad3")
+        # "main" branch, 9 Nov 2026 (after tinyusdz -> lightusd "rebrand")
+        set(TINYUSDZ_GIT_TAG "a4a0d7b6247a6f7c1d14e2d95ae182d5e735bdda")
         message("\n\n**** Cloning latest tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
     else () # if (ASSIMP_USD_BETA)
         # "dev" branch, 14 Mar 2025
@@ -1092,9 +1092,10 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
                 ${Tinyusdz_SRC_ABSPATH}/ascii-parser-basetype-inst.cc
                 ${Tinyusdz_SRC_ABSPATH}/ascii-parser-entry.cc
                 ${Tinyusdz_SRC_ABSPATH}/ascii-parser-props.cc
-                ${Tinyusdz_SRC_ABSPATH}/color-transform.cc
+                ${Tinyusdz_SRC_ABSPATH}/core/color-transform.cc
                 ${Tinyusdz_SRC_ABSPATH}/composition-reconstruct.cc
                 ${Tinyusdz_SRC_ABSPATH}/core/instance-key.cc
+                ${Tinyusdz_SRC_ABSPATH}/core/logger.cc
                 ${Tinyusdz_SRC_ABSPATH}/core/path-expression.cc
                 ${Tinyusdz_SRC_ABSPATH}/core/path-expression-eval.cc
                 ${Tinyusdz_SRC_ABSPATH}/crate-reader-arrays.cc
@@ -1144,7 +1145,9 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
                 ${Tinyusdz_SRC_ABSPATH}/sconv-physics.cc
                 ${Tinyusdz_SRC_ABSPATH}/sconv-shader.cc
                 ${Tinyusdz_SRC_ABSPATH}/sconv-skel.cc
+                ${Tinyusdz_SRC_ABSPATH}/imageio/png-stream.cc
                 ${Tinyusdz_SRC_ABSPATH}/imageproc/simd.cc
+                ${Tinyusdz_SRC_ABSPATH}/next/c/spline.c
                 ${Tinyusdz_SRC_ABSPATH}/spline-binary.cc
                 ${Tinyusdz_SRC_ABSPATH}/stage-converter.cc
                 ${Tinyusdz_SRC_ABSPATH}/timesamples.cc
@@ -1168,14 +1171,42 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
                 ${Tinyusdz_SRC_ABSPATH}/tydra/materialx-to-json.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/raytracing-scene-converter.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/next/render-converter.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/next/render-converter-material.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-analytic-basic.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-analytic-solid.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-anim.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-anim-light.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-anim-property.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-anim-skeleton.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-anim-value-clip.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-dedup.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-deferred.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-hierarchy.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-instancer.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-material.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-material-assembly.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-material-mtlx.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-material-signature.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-mesh.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-mesh-tangent.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-mesh-visitor.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-optimize.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-pprint.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-stage-instances.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-state.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-texture.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/render-data-xform-anim.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access-blendshape.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access-collection.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access-primvar.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access-property.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access-property-names.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access-skeleton.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access-terminal.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/scene-access-xform-node.cc
                 ${Tinyusdz_SRC_ABSPATH}/tydra/texture-util.cc
+                ${Tinyusdz_SRC_ABSPATH}/tydra/vol/volume-field.cc
+                ${Tinyusdz_SRC_ABSPATH}/unicode-xid-c.c
                 ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-1.cc
                 ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-2.cc
                 ${Tinyusdz_SRC_ABSPATH}/usda-reader-reconstruct-3.cc
@@ -1231,6 +1262,18 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
                 ${Tinyusdz_SRC_ABSPATH}/external/mikktspace/mikktspace.c
                 ${Tinyusdz_SRC_ABSPATH}/external/miniz.c
                 ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_io.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_lifecycle.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tvdb_memory.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_mesh.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_sdf_tree.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_sparse.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_sparse_tools.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_sparse_tree.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_thread.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_to_nanovdb.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_tree.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_volume.c
+                ${Tinyusdz_SRC_ABSPATH}/external/tinyvdb/tinyvdb_winding.c
         )
         # For convenience of users following best practices and treating
         # warnings-as-errors, surgically prevent known warnings from breaking build

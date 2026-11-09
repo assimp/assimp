@@ -352,11 +352,6 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
         }
     }
 #else // #if !defined(ASSIMP_BUILD_USD_BETA)
-    // TODO: restore animation functionality
-    // Don't want to populate animations at all; dummy values will
-    // cause model import to fail entirely
-    return;
-
     if (render_scene.animations.empty()) {
         return;
     }
@@ -384,11 +379,12 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
 
         newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
         for (int channelIndex = 0; channelIndex < animation.num_channels(); ++channelIndex) {
-//            auto &animationChannel = animation.channels[channelIndex];
             animationChannel(
                     render_scene,
+                    animation,
                     pScene,
                     newAiAnimation,
+                    animationIndex,
                     channelIndex
             );
         }
@@ -399,18 +395,137 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
 #if defined(ASSIMP_BUILD_USD_BETA)
 void USDImporterImplTinyusdz::animationChannel(
         const lightusd::tydra::RenderScene &render_scene,
+        const lightusd::tydra::AnimationClip &animation,
         aiScene *pScene,
         aiAnimation *newAiAnimation,
+        const int animationIndex,
         const int channelIndex) {
+    std::stringstream ss;
+    auto &animationChannel = animation.channels[channelIndex];
+    lightusd::tydra::ChannelTargetType target_type{animationChannel.target_type};
+    // TODO: support node animations
+    if (target_type == lightusd::tydra::ChannelTargetType::SceneNode) {
+        ss.str("");
+        ss << "    animations(): SceneNode: anim[" << animationIndex << "].channel[" << channelIndex << "]";
+        TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+        return;
+    }
+
     auto newAiNodeAnim = new aiNodeAnim();
     newAiAnimation->mChannels[channelIndex] = newAiNodeAnim;
+    if (animationChannel.is_skeletal()) {
+        int32_t skeleton_id{animationChannel.skeleton_id};
+        int32_t joint_id{animationChannel.joint_id};
+        if (skeleton_id < render_scene.skeletons.size()) {
+            const auto& skeleton = render_scene.skeletons[skeleton_id];
+            const SkelNode &root_node{skeleton.root_node};
+            for (int skelNodeIdx = 0; skelNodeIdx < root_node.children.size(); ++skelNodeIdx) {
+                ss.str("");
+                ss << "    animations(): anim[" << animationIndex << "].ch[" << channelIndex << "]" <<
+                        ": skel[" << skeleton_id << "]: child[" << skelNodeIdx << "] has " <<
+                        root_node.children[skelNodeIdx].children.size() << " children";
+                TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+            }
+            const int parent_joint_id = skeleton.parent_joint_indices[joint_id];
+//                // channel.joint_id is your flat index into the target skeleton's structures
+            if (joint_id < skeleton.num_joints()) {
+                ss.str("");
+                ss << "    animations(): anim[" << animationIndex << "].ch[" << channelIndex << "]" <<
+                   ": skel[" << skeleton_id << "].jt[" << joint_id <<
+                   "].par[" << parent_joint_id << "]";
+                if (joint_id < root_node.children.size()) {
+                    // TODO: this is incorrect, insufficient nodes to retrieve joint names
+                    const std::string &jointName = root_node.children[joint_id].joint_name;
+                    newAiNodeAnim->mNodeName = jointName;
+                    ss << " (\"" << jointName << "\") of " << skeleton.num_joints();
+                    TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+                } else {
+                    ss << "    WARNING: joint_id > root_node.children.size() (" <<
+                            root_node.children.size() << ")";
+                    TINYUSDZLOGW(TAG, "%s", ss.str().c_str());
+                }
+            }
+//
+//                // You can also look up flat transforms matching this joint index here:
+//                // auto rest_transform = skeleton.rest_transforms[channel.joint_id];
+        }
+    } // if (animationChannel.is_skeletal())
+
     newAiAnimation->mDuration = 0;
 
     std::vector<aiVectorKey> positionKeys;
     std::vector<aiQuatKey> rotationKeys;
     std::vector<aiVectorKey> scalingKeys;
 
-    // TODO: add switch on channel type (rot/scale/translate/weights etc)
+    const KeyframeSampler &sampler{animation.samplers[animationChannel.sampler]};
+    switch (animationChannel.path) {
+        case AnimationPath::Rotation: {
+            ss.str("");
+            ss << "    animations(): Rotation: anim[" << animationIndex << "].channel[" << channelIndex << "]: " <<
+                    sampler.num_keyframes() << " times, " << sampler.values.size() << " values, ";
+            TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+            // idx_t: time index; iq: quaternion values index
+            for (int idx_t = 0, iq = 0; idx_t < sampler.num_keyframes(); ++idx_t, iq += 4) {
+                if (sampler.times[idx_t] > newAiAnimation->mDuration) {
+                    newAiAnimation->mDuration = sampler.times[idx_t];
+                }
+                std::array<float, 4> quat{sampler.values[iq], sampler.values[iq + 1], sampler.values[iq + 2], sampler.values[iq + 3]};
+                rotationKeys.emplace_back(
+                        sampler.times[idx_t],
+                        tinyUsdzQuatToAiQuat(quat)
+                );
+            }
+            break;
+        }
+        case AnimationPath::Scale: {
+            ss.str("");
+            ss << "    animations(): Scale: anim[" << animationIndex << "].channel[" << channelIndex << "]: " <<
+                    sampler.num_keyframes() << " times, " << sampler.values.size() << " values, ";
+            TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+            // idx_t: time index; ixyz: scale (xyz) values index
+            for (int idx_t = 0, ixyz = 0; idx_t < sampler.num_keyframes(); ++idx_t, ixyz += 3) {
+                if (sampler.times[idx_t] > newAiAnimation->mDuration) {
+                    newAiAnimation->mDuration = sampler.times[idx_t];
+                }
+                std::array<float, 3> xyz{sampler.values[ixyz], sampler.values[ixyz + 1], sampler.values[ixyz + 2]};
+                scalingKeys.emplace_back(
+                        sampler.times[idx_t],
+                        tinyUsdzScaleOrPosToAssimp(xyz)
+                );
+            }
+            break;
+        }
+        case AnimationPath::Translation: {
+            ss.str("");
+            ss << "    animations(): Translation: anim[" << animationIndex << "].channel[" << channelIndex << "]: " <<
+                    sampler.num_keyframes() << " times, " << sampler.values.size() << " values, ";
+            TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+            // idx_t: time index; ixyz: translation (xyz) values index
+            for (int idx_t = 0, ixyz = 0; idx_t < sampler.num_keyframes(); ++idx_t, ixyz += 3) {
+                if (sampler.times[idx_t] > newAiAnimation->mDuration) {
+                    newAiAnimation->mDuration = sampler.times[idx_t];
+                }
+                std::array<float, 3> xyz{sampler.values[ixyz], sampler.values[ixyz + 1], sampler.values[ixyz + 2]};
+                positionKeys.emplace_back(
+                        sampler.times[idx_t],
+                        tinyUsdzScaleOrPosToAssimp(xyz)
+                );
+            }
+            break;
+        }
+        case AnimationPath::Weights: {
+                ss.str("");
+                ss << "    animations(): Weights: anim[" << animationIndex << "].channel[" << channelIndex << "]";
+                TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+            break;
+        }
+        case AnimationPath::CustomProperty: {
+                ss.str("");
+                ss << "    animations(): CustomProperty: anim[" << animationIndex << "].channel[" << channelIndex << "]";
+                TINYUSDZLOGD(TAG, "%s", ss.str().c_str());
+            break;
+        }
+    }
 
     newAiNodeAnim->mNumPositionKeys = unsigned(positionKeys.size());
     newAiNodeAnim->mPositionKeys = new aiVectorKey[newAiNodeAnim->mNumPositionKeys];

@@ -88,8 +88,10 @@ namespace Assimp {
 #if defined(ASSIMP_BUILD_USD_BETA)
     void animationChannel(
         const lightusd::tydra::RenderScene &render_scene,
+        const lightusd::tydra::AnimationClip &animation,
         aiScene *pScene,
         aiAnimation *newAiAnimation,
+        const int animationIndex,
         const int channelIndex);
 #endif //#if defined(ASSIMP_BUILD_USD_BETA)
 

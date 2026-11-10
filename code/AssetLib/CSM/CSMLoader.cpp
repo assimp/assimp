@@ -182,21 +182,21 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
                         if (anim->mChannels[i]->mPositionKeys != nullptr) delete[] anim->mChannels[i]->mPositionKeys;
                         anim->mChannels[i]->mPositionKeys = new aiVectorKey[alloc];
+                        // A $points section (re)starts its channels. Reset the key count
+                        // so a second section cannot keep the (potentially large) count
+                        // from the first one and index past a smaller re-allocated buffer
+                        // (heap out-of-bounds write).
+                        anim->mChannels[i]->mNumPositionKeys = 0;
                     }
                 } else {
                     // default init
                     for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
+                        // Reset the key count first: a reused buffer must restart at 0
+                        // even when the existing allocation is kept (see note above).
+                        anim->mChannels[i]->mNumPositionKeys = 0;
                         if (anim->mChannels[i]->mPositionKeys != nullptr) continue;
                         anim->mChannels[i]->mPositionKeys = new aiVectorKey[alloc];
                     }
-                }
-
-                // A $points section always (re)starts its channels from the buffers
-                // sized just above. Reset each channel's key count so a second $points
-                // section cannot keep the (potentially large) count from the first one
-                // and index past a smaller re-allocated buffer (heap out-of-bounds write).
-                for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
-                    anim->mChannels[i]->mNumPositionKeys = 0;
                 }
 
                 // Track every channel's own buffer capacity. A single shared counter

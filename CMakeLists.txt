@@ -271,7 +271,11 @@ SET (ASSIMP_SOVERSION 6)
 SET( ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources" )
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_C_STANDARD 11) # lightusd (nee tinyusdz) requires modern C for max_align_t
+if (ASSIMP_USD_BETA)
+    set(CMAKE_C_STANDARD 11) # lightusd (nee tinyusdz) requires modern C for max_align_t
+else () # if (ASSIMP_USD_BETA)
+    set(CMAKE_C_STANDARD 99)
+endif () # if (ASSIMP_USD_BETA)
 
 IF(NOT ASSIMP_IGNORE_GIT_HASH)
   # Get the current working branch

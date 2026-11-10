@@ -49,7 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ParsingUtils.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
+#include <algorithm>
+#include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <memory>
 #include <utility>
 
@@ -171,11 +174,16 @@ int ObjFileParser::parseIntDirect() {
         return 0;
     }
 
-    // Parse digits
+    // Parse digits. Accumulate in 64 bits and saturate at INT_MAX, so a number
+    // too large for int never overflows (that is undefined behaviour). The
+    // saturated value is still out of range, so the existing vertex index
+    // range checks reject the face instead of it silently using a wrapped index.
+    int64_t wide = 0;
     while (mDataIt != mDataItEnd && isdigit(static_cast<unsigned char>(*mDataIt))) {
-        result = result * 10 + (*mDataIt - '0');
+        wide = std::min<int64_t>(wide * 10 + (*mDataIt - '0'), std::numeric_limits<int>::max());
         ++mDataIt;
     }
+    result = static_cast<int>(wide);
 
     return negative ? -result : result;
 }
@@ -221,6 +229,9 @@ ai_real ObjFileParser::parseFloatDirect() {
     // Exponent (optional - OBJ files rarely use scientific notation)
     if (ptr < mTokenEnd && (*ptr == 'e' || *ptr == 'E')) {
         ++ptr;
+        // Past about +-400 a float is already inf or 0, so saturating here
+        // keeps the exponent from overflowing int without changing the result.
+        constexpr int maxExponent = 10000;
         int exponent = 0;
         bool expNegative = false;
         if (ptr < mTokenEnd && *ptr == '-') {
@@ -230,17 +241,27 @@ ai_real ObjFileParser::parseFloatDirect() {
             ++ptr;
         }
         while (ptr < mTokenEnd && isdigit(static_cast<unsigned char>(*ptr))) {
-            exponent = exponent * 10 + (*ptr - '0');
+            exponent = std::min(exponent * 10 + (*ptr - '0'), maxExponent);
             ++ptr;
         }
         if (expNegative) {
             exponent = -exponent;
         }
-        // Simple pow10 approximation for common exponents
-        if (exponent > 0) {
-            result *= static_cast<ai_real>(pow(10.0, exponent));
-        } else if (exponent < 0) {
-            result /= static_cast<ai_real>(pow(10.0, -exponent));
+        // Scale in double and convert to ai_real once. Converting 10^39 to
+        // float first gives inf, so 1e-39 used to read as 0. A zero mantissa is
+        // skipped because 0 * inf is NaN (0e400 used to read as NaN).
+        if (result != 0.0f && exponent != 0) {
+            double scaled = static_cast<double>(result);
+            while (exponent > 300) {
+                scaled *= 1e300;
+                exponent -= 300;
+            }
+            while (exponent < -300) {
+                scaled *= 1e-300;
+                exponent += 300;
+            }
+            scaled *= pow(10.0, exponent);
+            result = static_cast<ai_real>(scaled);
         }
     }
 

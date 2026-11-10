@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 #include "Tools/TestTools.h"
+#include "UnitTestFileGenerator.h"
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #   include "AssetLib/glTF2/glTF2AssetWriter.h"
 #endif // ASSIMP_BUILD_NO_EXPORT
@@ -52,10 +53,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/mesh.h>
 
 #include <rapidjson/schema.h>
 
 #include <array>
+#include <cstdint>
+#include <cstdio>
 #include <fstream>
 #include <sstream>
 
@@ -800,8 +804,190 @@ TEST_F(utglTF2ImportExport, incorrect_vertex_arrays) {
     EXPECT_EQ(scene->mMeshes[7]->mNumFaces, 17u);
 }
 
-
 #ifndef ASSIMP_BUILD_NO_EXPORT
+
+namespace {
+
+struct ExportedMaterialCase {
+    const char *name;
+    float opacity;
+    bool hasSpecular;
+    bool zeroSpecularColor;
+    bool unlit;
+    bool hasBaseColor;
+    aiColor4D diffuseColor;
+    aiColor4D baseColor;
+    const char *alphaMode;
+    float expectedAlpha;
+    const char *expectedAlphaMode;
+    bool expectSpecular;
+};
+
+std::unique_ptr<aiScene> MakeMaterialExportScene(const ExportedMaterialCase &testCase) {
+    std::unique_ptr<aiScene> scene(new aiScene);
+    scene->mNumMaterials = 1;
+    scene->mMaterials = new aiMaterial *[1];
+    scene->mMaterials[0] = new aiMaterial;
+
+    aiMaterial *material = scene->mMaterials[0];
+    aiString name("opacity_test_material");
+    material->AddProperty(&name, AI_MATKEY_NAME);
+    material->AddProperty(&testCase.diffuseColor, 1, AI_MATKEY_COLOR_DIFFUSE);
+    material->AddProperty(&testCase.opacity, 1, AI_MATKEY_OPACITY);
+    if (testCase.hasSpecular) {
+        const aiColor3D specularColor = testCase.zeroSpecularColor ? aiColor3D(0.0f, 0.0f, 0.0f) : aiColor3D(0.7f, 0.6f, 0.5f);
+        material->AddProperty(&specularColor, 1, AI_MATKEY_COLOR_SPECULAR);
+    }
+    if (testCase.unlit) {
+        const aiShadingMode shadingMode = aiShadingMode_Unlit;
+        material->AddProperty(&shadingMode, 1, AI_MATKEY_SHADING_MODEL);
+    }
+    if (testCase.hasBaseColor) {
+        material->AddProperty(&testCase.baseColor, 1, AI_MATKEY_BASE_COLOR);
+    }
+    if (testCase.alphaMode != nullptr) {
+        const aiString alphaMode(testCase.alphaMode);
+        material->AddProperty(&alphaMode, AI_MATKEY_GLTF_ALPHAMODE);
+    }
+
+    scene->mNumMeshes = 1;
+    scene->mMeshes = new aiMesh *[1];
+    scene->mMeshes[0] = new aiMesh;
+    aiMesh *mesh = scene->mMeshes[0];
+    mesh->mMaterialIndex = 0;
+    mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+    mesh->mNumVertices = 3;
+    mesh->mVertices = new aiVector3D[3]{
+        aiVector3D(0.0f, 0.0f, 0.0f),
+        aiVector3D(1.0f, 0.0f, 0.0f),
+        aiVector3D(0.0f, 1.0f, 0.0f)
+    };
+    mesh->mNumFaces = 1;
+    mesh->mFaces = new aiFace[1];
+    mesh->mFaces[0].mNumIndices = 3;
+    mesh->mFaces[0].mIndices = new unsigned int[3]{ 0, 1, 2 };
+
+    scene->mRootNode = new aiNode;
+    scene->mRootNode->mNumMeshes = 1;
+    scene->mRootNode->mMeshes = new unsigned int[1]{ 0 };
+    return scene;
+}
+
+std::string MakeTemporaryOutputPath(const char *extension) {
+    char templatePath[] = TMP_PATH "assimp_gltf2_opacity_XXXXXX";
+    std::string temporaryPath;
+    FILE *temporaryFile = MakeTmpFile(templatePath, sizeof(templatePath) - 1, temporaryPath);
+    if (temporaryFile == nullptr) {
+        return {};
+    }
+    std::fclose(temporaryFile);
+    std::remove(temporaryPath.c_str());
+    return temporaryPath + extension;
+}
+
+uint32_t ReadLittleEndianUint32(const std::string &data, size_t offset) {
+    return static_cast<uint32_t>(static_cast<unsigned char>(data[offset])) |
+           (static_cast<uint32_t>(static_cast<unsigned char>(data[offset + 1])) << 8) |
+           (static_cast<uint32_t>(static_cast<unsigned char>(data[offset + 2])) << 16) |
+           (static_cast<uint32_t>(static_cast<unsigned char>(data[offset + 3])) << 24);
+}
+
+void ExportAndCheckMaterial(const ExportedMaterialCase &testCase, const char *format, const char *extension) {
+    const std::string outputPath = MakeTemporaryOutputPath(extension);
+    ASSERT_FALSE(outputPath.empty());
+
+    std::unique_ptr<aiScene> scene = MakeMaterialExportScene(testCase);
+    Assimp::Exporter exporter;
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene.get(), format, outputPath.c_str()))
+            << exporter.GetErrorString();
+
+    std::ifstream input(outputPath, std::ios::binary);
+    ASSERT_TRUE(input.good());
+    const std::string output((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    input.close();
+    std::remove(outputPath.c_str());
+    if (std::string(extension) == ".gltf") {
+        const size_t extensionOffset = outputPath.find_last_of('.');
+        const std::string binaryPath = outputPath.substr(0, extensionOffset) + ".bin";
+        std::remove(binaryPath.c_str());
+    }
+
+    std::string json = output;
+    if (std::string(extension) == ".glb") {
+        ASSERT_GE(output.size(), 20u);
+        ASSERT_EQ(0x46546C67u, ReadLittleEndianUint32(output, 0));
+        ASSERT_EQ(2u, ReadLittleEndianUint32(output, 4));
+        const uint32_t jsonLength = ReadLittleEndianUint32(output, 12);
+        ASSERT_EQ(0x4E4F534Au, ReadLittleEndianUint32(output, 16));
+        ASSERT_LE(20u + jsonLength, output.size());
+        json.assign(output.data() + 20, jsonLength);
+    }
+
+    rapidjson::Document document;
+    document.Parse(json.c_str());
+    ASSERT_FALSE(document.HasParseError());
+    ASSERT_TRUE(document.HasMember("materials"));
+    ASSERT_EQ(document["materials"].Size(), 1u);
+    const rapidjson::Value &material = document["materials"][0];
+    ASSERT_TRUE(material.HasMember("pbrMetallicRoughness"));
+    const rapidjson::Value &pbr = material["pbrMetallicRoughness"];
+    float alpha = 1.0f;
+    if (pbr.HasMember("baseColorFactor")) {
+        ASSERT_GE(pbr["baseColorFactor"].Size(), 4u);
+        alpha = pbr["baseColorFactor"][3].GetFloat();
+    }
+    EXPECT_NEAR(testCase.expectedAlpha, alpha, 0.00001f) << testCase.name << " " << format;
+    if (testCase.hasBaseColor) {
+        ASSERT_TRUE(pbr.HasMember("baseColorFactor"));
+        for (unsigned int channel = 0; channel < 3; ++channel) {
+            EXPECT_NEAR(testCase.baseColor[channel], pbr["baseColorFactor"][channel].GetFloat(), 0.00001f)
+                    << testCase.name << " " << format;
+        }
+    }
+
+    const char *alphaMode = "OPAQUE";
+    if (material.HasMember("alphaMode")) {
+        alphaMode = material["alphaMode"].GetString();
+    }
+    EXPECT_STREQ(testCase.expectedAlphaMode, alphaMode) << testCase.name << " " << format;
+
+    const bool hasSpecular = material.HasMember("extensions") &&
+                             material["extensions"].HasMember("KHR_materials_specular");
+    EXPECT_EQ(testCase.expectSpecular, hasSpecular) << testCase.name << " " << format;
+    if (hasSpecular) {
+        const rapidjson::Value &specular = material["extensions"]["KHR_materials_specular"];
+        ASSERT_TRUE(specular.HasMember("specularFactor"));
+        EXPECT_NEAR(1.0f, specular["specularFactor"].GetFloat(), 0.00001f)
+                << testCase.name << " " << format;
+    }
+    if (testCase.unlit) {
+        ASSERT_TRUE(material.HasMember("extensions"));
+        EXPECT_TRUE(material["extensions"].HasMember("KHR_materials_unlit"));
+    }
+}
+
+} // namespace
+
+TEST_F(utglTF2ImportExport, exportMaterialOpacityWithExtensions) {
+    const aiColor4D diffuseColor(0.9f, 0.1f, 0.2f, 1.0f);
+    const ExportedMaterialCase cases[] = {
+        { "transparent_specular", 0.6f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", true },
+        { "zero_specular_color", 0.6f, true, true, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", true },
+        { "zero_opacity_specular", 0.0f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.0f, "BLEND", true },
+        { "opaque_specular", 1.0f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 1.0f, "OPAQUE", true },
+        { "transparent_no_specular", 0.6f, false, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", false },
+        { "transparent_unlit", 0.6f, true, false, true, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", false },
+        { "base_color_alpha_composition", 0.5f, true, false, false, true, diffuseColor, aiColor4D(0.2f, 0.3f, 0.4f, 0.4f), nullptr, 0.2f, "BLEND", true },
+        { "base_color_precedence", 1.0f, true, false, false, true, diffuseColor, aiColor4D(0.2f, 0.3f, 0.4f, 0.7f), nullptr, 0.7f, "OPAQUE", true },
+        { "explicit_alpha_mode", 0.6f, true, false, false, false, diffuseColor, aiColor4D(), "MASK", 0.6f, "MASK", true }
+    };
+
+    for (const ExportedMaterialCase &testCase : cases) {
+        ExportAndCheckMaterial(testCase, "gltf2", ".gltf");
+        ExportAndCheckMaterial(testCase, "glb2", ".glb");
+    }
+}
+
 TEST_F(utglTF2ImportExport, exportglTF2FromFileTest) {
     EXPECT_TRUE(exporterTest());
 }

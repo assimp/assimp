@@ -1012,7 +1012,7 @@ IF (ASSIMP_BUILD_USD_IMPORTER)
     #       in flux
     if (ASSIMP_USD_BETA)
         # "main" branch, 9 Nov 2026 (after tinyusdz -> lightusd "rebrand")
-        set(TINYUSDZ_GIT_TAG "a4a0d7b6247a6f7c1d14e2d95ae182d5e735bdda")
+        set(TINYUSDZ_GIT_TAG "2229f7d425df4d8d338e88080dc5c48d7ecb76b2")
         message("\n\n**** Cloning latest tinyusdz repo, git tag ${TINYUSDZ_GIT_TAG}\n\n")
     else () # if (ASSIMP_USD_BETA)
         # "dev" branch, 14 Mar 2025

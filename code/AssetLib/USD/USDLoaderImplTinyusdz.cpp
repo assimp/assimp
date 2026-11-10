@@ -378,7 +378,7 @@ void USDImporterImplTinyusdz::animations(const lightusd::tydra::RenderScene &ren
         newAiAnimation->mNumChannels = unsigned(animation.num_channels());
 
         newAiAnimation->mChannels = new aiNodeAnim *[newAiAnimation->mNumChannels];
-        for (int channelIndex = 0; channelIndex < animation.num_channels(); ++channelIndex) {
+        for (decltype(animation.channels.size()) channelIndex = 0; channelIndex < animation.num_channels(); ++channelIndex) {
             animationChannel(
                     render_scene,
                     animation,
@@ -725,6 +725,9 @@ void USDImporterImplTinyusdz::bonesForMesh(
 
                 if (jointWeight > 0) {
                     const int jointIndex = jointIndices[index];
+                    if (jointIndex < 0 || static_cast<unsigned int>(jointIndex) >= numBones) {
+                        continue;
+                    }
                     aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
                 }
             }

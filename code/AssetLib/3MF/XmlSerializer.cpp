@@ -517,11 +517,23 @@ aiMesh *XmlSerializer::ReadMesh(XmlNode &node) {
     }
 
     aiMesh *mesh = new aiMesh();
+    bool hasVertices = false;
     for (XmlNode &currentNode : node.children()) {
         const std::string currentName = currentNode.name();
         if (currentName == XmlTag::vertices) {
+            if (hasVertices) {
+                throw DeadlyImportError("3MF: duplicate <vertices> element in <mesh>");
+            }
             ImportVertices(currentNode, mesh);
+            hasVertices = true;
         } else if (currentName == XmlTag::triangles) {
+            // The per-vertex texcoord/color arrays in ImportTriangles are sized from
+            // mesh->mNumVertices; requiring <vertices> to appear first and only once keeps
+            // that count final, so a later <vertices> block cannot grow mNumVertices past
+            // the already-allocated arrays and cause an out-of-bounds write.
+            if (!hasVertices) {
+                throw DeadlyImportError("3MF: <triangles> element before <vertices> in <mesh>");
+            }
             ImportTriangles(currentNode, mesh);
         }
     }

@@ -39,8 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines small vector with inplace storage.
-Based on CppCon 2016: Chandler Carruth "High Performance Code 201: Hybrid Data Structures" */
+/** 
+ * @file Defines small vector with inplace storage.
+ * Based on CppCon 2016: Chandler Carruth "High Performance Code 201: Hybrid Data Structures" 
+ */
 
 #pragma once
 #ifndef AI_SMALLVECTOR_H_INC
@@ -65,12 +67,7 @@ template<typename T, unsigned int Capacity>
 class SmallVector {
 public:
     /// @brief  The default class constructor.
-    SmallVector() :
-            mStorage(mInplaceStorage),
-            mSize(0),
-            mCapacity(Capacity) {
-        // empty
-    }
+    SmallVector() = default;
 
     /// @brief  The class destructor.
     ~SmallVector() {
@@ -175,10 +172,10 @@ private:
         mStorage[mSize++] = item;
     }
 
-    T* mStorage;
-    size_t mSize;
-    size_t mCapacity;
-    T mInplaceStorage[Capacity];
+    T* mStorage{mInplaceStorage};
+    size_t mSize{Capacity};
+    size_t mCapacity{Capacity};
+    T mInplaceStorage[Capacity]{};
 };
 
 } // end namespace Assimp

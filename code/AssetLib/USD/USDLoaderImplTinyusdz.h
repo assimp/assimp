@@ -112,6 +112,17 @@ public:
             size_t meshIdx,
             const std::string &nameWExt);
 
+    void bones(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            const std::string &nameWExt);
+
+    void bonesForMesh(
+            const tinyusdz::tydra::RenderScene &render_scene,
+            aiScene *pScene,
+            size_t meshIdx,
+            const std::string &nameWExt);
+
     void materials(
             const tinyusdz::tydra::RenderScene &render_scene,
             aiScene *pScene,

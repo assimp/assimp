@@ -173,7 +173,7 @@ private:
     }
 
     T* mStorage{mInplaceStorage};
-    size_t mSize{Capacity};
+    size_t mSize{0};
     size_t mCapacity{Capacity};
     T mInplaceStorage[Capacity]{};
 };

@@ -219,6 +219,7 @@ void USDImporterImplTinyusdz::InternReadFile(const std::string &pFile, aiScene *
     // sanityCheckNodesRecursive(pScene->mRootNode);
     animations(render_scene, pScene);
     meshes(render_scene, pScene, nameWExt);
+    bones(render_scene, pScene, nameWExt);
     materials(render_scene, pScene, nameWExt);
     textures(render_scene, pScene, nameWExt);
     textureImages(render_scene, pScene, nameWExt);
@@ -415,62 +416,6 @@ void USDImporterImplTinyusdz::verticesForMesh(const tinyusdz::tydra::RenderScene
     pScene->mMeshes[meshIdx]->mNumVertices = numVertices;
     pScene->mMeshes[meshIdx]->mVertices = new aiVector3D[pScene->mMeshes[meshIdx]->mNumVertices];
 
-    // Check if this is a skinned mesh
-    if (int skeleton_id = render_scene.meshes[meshIdx].skel_id; skeleton_id > -1) {
-        // Recursively iterate to collect all the joints in the hierarchy into a flattened array
-        std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
-        skeletonNodes.push_back(&render_scene.skeletons[skeleton_id].root_node);
-        for (int i = 0; i < skeletonNodes.size(); ++i) {
-            for (const auto &child : skeletonNodes[i]->children) {
-                skeletonNodes.push_back(&child);
-            }
-        }
-
-        // Convert USD skeleton joints to Assimp bones
-        const unsigned int numBones = unsigned(skeletonNodes.size());
-        pScene->mMeshes[meshIdx]->mNumBones = numBones;
-        pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones];
-
-        for (unsigned int i = 0; i < numBones; ++i) {
-            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
-            const int boneIndex = skeletonNode->joint_id;
-
-            // Sorted so that Assimp bone ids align with USD joint id
-            auto outputBone = new aiBone();
-            outputBone->mName = aiString(skeletonNode->joint_name);
-            outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m).Inverse();
-            pScene->mMeshes[meshIdx]->mBones[boneIndex] = outputBone;
-        }
-
-        // Vertex weights
-        std::vector<std::vector<aiVertexWeight>> aiBonesVertexWeights;
-        aiBonesVertexWeights.resize(numBones);
-
-        const std::vector<int> &jointIndices = render_scene.meshes[meshIdx].joint_and_weights.jointIndices;
-        const std::vector<float> &jointWeightIndices = render_scene.meshes[meshIdx].joint_and_weights.jointWeights;
-        const int numWeightsPerVertex = render_scene.meshes[meshIdx].joint_and_weights.elementSize;
-
-        for (unsigned int vertexIndex = 0; vertexIndex < numVertices; ++vertexIndex) {
-            for (int weightIndex = 0; weightIndex < numWeightsPerVertex; ++weightIndex) {
-                const unsigned int index = vertexIndex * numWeightsPerVertex + weightIndex;
-                const float jointWeight = jointWeightIndices[index];
-
-                if (jointWeight > 0) {
-                    const int jointIndex = jointIndices[index];
-                    aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
-                }
-            }
-        }
-
-        for (unsigned boneIndex = 0; boneIndex < numBones; ++boneIndex) {
-            const auto numWeightsForBone = unsigned(aiBonesVertexWeights[boneIndex].size());
-            pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights = new aiVertexWeight[numWeightsForBone];
-            pScene->mMeshes[meshIdx]->mBones[boneIndex]->mNumWeights = numWeightsForBone;
-
-            std::swap_ranges(aiBonesVertexWeights[boneIndex].begin(), aiBonesVertexWeights[boneIndex].end(), pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights);
-        }
-    } // Skinned mesh end
-
     for (size_t j = 0; j < pScene->mMeshes[meshIdx]->mNumVertices; ++j) {
         pScene->mMeshes[meshIdx]->mVertices[j].x = render_scene.meshes[meshIdx].points[j][0];
         pScene->mMeshes[meshIdx]->mVertices[j].y = render_scene.meshes[meshIdx].points[j][1];
@@ -532,6 +477,81 @@ void USDImporterImplTinyusdz::uvsForMesh(
             pScene->mMeshes[meshIdx]->mTextureCoords[uvSlotIdx][vertIdx].y = floatPtr[fpj + 1];
         }
     }
+}
+
+void USDImporterImplTinyusdz::bones(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        const std::string &nameWExt) {
+    for (size_t meshIdx = 0; meshIdx < render_scene.meshes.size(); ++meshIdx) {
+        bonesForMesh(render_scene, pScene, meshIdx, nameWExt);
+    }
+}
+
+void USDImporterImplTinyusdz::bonesForMesh(
+        const tinyusdz::tydra::RenderScene &render_scene,
+        aiScene *pScene,
+        size_t meshIdx,
+        const std::string &nameWExt) {
+    const auto numVertices = static_cast<unsigned int>(render_scene.meshes[meshIdx].points.size());
+    // Check if this is a skinned mesh
+    if (int skeleton_id = render_scene.meshes[meshIdx].skel_id; skeleton_id > -1) {
+        // Recursively iterate to collect all the joints in the hierarchy into a flattened array
+        std::vector<const tinyusdz::tydra::SkelNode *> skeletonNodes;
+        skeletonNodes.push_back(&render_scene.skeletons[skeleton_id].root_node);
+        for (int i = 0; i < skeletonNodes.size(); ++i) {
+            for (const auto &child : skeletonNodes[i]->children) {
+                skeletonNodes.push_back(&child);
+            }
+        }
+
+        // Convert USD skeleton joints to Assimp bones
+        const unsigned int numBones = unsigned(skeletonNodes.size());
+        pScene->mMeshes[meshIdx]->mNumBones = numBones;
+        pScene->mMeshes[meshIdx]->mBones = new aiBone *[numBones];
+
+        for (unsigned int i = 0; i < numBones; ++i) {
+            const tinyusdz::tydra::SkelNode *skeletonNode = skeletonNodes[i];
+            const int boneIndex = skeletonNode->joint_id;
+
+            // Sorted so that Assimp bone ids align with USD joint id
+            auto outputBone = new aiBone();
+            outputBone->mName = aiString(skeletonNode->joint_name);
+            outputBone->mOffsetMatrix = tinyUsdzMat4ToAiMat4(skeletonNode->bind_transform.m).Inverse();
+            pScene->mMeshes[meshIdx]->mBones[boneIndex] = outputBone;
+        }
+
+        // Vertex weights
+        std::vector<std::vector<aiVertexWeight>> aiBonesVertexWeights;
+        aiBonesVertexWeights.resize(numBones);
+
+        const std::vector<int> &jointIndices = render_scene.meshes[meshIdx].joint_and_weights.jointIndices;
+        const std::vector<float> &jointWeightIndices = render_scene.meshes[meshIdx].joint_and_weights.jointWeights;
+        const int numWeightsPerVertex = render_scene.meshes[meshIdx].joint_and_weights.elementSize;
+
+        for (unsigned int vertexIndex = 0; vertexIndex < numVertices; ++vertexIndex) {
+            for (int weightIndex = 0; weightIndex < numWeightsPerVertex; ++weightIndex) {
+                const unsigned int index = vertexIndex * numWeightsPerVertex + weightIndex;
+                const float jointWeight = jointWeightIndices[index];
+
+                if (jointWeight > 0) {
+                    const int jointIndex = jointIndices[index];
+                    if (jointIndex < 0 || static_cast<unsigned int>(jointIndex) >= numBones) {
+                        continue;
+                    }
+                    aiBonesVertexWeights[jointIndex].emplace_back(vertexIndex, jointWeight);
+                }
+            }
+        }
+
+        for (unsigned boneIndex = 0; boneIndex < numBones; ++boneIndex) {
+            const auto numWeightsForBone = unsigned(aiBonesVertexWeights[boneIndex].size());
+            pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights = new aiVertexWeight[numWeightsForBone];
+            pScene->mMeshes[meshIdx]->mBones[boneIndex]->mNumWeights = numWeightsForBone;
+
+            std::swap_ranges(aiBonesVertexWeights[boneIndex].begin(), aiBonesVertexWeights[boneIndex].end(), pScene->mMeshes[meshIdx]->mBones[boneIndex]->mWeights);
+        }
+    } // Skinned mesh end
 }
 
 static std::string nameForTextureWithId(const RenderScene &render_scene, const int targetId) {

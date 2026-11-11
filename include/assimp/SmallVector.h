@@ -50,6 +50,8 @@ Based on CppCon 2016: Chandler Carruth "High Performance Code 201: Hybrid Data S
 #   pragma GCC system_header
 #endif
 
+#include <cstring>
+
 namespace Assimp {
 
 // --------------------------------------------------------------------------------------------
@@ -101,6 +103,26 @@ public:
     /// @return The current size.
     size_t size() const {
         return mSize;
+    }
+
+    /// @brief  Returns true, if the vector holds no items.
+    /// @return true if empty, false otherwise.
+    bool empty() const {
+        return mSize == 0;
+    }
+
+    /// @brief  Access an item by its index.
+    /// @param  index   [in] The item index.
+    /// @return Reference to the stored item.
+    T &operator[](size_t index) {
+        return mStorage[index];
+    }
+
+    /// @brief  Access an item by its index (const overload).
+    /// @param  index   [in] The item index.
+    /// @return Const reference to the stored item.
+    const T &operator[](size_t index) const {
+        return mStorage[index];
     }
 
     /// @brief  Returns a pointer to the first item.

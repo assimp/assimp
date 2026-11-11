@@ -168,20 +168,37 @@ void TerragenImporter::InternReadFile(const std::string &pFile,
 
             if (!hscale) hscale = 1;
 
-            // Ensure we have enough data
-            if (reader.GetRemainingSize() < x * y * 2)
-                throw DeadlyImportError("TER: ALTW chunk is too small");
-
             if (x <= 1 || y <= 1)
                 throw DeadlyImportError("TER: Invalid terrain size");
 
-            // Allocate the output mesh
+            // Ensure we have enough data. The product of two 16-bit point
+            // counts can exceed the range of a 32-bit integer once doubled,
+            // so the size check has to happen in 64 bits: evaluated in 32
+            // bits it can wrap around to a small value and pass for a file
+            // that is far too small to hold the terrain.
+            const uint64_t numPixels = static_cast<uint64_t>(x) * y;
+            if (static_cast<uint64_t>(reader.GetRemainingSize()) < numPixels * 2)
+                throw DeadlyImportError("TER: ALTW chunk is too small");
+
+            // Allocate the output mesh. The face and vertex counts are kept
+            // in 64 bits as well: (x - 1) * (y - 1) * 4 can exceed 32 bits,
+            // and a wrapped vertex count would make the copy loops below
+            // write past the vertex and texcoord arrays.
+            const uint64_t numFaces = numPixels - x - y + 1;
+            if (numFaces > AI_MAX_ALLOC(aiFace) ||
+                    numFaces * 4 > AI_MAX_ALLOC(aiVector3D)) {
+                throw DeadlyImportError("TER: Terrain has too many faces");
+            }
             pScene->mMeshes = new aiMesh *[pScene->mNumMeshes = 1];
             aiMesh *m = pScene->mMeshes[0] = new aiMesh();
 
             // We return quads
-            aiFace *f = m->mFaces = new aiFace[m->mNumFaces = (x - 1) * (y - 1)];
-            aiVector3D *pv = m->mVertices = new aiVector3D[m->mNumVertices = m->mNumFaces * 4];
+            m->mNumFaces = static_cast<unsigned int>(numFaces);
+            m->mNumVertices = static_cast<unsigned int>(numFaces * 4);
+            m->mFaces = new aiFace[m->mNumFaces];
+            m->mVertices = new aiVector3D[m->mNumVertices];
+            aiFace *f = m->mFaces;
+            aiVector3D *pv = m->mVertices;
 
             aiVector3D *uv(nullptr);
             float step_y(0.0f), step_x(0.0f);

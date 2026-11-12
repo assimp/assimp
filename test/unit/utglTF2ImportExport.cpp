@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 #include "Tools/TestTools.h"
-#include "UnitTestFileGenerator.h"
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #   include "AssetLib/glTF2/glTF2AssetWriter.h"
 #endif // ASSIMP_BUILD_NO_EXPORT
@@ -873,18 +872,6 @@ std::unique_ptr<aiScene> MakeMaterialExportScene(const ExportedMaterialCase &tes
     return scene;
 }
 
-std::string MakeTemporaryOutputPath(const char *extension) {
-    char templatePath[] = TMP_PATH "assimp_gltf2_opacity_XXXXXX";
-    std::string temporaryPath;
-    FILE *temporaryFile = MakeTmpFile(templatePath, sizeof(templatePath) - 1, temporaryPath);
-    if (temporaryFile == nullptr) {
-        return {};
-    }
-    std::fclose(temporaryFile);
-    std::remove(temporaryPath.c_str());
-    return temporaryPath + extension;
-}
-
 uint32_t ReadLittleEndianUint32(const std::string &data, size_t offset) {
     return static_cast<uint32_t>(static_cast<unsigned char>(data[offset])) |
            (static_cast<uint32_t>(static_cast<unsigned char>(data[offset + 1])) << 8) |
@@ -892,35 +879,26 @@ uint32_t ReadLittleEndianUint32(const std::string &data, size_t offset) {
            (static_cast<uint32_t>(static_cast<unsigned char>(data[offset + 3])) << 24);
 }
 
-void ExportAndCheckMaterial(const ExportedMaterialCase &testCase, const char *format, const char *extension) {
-    const std::string outputPath = MakeTemporaryOutputPath(extension);
-    ASSERT_FALSE(outputPath.empty());
-
+void ExportAndCheckMaterial(const ExportedMaterialCase &testCase, const char *format) {
+    SCOPED_TRACE(std::string(testCase.name) + " " + format);
     std::unique_ptr<aiScene> scene = MakeMaterialExportScene(testCase);
     Assimp::Exporter exporter;
-    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene.get(), format, outputPath.c_str()))
-            << exporter.GetErrorString();
+    // Exercise the serializer without temporary files. The exporter owns the
+    // main blob and any companion buffer blobs, including on early assertion exits.
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene.get(), format);
+    ASSERT_NE(nullptr, blob) << exporter.GetErrorString();
+    ASSERT_NE(nullptr, blob->data);
+    const std::string contents(static_cast<const char *>(blob->data), blob->size);
 
-    std::ifstream input(outputPath, std::ios::binary);
-    ASSERT_TRUE(input.good());
-    const std::string output((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-    input.close();
-    std::remove(outputPath.c_str());
-    if (std::string(extension) == ".gltf") {
-        const size_t extensionOffset = outputPath.find_last_of('.');
-        const std::string binaryPath = outputPath.substr(0, extensionOffset) + ".bin";
-        std::remove(binaryPath.c_str());
-    }
-
-    std::string json = output;
-    if (std::string(extension) == ".glb") {
-        ASSERT_GE(output.size(), 20u);
-        ASSERT_EQ(0x46546C67u, ReadLittleEndianUint32(output, 0));
-        ASSERT_EQ(2u, ReadLittleEndianUint32(output, 4));
-        const uint32_t jsonLength = ReadLittleEndianUint32(output, 12);
-        ASSERT_EQ(0x4E4F534Au, ReadLittleEndianUint32(output, 16));
-        ASSERT_LE(20u + jsonLength, output.size());
-        json.assign(output.data() + 20, jsonLength);
+    std::string json = contents;
+    if (std::string(format) == "glb2") {
+        ASSERT_GE(contents.size(), 20u);
+        ASSERT_EQ(0x46546C67u, ReadLittleEndianUint32(contents, 0));
+        ASSERT_EQ(2u, ReadLittleEndianUint32(contents, 4));
+        const uint32_t jsonLength = ReadLittleEndianUint32(contents, 12);
+        ASSERT_EQ(0x4E4F534Au, ReadLittleEndianUint32(contents, 16));
+        ASSERT_LE(jsonLength, contents.size() - 20u);
+        json.assign(contents.data() + 20, jsonLength);
     }
 
     rapidjson::Document document;
@@ -931,19 +909,17 @@ void ExportAndCheckMaterial(const ExportedMaterialCase &testCase, const char *fo
     const rapidjson::Value &material = document["materials"][0];
     ASSERT_TRUE(material.HasMember("pbrMetallicRoughness"));
     const rapidjson::Value &pbr = material["pbrMetallicRoughness"];
-    float alpha = 1.0f;
-    if (pbr.HasMember("baseColorFactor")) {
-        ASSERT_GE(pbr["baseColorFactor"].Size(), 4u);
-        alpha = pbr["baseColorFactor"][3].GetFloat();
+    // Every case uses a non-white colour, so the factor must be written. The
+    // exporter prefers the base colour and falls back to the diffuse colour.
+    ASSERT_TRUE(pbr.HasMember("baseColorFactor"));
+    ASSERT_EQ(pbr["baseColorFactor"].Size(), 4u);
+    const aiColor4D &expectedColor = testCase.hasBaseColor ? testCase.baseColor : testCase.diffuseColor;
+    for (unsigned int channel = 0; channel < 3; ++channel) {
+        EXPECT_NEAR(expectedColor[channel], pbr["baseColorFactor"][channel].GetFloat(), 0.00001f)
+                << testCase.name << " " << format;
     }
-    EXPECT_NEAR(testCase.expectedAlpha, alpha, 0.00001f) << testCase.name << " " << format;
-    if (testCase.hasBaseColor) {
-        ASSERT_TRUE(pbr.HasMember("baseColorFactor"));
-        for (unsigned int channel = 0; channel < 3; ++channel) {
-            EXPECT_NEAR(testCase.baseColor[channel], pbr["baseColorFactor"][channel].GetFloat(), 0.00001f)
-                    << testCase.name << " " << format;
-        }
-    }
+    EXPECT_NEAR(testCase.expectedAlpha, pbr["baseColorFactor"][3].GetFloat(), 0.00001f)
+            << testCase.name << " " << format;
 
     const char *alphaMode = "OPAQUE";
     if (material.HasMember("alphaMode")) {
@@ -983,8 +959,8 @@ TEST_F(utglTF2ImportExport, exportMaterialOpacityWithExtensions) {
     };
 
     for (const ExportedMaterialCase &testCase : cases) {
-        ExportAndCheckMaterial(testCase, "gltf2", ".gltf");
-        ExportAndCheckMaterial(testCase, "glb2", ".glb");
+        ExportAndCheckMaterial(testCase, "gltf2");
+        ExportAndCheckMaterial(testCase, "glb2");
     }
 }
 

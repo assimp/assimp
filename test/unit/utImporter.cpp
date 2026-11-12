@@ -362,6 +362,15 @@ TEST_F(ImporterTest, unexpectedException) {
     }
 }
 
+TEST_F(ImporterTest, sceneWithoutRootNodeFails) {
+    // FailingImporter returns an empty scene for any other file name.
+    pImp->RegisterLoader(new FailingImporter);
+    pImp->SetIOHandler(new TestIOSystem);
+    const aiScene *scene = pImp->ReadFile("noRootNode.fail", aiProcess_OptimizeGraph | aiProcess_PopulateArmatureData);
+    EXPECT_EQ(scene, nullptr);
+    EXPECT_STREQ(pImp->GetErrorString(), "Importer returned a scene without a root node");
+}
+
 // ------------------------------------------------------------------------------------------------
 
 struct ExtensionTestCase {

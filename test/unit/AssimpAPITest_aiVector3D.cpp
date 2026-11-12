@@ -180,6 +180,5 @@ TEST_F(AssimpAPITest_aiVector3D, aiTransformVecByMatrix4Test) {
     v_c = v_cpp = random_vec3();
     v_cpp *= m;
     aiTransformVecByMatrix4(&v_c, &m);
-    v_cpp.Equal(v_c, std::numeric_limits<ai_real>::min());
-    EXPECT_EQ(v_cpp, v_c);
+    EXPECT_TRUE(v_cpp.Equal(v_c, std::numeric_limits<ai_real>::min()));
 }

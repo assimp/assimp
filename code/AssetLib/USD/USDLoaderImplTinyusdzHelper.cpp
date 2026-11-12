@@ -48,30 +48,54 @@ namespace {
 //const char *const TAG = "tinyusdz helper";
 }
 
+#if defined(ASSIMP_BUILD_USD_BETA)
+using AnimationPath = lightusd::tydra::AnimationPath;
+std::string Assimp::tinyusdzAnimChannelTypeFor(AnimationPath animChannel) {
+#else
 using ChannelType = tinyusdz::tydra::AnimationChannel::ChannelType;
 std::string Assimp::tinyusdzAnimChannelTypeFor(ChannelType animChannel) {
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
     switch (animChannel) {
+#if !defined(ASSIMP_BUILD_USD_BETA)
     case ChannelType::Transform: {
         return "Transform";
     }
+#endif //#if !defined(ASSIMP_BUILD_USD_BETA)
+#if defined(ASSIMP_BUILD_USD_BETA)
+    case AnimationPath::Translation: {
+#else
     case ChannelType::Translation: {
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
         return "Translation";
     }
+#if defined(ASSIMP_BUILD_USD_BETA)
+    case AnimationPath::Rotation: {
+#else
     case ChannelType::Rotation: {
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
         return "Rotation";
     }
+#if defined(ASSIMP_BUILD_USD_BETA)
+    case AnimationPath::Scale: {
+#else
     case ChannelType::Scale: {
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
         return "Scale";
     }
+#if defined(ASSIMP_BUILD_USD_BETA)
+    case AnimationPath::Weights: {
+        return "Weights";
+#else
     case ChannelType::Weight: {
         return "Weight";
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
     }
     default:
         return "Invalid";
     }
 }
 
-using tinyusdz::tydra::NodeType;
+using lightusd::tydra::NodeType;
 std::string Assimp::tinyusdzNodeTypeFor(NodeType type) {
     switch (type) {
     case NodeType::Xform: {

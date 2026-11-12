@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2026, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -42,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "MathTest.h"
+#include <limits>
 
 using namespace Assimp;
 
@@ -181,5 +180,6 @@ TEST_F(AssimpAPITest_aiVector3D, aiTransformVecByMatrix4Test) {
     v_c = v_cpp = random_vec3();
     v_cpp *= m;
     aiTransformVecByMatrix4(&v_c, &m);
+    v_cpp.Equal(v_c, std::numeric_limits<ai_real>::min());
     EXPECT_EQ(v_cpp, v_c);
 }

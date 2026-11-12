@@ -34,6 +34,8 @@ __Importers__:
 - LWS
 - LXO
 - [M3D](https://bztsrc.gitlab.io/model3d)
+   - **REQUIRES OPT-IN:** enable cmake options `ASSIMP_BUILD_M3D_IMPORTER`/`ASSIMP_BUILD_M3D_EXPORTER`
+      - NOTE: author of `M3D` format abandoned assimp support; implementation is incomplete and buggy.
 - MD2
 - MD3
 - MD5
@@ -61,6 +63,10 @@ __Importers__:
 - TER
 - UC
 - [USD](https://en.wikipedia.org/wiki/Universal_Scene_Description)
+   - **REQUIRES OPT-IN:** enable cmake option `ASSIMP_BUILD_USD_IMPORTER`
+   - To use latest v1.0.0 USD release also enable cmake option `ASSIMP_USD_BETA`
+- VRML/WRL
+   - **REQUIRES OPT-IN:** enable cmake option `ASSIMP_BUILD_VRML_IMPORTER`
 - VTA
 - X
 - [X3D](https://en.wikipedia.org/wiki/X3D)

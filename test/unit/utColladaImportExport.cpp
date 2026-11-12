@@ -281,6 +281,15 @@ TEST_F(utColladaImportExport, importTriangulate) {
 }
 
 
+TEST_F(utColladaImportExport, rejectsSkinJointIndexOutOfRange) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/malformed_skin_joint_index_oob.dae", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_STREQ("Collada: joint index out of range while resolving skin weights", importer.GetErrorString());
+}
+
+
 TEST_F(utColladaImportExport, importConcavePolygon) {
     Importer importer;
 

@@ -576,7 +576,7 @@ bool X3DExporter::CheckAndExport_Light(const aiNode &pNode, const size_t pTabLev
     if (pNode.mName.length == 0) return false;
 
     // search for light with name like node has.
-    for (idx_light = 0; mScene->mNumLights; idx_light++) {
+    for (idx_light = 0; idx_light < mScene->mNumLights; idx_light++) {
         if (pNode.mName == mScene->mLights[idx_light]->mName) {
             found = true;
             break;

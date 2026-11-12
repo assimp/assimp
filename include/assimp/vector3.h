@@ -69,7 +69,9 @@ template <typename TReal>
 class aiVector3t {
 public:
     /// @brief  The default class constructor.
-    aiVector3t() AI_NO_EXCEPT : x(), y(), z() {}
+    aiVector3t() AI_NO_EXCEPT : x(0), y(0), z(0) {
+        // empty
+    }
 
     /// @brief  The class constructor with the components.
     /// @param  _x  The x-component for the vector.

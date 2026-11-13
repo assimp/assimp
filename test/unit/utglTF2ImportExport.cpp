@@ -849,6 +849,50 @@ TEST_F(utglTF2ImportExport, export_normalized_normals) {
     }
 }
 
+static aiNode *findNodeWithMeshes(aiNode *node) {
+    if (node->mNumMeshes > 0) {
+        return node;
+    }
+    for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+        if (aiNode *found = findNodeWithMeshes(node->mChildren[i])) {
+            return found;
+        }
+    }
+    return nullptr;
+}
+
+TEST_F(utglTF2ImportExport, export_node_translation_in_trs) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_NE(scene, nullptr);
+    aiNode *node = findNodeWithMeshes(scene->mRootNode);
+    ASSERT_NE(node, nullptr);
+    // the root node is always exported as a matrix, so test a child
+    ASSERT_NE(node, scene->mRootNode);
+
+    ExportProperties properties;
+    properties.SetPropertyBool("GLTF2_NODE_IN_TRS", true);
+    // a translation of (1, 1, 1) used to be taken for "no translation" and dropped
+    for (const aiVector3D &translation : { aiVector3D(1, 1, 1), aiVector3D(2, 3, 4) }) {
+        aiMatrix4x4::Translation(translation, node->mTransformation);
+        Assimp::Exporter exporter;
+        const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "glb2", 0, &properties);
+        ASSERT_NE(blob, nullptr);
+
+        Assimp::Importer reimporter;
+        const aiScene *result = reimporter.ReadFileFromMemory(blob->data, blob->size, aiProcess_ValidateDataStructure, "glb");
+        ASSERT_NE(result, nullptr);
+        const aiNode *exported = findNodeWithMeshes(result->mRootNode);
+        ASSERT_NE(exported, nullptr);
+        aiVector3D scaling, position;
+        aiQuaternion rotation;
+        exported->mTransformation.Decompose(scaling, rotation, position);
+        EXPECT_NEAR(translation.x, position.x, 1e-5);
+        EXPECT_NEAR(translation.y, position.y, 1e-5);
+        EXPECT_NEAR(translation.z, position.z, 1e-5);
+    }
+}
+
 #endif // ASSIMP_BUILD_NO_EXPORT
 
 TEST_F(utglTF2ImportExport, sceneMetadata) {

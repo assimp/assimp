@@ -406,3 +406,14 @@ TEST_F(utLWOImportExport, importLWOBFaceIndexBeforePoints) {
 
     EXPECT_NE(nullptr, scene);
 }
+
+// A VMAP chunk is sized against the point list as it stands when the chunk is parsed. A second
+// PNTS chunk then grows the point list without resizing the channel, so face indices that are
+// in range for the point list run past the channel's storage. FindUVChannels used to index the
+// channel with those indices and read out of bounds.
+TEST_F(utLWOImportExport, importLWO2VMapStalePointCount) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/LWO/LWO2/invalid/VMapStalePointCount.lwo", aiProcess_ValidateDataStructure);
+
+    EXPECT_NE(nullptr, scene);
+}

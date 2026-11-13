@@ -38,8 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file quaternion.h
- *  @brief Quaternion structure, including operators when compiling in C++
+/**
+ * @file quaternion.h
+ * @brief Quaternion structure, including operators when compiling in C++
  */
 #pragma once
 #ifndef AI_QUATERNION_H_INC
@@ -65,25 +66,40 @@ template <typename TReal> class aiMatrix4x4t;
 template <typename TReal>
 class aiQuaterniont {
 public:
-    aiQuaterniont() AI_NO_EXCEPT : w(1.0), x(), y(), z() {}
-    aiQuaterniont(TReal pw, TReal px, TReal py, TReal pz)
-        : w(pw), x(px), y(py), z(pz) {}
+    aiQuaterniont() AI_NO_EXCEPT : w(1.0), x(0), y(0), z(0) {
+        // empty
+    }
+    aiQuaterniont(TReal pw, TReal px, TReal py, TReal pz) : w(pw), x(px), y(py), z(pz) {
+        // empty
+    }
 
     /**
      *  @brief  Construct from rotation matrix. Result is undefined if the matrix is not orthonormal.
+     *  @param[in] rotMatrix    The rotation matrix to construct from.
      */
-    explicit aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);
+    explicit aiQuaterniont(const aiMatrix3x3t<TReal> &rotMatrix);
 
-    /** Construct from euler angles */
-    aiQuaterniont( TReal roty, TReal rotz, TReal rotx);
+    /** 
+     * @brief Construct from euler angles
+     * @param[in] rotY  Rotation around y-axis
+     * @param[in] rotZ  Rotation around z-axis
+     * @param[in] rotX  Rotation around x-axis
+     */
+    aiQuaterniont( TReal rotY, TReal rotZ, TReal rotX);
 
-    /** Construct from an axis-angle pair */
+    /** 
+     * @brief Construct from an axis-angle pair 
+     */
     aiQuaterniont( aiVector3t<TReal> axis, TReal angle);
 
-    /** Construct from a normalized quaternion stored in a vec3 */
+    /** 
+     * @brief Construct from a normalized quaternion stored in a vec3 
+     */
     explicit aiQuaterniont( aiVector3t<TReal> normalized);
 
-    /** Returns a matrix representation of the quaternion */
+    /** 
+     * @brief Returns a matrix representation of the quaternion 
+     */
     aiMatrix3x3t<TReal> GetMatrix() const;
 
     bool operator== (const aiQuaterniont& o) const;

@@ -39,8 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file Defines small vector with inplace storage.
-Based on CppCon 2016: Chandler Carruth "High Performance Code 201: Hybrid Data Structures" */
+/** 
+ * @file Defines small vector with inplace storage.
+ * Based on CppCon 2016: Chandler Carruth "High Performance Code 201: Hybrid Data Structures" 
+ */
 
 #pragma once
 #ifndef AI_SMALLVECTOR_H_INC
@@ -49,6 +51,8 @@ Based on CppCon 2016: Chandler Carruth "High Performance Code 201: Hybrid Data S
 #ifdef __GNUC__
 #   pragma GCC system_header
 #endif
+
+#include <cstring>
 
 namespace Assimp {
 
@@ -63,12 +67,7 @@ template<typename T, unsigned int Capacity>
 class SmallVector {
 public:
     /// @brief  The default class constructor.
-    SmallVector() :
-            mStorage(mInplaceStorage),
-            mSize(0),
-            mCapacity(Capacity) {
-        // empty
-    }
+    SmallVector() = default;
 
     /// @brief  The class destructor.
     ~SmallVector() {
@@ -101,6 +100,26 @@ public:
     /// @return The current size.
     size_t size() const {
         return mSize;
+    }
+
+    /// @brief  Returns true, if the vector holds no items.
+    /// @return true if empty, false otherwise.
+    bool empty() const {
+        return mSize == 0;
+    }
+
+    /// @brief  Access an item by its index.
+    /// @param  index   [in] The item index.
+    /// @return Reference to the stored item.
+    T &operator[](size_t index) {
+        return mStorage[index];
+    }
+
+    /// @brief  Access an item by its index (const overload).
+    /// @param  index   [in] The item index.
+    /// @return Const reference to the stored item.
+    const T &operator[](size_t index) const {
+        return mStorage[index];
     }
 
     /// @brief  Returns a pointer to the first item.
@@ -153,10 +172,10 @@ private:
         mStorage[mSize++] = item;
     }
 
-    T* mStorage;
-    size_t mSize;
-    size_t mCapacity;
-    T mInplaceStorage[Capacity];
+    T* mStorage{mInplaceStorage};
+    size_t mSize{0};
+    size_t mCapacity{Capacity};
+    T mInplaceStorage[Capacity]{};
 };
 
 } // end namespace Assimp

@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ParsingUtils.h>
 #include <assimp/SkeletonMeshBuilder.h>
 #include <assimp/ZipArchiveIOSystem.h>
+#include <memory>
 #include <assimp/anim.h>
 #include <assimp/fast_atof.h>
 #include <assimp/importerdesc.h>
@@ -231,8 +232,10 @@ void ColladaLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IO
 // ------------------------------------------------------------------------------------------------
 // Recursively constructs a scene node for the given parser node and returns it.
 aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collada::Node *pNode) {
-    // create a node for it
-    auto *node = new aiNode();
+    // create a node for it; hold it in a guard so a throw while building
+    // children/meshes doesn't leak the partially constructed subtree
+    std::unique_ptr<aiNode> nodeGuard(new aiNode());
+    aiNode *node = nodeGuard.get();
 
     // find a name for the new node. It's more complicated than you might think
     node->mName.Set(FindNameForNode(pNode));
@@ -274,7 +277,7 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
     BuildCamerasForNode(pParser, pNode, node);
     BuildLightsForNode(pParser, pNode, node);
 
-    return node;
+    return nodeGuard.release();
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -1,6 +1,11 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "wheel==0.46.3",
+    "packaging",
+    "pyMSVC@git+https://github.com/kdschlosser/python_msvc ; sys_platform=='win32'",
+]
+build-backend = "builder._backend"
+backend-path = ["."]
 
 [project]
 name = "pyassimp"
@@ -15,14 +20,6 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy"]
 
-[project.optional-dependencies]
-test = ["pytest>=9"]
-release = ["build", "twine"]
-
-[tool.setuptools]
-packages = ["pyassimp"]
-
-[tool.pytest]
-minversion = "9.0"
-testpaths = ["tests"]
-strict = true
+[project.urls]
+"Homepage" = "https://github.com/assimp/assimp"
+"Source" = "https://github.com/assimp/assimp"

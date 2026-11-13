@@ -1241,6 +1241,69 @@ TEST_F(utglTF2ImportExport, importMalformedSparseAccessor) {
     EXPECT_NE(errorString.find("Invalid sparse accessor: missing required 'values' object."), std::string::npos);
 }
 
+namespace {
+
+// A glTF 2.0 document whose only buffer has the given uri, read by one POSITION accessor of a point mesh.
+std::string makeDataUriDocument(const std::string &uri, size_t byteLength) {
+    std::string document = "{\"asset\":{\"version\":\"2.0\"},\"buffers\":[{\"uri\":\"" + uri + "\",\"byteLength\":" + std::to_string(byteLength) + "}],";
+    document += "\"bufferViews\":[{\"buffer\":0,\"byteOffset\":0,\"byteLength\":12}],";
+    document += "\"accessors\":[{\"bufferView\":0,\"componentType\":5126,\"count\":1,\"type\":\"VEC3\"}],";
+    document += "\"meshes\":[{\"primitives\":[{\"attributes\":{\"POSITION\":0},\"mode\":0}]}],";
+    document += "\"nodes\":[{\"mesh\":0}],\"scenes\":[{\"nodes\":[0]}],\"scene\":0}";
+    return document;
+}
+
+// A raw (not base64) data uri with 12 bytes of data, whose data starts at the given offset.
+std::string makeRawDataUri(size_t dataOffset) {
+    return "data:" + std::string(dataOffset - 6, 'A') + ",AAAAAAAAAAAA";
+}
+
+} // namespace
+
+TEST_F(utglTF2ImportExport, importDataUriWithDataOffsetBeyondSignedCharRange) {
+    // Data offsets in the range 128..255 used to wrap around to a negative offset, which made the
+    // buffer start before the uri and read out of bounds.
+    for (const size_t dataOffset : { 128u, 139u, 200u, 255u }) {
+        const std::string document = makeDataUriDocument(makeRawDataUri(dataOffset), 12);
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(document.data(), document.size(), 0, "gltf");
+        ASSERT_NE(nullptr, scene) << "data offset " << dataOffset << ": " << importer.GetErrorString();
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(1u, scene->mMeshes[0]->mNumVertices);
+    }
+}
+
+TEST_F(utglTF2ImportExport, importDataUriWithWrongLength) {
+    // The reported proof of concept: data offset 139 and a byteLength of 257, which is what the
+    // wrapped length used to be. The one byte of data behind the comma is all there is.
+    const std::string document = makeDataUriDocument("data:" + std::string(133, 'A') + ",X", 257);
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(document.data(), document.size(), 0, "gltf");
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("expected 257 bytes, but found 1"));
+}
+
+TEST_F(utglTF2ImportExport, importDataUriWithTooLongHeader) {
+    // The data offset is packed into a single byte of the uri, so it can not exceed 255.
+    const std::string document = makeDataUriDocument(makeRawDataUri(256), 12);
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(document.data(), document.size(), 0, "gltf");
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("data URI"));
+}
+
+TEST_F(utglTF2ImportExport, importUriStartingWithDataUriMarker) {
+    // The parsed offsets are stored in the first bytes of the uri behind a marker byte (0x10). A
+    // uri which merely starts with that byte was never parsed and must not be trusted. The fifth
+    // byte is 0x80, which used to be read as -128 and made the buffer start before the uri.
+    const std::string uri = std::string("\\u0010\\u0000\\u0000\\u0000") + '\x80' + "ABC";
+    const std::string document = makeDataUriDocument(uri, 136);
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(document.data(), document.size(), 0, "gltf");
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("data URI"));
+}
+
 TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
     // The sampler's interpolation mode reaches the keys (da281b7f added the
     // field, #6543 taught glTF2 to fill it). Nothing covered it, so a

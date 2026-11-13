@@ -42,13 +42,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GeometryUtils.h"
 
 #include <assimp/vector3.h>
+#include <cmath>
 
 namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 ai_real GeometryUtils::heron( ai_real a, ai_real b, ai_real c ) {
     const ai_real s    = (a + b + c) * 0.5;
-    const ai_real area = pow((s * ( s - a ) * ( s - b ) * ( s - c ) ), static_cast<ai_real>(0.5));
+    const ai_real area = std::sqrt(s * ( s - a ) * ( s - b ) * ( s - c ) );
     return area;
 }
 
@@ -58,7 +59,7 @@ ai_real GeometryUtils::distance3D( const aiVector3D &vA, const aiVector3D &vB ) 
     const ai_real ly = ( vB.y - vA.y );
     const ai_real lz = ( vB.z - vA.z );
     const ai_real a  = lx*lx + ly*ly + lz*lz;
-    const ai_real d  = pow( a, static_cast<ai_real>(0.5));
+    const ai_real d  = std::sqrt( a );
 
     return d;
 }

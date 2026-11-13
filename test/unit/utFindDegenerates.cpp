@@ -240,4 +240,5 @@ TEST_F(FindDegeneratesProcessTest, invalidVertexIndex) {
     EXPECT_EQ(scene->mNumMeshes, 1u);
     EXPECT_EQ(scene->mRootNode->mNumMeshes, 1u);
     EXPECT_EQ(scene->mRootNode->mMeshes[0], 0u);
+    EXPECT_EQ(scene->mMeshes[0]->mPrimitiveTypes, static_cast<unsigned int>(aiPrimitiveType_TRIANGLE));
 }

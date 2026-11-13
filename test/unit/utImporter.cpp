@@ -395,3 +395,12 @@ INSTANTIATE_TEST_SUITE_P(
     [](const ::testing::TestParamInfo<ExtensionTest::ParamType>& info) {
         return info.param.testName;
     });
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(ImporterTest, readFileFromMemoryKeepsDefaultIOHandler) {
+    static const char obj[] = "v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n";
+    Importer importer;
+    EXPECT_TRUE(importer.IsDefaultIOHandler());
+    importer.ReadFileFromMemory(obj, sizeof(obj) - 1, 0, "obj");
+    EXPECT_TRUE(importer.IsDefaultIOHandler());
+}

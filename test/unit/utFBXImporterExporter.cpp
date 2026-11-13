@@ -530,6 +530,33 @@ std::string fbxTriangleWithLastIndex(const char *lastIndex) {
            "}\n";
 }
 
+std::string fbxLineWithPointsIndex(const char *pointsIndex) {
+    return std::string(
+            "; FBX 7.4.0 project file\n"
+            "FBXHeaderExtension:  {\n"
+            "\tFBXHeaderVersion: 1003\n"
+            "\tFBXVersion: 7400\n"
+            "}\n"
+            "Objects:  {\n"
+            "\tGeometry: 10, \"Geometry::\", \"Line\" {\n"
+            "\t\tPoints: *9 {\n"
+            "\t\t\ta: 0,0,0,1,0,0,0,1,0\n"
+            "\t\t}\n"
+            "\t\tPointsIndex: *3 {\n"
+            "\t\t\ta: ") +
+           pointsIndex +
+           "\n"
+           "\t\t}\n"
+           "\t}\n"
+           "\tModel: 20, \"Model::line\", \"Line\" {\n"
+           "\t}\n"
+           "}\n"
+           "Connections:  {\n"
+           "\tC: \"OO\",10,20\n"
+           "\tC: \"OO\",20,0\n"
+           "}\n";
+}
+
 } // namespace
 
 TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
@@ -545,6 +572,27 @@ TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
     // The geometry is rejected as out of range, so the triangle mesh is not imported.
     const std::string intMin = fbxTriangleWithLastIndex("-2147483648");
     scene = importer.ReadFileFromMemory(intMin.data(), intMin.size(), aiProcess_ValidateDataStructure, "fbx");
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(0u, scene->mNumMeshes);
+}
+
+TEST_F(utFBXImporterExporter, importLinePointsIndexOutOfRange) {
+    // Every PointsIndex entry, including an end point stored as -(index + 1),
+    // must address one of the line's points.
+    Assimp::Importer importer;
+    const std::string valid = fbxLineWithPointsIndex("0,1,-3");
+    const aiScene *scene = importer.ReadFileFromMemory(valid.data(), valid.size(), aiProcess_JoinIdenticalVertices, "fbx");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(2u, scene->mMeshes[0]->mNumFaces);
+
+    const std::string badPoint = fbxLineWithPointsIndex("0,100000,-3");
+    scene = importer.ReadFileFromMemory(badPoint.data(), badPoint.size(), aiProcess_JoinIdenticalVertices, "fbx");
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(0u, scene->mNumMeshes);
+
+    const std::string badEndPoint = fbxLineWithPointsIndex("0,1,-100000");
+    scene = importer.ReadFileFromMemory(badEndPoint.data(), badEndPoint.size(), aiProcess_JoinIdenticalVertices, "fbx");
     ASSERT_NE(nullptr, scene);
     EXPECT_EQ(0u, scene->mNumMeshes);
 }

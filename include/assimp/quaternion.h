@@ -38,8 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file quaternion.h
- *  @brief Quaternion structure, including operators when compiling in C++
+/**
+ * @file quaternion.h
+ * @brief Quaternion structure, including operators when compiling in C++
  */
 #pragma once
 #ifndef AI_QUATERNION_H_INC
@@ -74,13 +75,17 @@ public:
 
     /**
      *  @brief  Construct from rotation matrix. Result is undefined if the matrix is not orthonormal.
+     *  @param[in] rotMatrix    The rotation matrix to construct from.
      */
-    explicit aiQuaterniont(const aiMatrix3x3t<TReal>& pRotMatrix);
+    explicit aiQuaterniont(const aiMatrix3x3t<TReal> &rotMatrix);
 
     /** 
-     * @brief Construct from euler angles 
+     * @brief Construct from euler angles
+     * @param[in] rotY  Rotation around y-axis
+     * @param[in] rotZ  Rotation around z-axis
+     * @param[in] rotX  Rotation around x-axis
      */
-    aiQuaterniont( TReal roty, TReal rotz, TReal rotx);
+    aiQuaterniont( TReal rotY, TReal rotZ, TReal rotX);
 
     /** 
      * @brief Construct from an axis-angle pair 

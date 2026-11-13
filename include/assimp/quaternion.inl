@@ -70,13 +70,13 @@ aiQuaterniont<TReal> operator * (const aiMatrix4x4t<TReal>& pMatrix, const aiQua
 }
 // ---------------------------------------------------------------------------
 template<typename TReal>
-bool aiQuaterniont<TReal>::operator== (const aiQuaterniont& o) const {
+AI_FORCE_INLINE bool aiQuaterniont<TReal>::operator== (const aiQuaterniont& o) const {
     return x == o.x && y == o.y && z == o.z && w == o.w;
 }
 
 // ---------------------------------------------------------------------------
 template<typename TReal>
-bool aiQuaterniont<TReal>::operator!= (const aiQuaterniont& o) const {
+AI_FORCE_INLINE bool aiQuaterniont<TReal>::operator!= (const aiQuaterniont& o) const {
     return !(*this == o);
 }
 
@@ -86,11 +86,10 @@ AI_FORCE_INLINE
 aiQuaterniont<TReal>& aiQuaterniont<TReal>::operator *= (const aiMatrix4x4t<TReal>& mat){
     return (*this = mat * (*this));
 }
-// ------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
 template<typename TReal>
-inline bool aiQuaterniont<TReal>::Equal(const aiQuaterniont& o, TReal epsilon) const {
+AI_FORCE_INLINE bool aiQuaterniont<TReal>::Equal(const aiQuaterniont& o, TReal epsilon) const {
     return
         std::abs(x - o.x) <= epsilon &&
         std::abs(y - o.y) <= epsilon &&
@@ -101,7 +100,7 @@ inline bool aiQuaterniont<TReal>::Equal(const aiQuaterniont& o, TReal epsilon) c
 // ---------------------------------------------------------------------------
 // Constructs a quaternion from a rotation matrix
 template<typename TReal>
-inline aiQuaterniont<TReal>::aiQuaterniont( const aiMatrix3x3t<TReal> &pRotMatrix) {
+AI_FORCE_INLINE aiQuaterniont<TReal>::aiQuaterniont( const aiMatrix3x3t<TReal> &pRotMatrix) {
     TReal t = pRotMatrix.a1 + pRotMatrix.b2 + pRotMatrix.c3;
 
     // large enough
@@ -138,7 +137,7 @@ inline aiQuaterniont<TReal>::aiQuaterniont( const aiMatrix3x3t<TReal> &pRotMatri
 // ---------------------------------------------------------------------------
 // Construction from euler angles
 template<typename TReal>
-inline aiQuaterniont<TReal>::aiQuaterniont( TReal fPitch, TReal fYaw, TReal fRoll ) {
+AI_FORCE_INLINE aiQuaterniont<TReal>::aiQuaterniont( TReal fPitch, TReal fYaw, TReal fRoll ) {
     const TReal fSinPitch(std::sin(fPitch*static_cast<TReal>(0.5)));
     const TReal fCosPitch(std::cos(fPitch*static_cast<TReal>(0.5)));
     const TReal fSinYaw(std::sin(fYaw*static_cast<TReal>(0.5)));
@@ -156,7 +155,7 @@ inline aiQuaterniont<TReal>::aiQuaterniont( TReal fPitch, TReal fYaw, TReal fRol
 // ---------------------------------------------------------------------------
 // Returns a matrix representation of the quaternion
 template<typename TReal>
-inline aiMatrix3x3t<TReal> aiQuaterniont<TReal>::GetMatrix() const {
+AI_FORCE_INLINE aiMatrix3x3t<TReal> aiQuaterniont<TReal>::GetMatrix() const {
     aiMatrix3x3t<TReal> resMatrix;
     resMatrix.a1 = static_cast<TReal>(1.0) - static_cast<TReal>(2.0) * (y * y + z * z);
     resMatrix.a2 = static_cast<TReal>(2.0) * (x * y - z * w);
@@ -174,7 +173,7 @@ inline aiMatrix3x3t<TReal> aiQuaterniont<TReal>::GetMatrix() const {
 // ---------------------------------------------------------------------------
 // Construction from an axis-angle pair
 template<typename TReal>
-inline aiQuaterniont<TReal>::aiQuaterniont( aiVector3t<TReal> axis, TReal angle) {
+AI_FORCE_INLINE aiQuaterniont<TReal>::aiQuaterniont( aiVector3t<TReal> axis, TReal angle) {
     axis.Normalize();
 
     const TReal sin_a = std::sin( angle / 2 );
@@ -187,7 +186,7 @@ inline aiQuaterniont<TReal>::aiQuaterniont( aiVector3t<TReal> axis, TReal angle)
 // ---------------------------------------------------------------------------
 // Construction from am existing, normalized quaternion
 template<typename TReal>
-inline aiQuaterniont<TReal>::aiQuaterniont( aiVector3t<TReal> normalized) {
+AI_FORCE_INLINE aiQuaterniont<TReal>::aiQuaterniont( aiVector3t<TReal> normalized) {
     x = normalized.x;
     y = normalized.y;
     z = normalized.z;
@@ -197,7 +196,7 @@ inline aiQuaterniont<TReal>::aiQuaterniont( aiVector3t<TReal> normalized) {
     if (t < static_cast<TReal>(0.0)) {
         w = static_cast<TReal>(0.0);
     } else {
-        w = std::sqrt (t);
+        w = std::sqrt(t);
     }
 }
 
@@ -206,7 +205,7 @@ inline aiQuaterniont<TReal>::aiQuaterniont( aiVector3t<TReal> normalized) {
 // Implementation adopted from the gmtl project. All others I found on the net fail in some cases.
 // Congrats, gmtl!
 template<typename TReal>
-inline void aiQuaterniont<TReal>::Interpolate( aiQuaterniont& pOut, const aiQuaterniont& pStart, const aiQuaterniont& pEnd, TReal pFactor) {
+AI_FORCE_INLINE void aiQuaterniont<TReal>::Interpolate( aiQuaterniont& pOut, const aiQuaterniont& pStart, const aiQuaterniont& pEnd, TReal pFactor) {
     // calc cosine theta
     TReal cosom = pStart.x * pEnd.x + pStart.y * pEnd.y + pStart.z * pEnd.z + pStart.w * pEnd.w;
 
@@ -243,7 +242,7 @@ inline void aiQuaterniont<TReal>::Interpolate( aiQuaterniont& pOut, const aiQuat
 
 // ---------------------------------------------------------------------------
 template<typename TReal>
-inline aiQuaterniont<TReal>& aiQuaterniont<TReal>::Normalize() {
+AI_FORCE_INLINE aiQuaterniont<TReal>& aiQuaterniont<TReal>::Normalize() {
     // compute the magnitude and divide through it
     const TReal mag = std::sqrt(x*x + y*y + z*z + w*w);
     if (mag) {
@@ -258,7 +257,7 @@ inline aiQuaterniont<TReal>& aiQuaterniont<TReal>::Normalize() {
 
 // ---------------------------------------------------------------------------
 template<typename TReal>
-inline aiQuaterniont<TReal> aiQuaterniont<TReal>::operator* (const aiQuaterniont& t) const {
+AI_FORCE_INLINE aiQuaterniont<TReal> aiQuaterniont<TReal>::operator* (const aiQuaterniont& t) const {
     return aiQuaterniont(w*t.w - x*t.x - y*t.y - z*t.z,
         w*t.x + x*t.w + y*t.z - z*t.y,
         w*t.y + y*t.w + z*t.x - x*t.z,
@@ -267,7 +266,7 @@ inline aiQuaterniont<TReal> aiQuaterniont<TReal>::operator* (const aiQuaterniont
 
 // ---------------------------------------------------------------------------
 template<typename TReal>
-inline aiQuaterniont<TReal>& aiQuaterniont<TReal>::Conjugate () {
+AI_FORCE_INLINE aiQuaterniont<TReal>& aiQuaterniont<TReal>::Conjugate () {
     x = -x;
     y = -y;
     z = -z;
@@ -276,7 +275,7 @@ inline aiQuaterniont<TReal>& aiQuaterniont<TReal>::Conjugate () {
 
 // ---------------------------------------------------------------------------
 template<typename TReal>
-inline aiVector3t<TReal> aiQuaterniont<TReal>::Rotate (const aiVector3t<TReal>& v) const {
+AI_FORCE_INLINE aiVector3t<TReal> aiQuaterniont<TReal>::Rotate (const aiVector3t<TReal>& v) const {
     aiQuaterniont q2(0.f,v.x,v.y,v.z), q = *this, qinv = q;
     qinv.Conjugate();
 

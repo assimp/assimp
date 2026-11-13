@@ -1204,6 +1204,9 @@ public:
     //! Main function
     void Load(const std::string &file, bool isBinary = false);
 
+    //! Reject absolute paths, ".." segments, and external URIs on memory loads.
+    void CheckExternalUri(const char *uri) const;
+
     //! Parse the AssetMetadata and check that the version is 2.
     bool CanRead(const std::string &pFile, bool isBinary = false);
 
@@ -1235,6 +1238,7 @@ private:
     IOSystem *mIOSystem;
     rapidjson::IRemoteSchemaDocumentProvider *mSchemaDocumentProvider;
     std::string mCurrentAssetDir;
+    bool mLoadFromMemory = false;
     size_t mSceneLength;
     size_t mBodyOffset;
     size_t mBodyLength;

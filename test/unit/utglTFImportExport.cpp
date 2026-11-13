@@ -40,12 +40,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
+#include "UriTestHelpers.h"
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 
 #include <assimp/commonMetaData.h>
 #include <assimp/scene.h>
+
+#include <sstream>
+#include <string>
 
 using namespace Assimp;
 
@@ -108,4 +112,62 @@ TEST_F(utglTFImportExport, sceneMetadata) {
         ASSERT_TRUE(scene->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, generator));
         ASSERT_EQ(strncmp(generator.C_Str(), "collada2gltf", 12), 0);
     }
+}
+
+
+using namespace Assimp::UriTest;
+
+namespace {
+
+// Builds a minimal glTF 1.0 triangle whose buffer uses the given URI.
+std::string Gltf1Buffer(const std::string &bufferUri) {
+    std::ostringstream json;
+    json << "{\n"
+            "  \"asset\": {\"version\": \"1.0\"},\n"
+            "  \"scene\": \"s\",\n"
+            "  \"scenes\": {\"s\": {\"nodes\": [\"n\"]}},\n"
+            "  \"nodes\": {\"n\": {\"meshes\": [\"m\"]}},\n"
+            "  \"meshes\": {\"m\": {\"primitives\": [{\"attributes\": {\"POSITION\": \"p\"}}]}},\n"
+            "  \"accessors\": {\"p\": {\"bufferView\": \"v\", \"byteOffset\": 0, \"componentType\": 5126, \"count\": 3, \"type\": \"VEC3\"}},\n"
+            "  \"bufferViews\": {\"v\": {\"buffer\": \"b\", \"byteOffset\": 0, \"byteLength\": 36}},\n"
+            "  \"buffers\": {\"b\": {\"byteLength\": 36, \"type\": \"arraybuffer\", \"uri\": \""
+         << JsonEscape(bufferUri) << "\"}}\n"
+            "}\n";
+    return json.str();
+}
+
+// Builds a minimal glTF 1.0 triangle whose diffuse image uses the given URI.
+std::string Gltf1Image(const std::string &imageUri) {
+    std::ostringstream json;
+    json << "{\n"
+            "  \"asset\": {\"version\": \"1.0\"},\n"
+            "  \"scene\": \"s\",\n"
+            "  \"scenes\": {\"s\": {\"nodes\": [\"n\"]}},\n"
+            "  \"nodes\": {\"n\": {\"meshes\": [\"m\"]}},\n"
+            "  \"meshes\": {\"m\": {\"primitives\": [{\"attributes\": {\"POSITION\": \"p\"}, \"material\": \"mat\"}]}},\n"
+            "  \"materials\": {\"mat\": {\"values\": {\"diffuse\": \"tex\"}}},\n"
+            "  \"textures\": {\"tex\": {\"source\": \"img\"}},\n"
+            "  \"images\": {\"img\": {\"uri\": \""
+         << JsonEscape(imageUri) << "\"}},\n"
+            "  \"accessors\": {\"p\": {\"bufferView\": \"v\", \"byteOffset\": 0, \"componentType\": 5126, \"count\": 3, \"type\": \"VEC3\"}},\n"
+            "  \"bufferViews\": {\"v\": {\"buffer\": \"b\", \"byteOffset\": 0, \"byteLength\": 36}},\n"
+            "  \"buffers\": {\"b\": {\"byteLength\": 36, \"type\": \"arraybuffer\", \"uri\": \""
+         << kDataUri36Zeros << "\"}}\n"
+            "}\n";
+    return json.str();
+}
+
+} // namespace
+
+TEST_F(utglTFImportExport, externalUriIsContained) {
+    const ScratchPackage scratch("assimp-issue6933-gltf1-");
+    ASSERT_TRUE(scratch.Populate());
+
+    ExpectFileLoads(scratch.Write("benign.gltf", Gltf1Buffer("triangle.bin")));
+    ExpectFileRejected(scratch.Write("traversal.gltf", Gltf1Buffer("../secret.bin")), nullptr, "secret.bin");
+    ExpectTextureUriKept(scratch.Write("image_ok.gltf", Gltf1Image("tex/ok.png")), "tex/ok.png");
+    ExpectFileRejected(scratch.Write("image_bad.gltf", Gltf1Image("../secret.png")), nullptr, "secret.png");
+
+    ExpectMemoryRejected(Gltf1Buffer("/etc/passwd"), nullptr);
+    ExpectMemoryLoads(Gltf1Buffer(kDataUri36Zeros));
 }

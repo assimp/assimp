@@ -918,6 +918,7 @@ private:
     IOSystem *mIOSystem;
 
     std::string mCurrentAssetDir;
+    bool mLoadFromMemory = false;
 
     size_t mSceneLength;
     size_t mBodyOffset, mBodyLength;
@@ -984,6 +985,9 @@ public:
 
     //! Main function
     void Load(const std::string &file, bool isBinary = false);
+
+    //! Reject absolute paths, ".." segments, and external URIs on memory loads.
+    void CheckExternalUri(const char *uri) const;
 
     //! Enables the "KHR_binary_glTF" extension on the asset
     void SetAsBinary();

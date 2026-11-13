@@ -242,6 +242,13 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
                     curUVs, curUV2s, curColors, useColors);
         }
 
+        // Without vertex data there is nothing the indices could refer to
+        if (curVertices.empty()) {
+            ASSIMP_LOG_WARN("IRRMESH: Found mesh without vertices");
+            curMat.reset();
+            continue; // Go to next buffer
+        }
+
         // Get indices
         // At this point we have some vertices and a valid material
         // Collect indices and create aiMesh at the same time
@@ -363,6 +370,13 @@ void IRRMeshImporter::InternReadFile(const std::string &pFile,
             // We should be at the end of mFaces
             if (curFace != faceEnd) {
                 ASSIMP_LOG_ERROR("IRRMESH: Not enough indices");
+
+                // Drop the faces that did not get all three indices, their
+                // index arrays are uninitialized or missing
+                curMesh->mNumFaces = static_cast<unsigned int>(curFace - curMesh->mFaces);
+                if (!curMesh->mNumFaces) {
+                    releaseMesh(&curMesh);
+                }
             }
         }
 

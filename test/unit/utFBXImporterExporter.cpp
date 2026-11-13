@@ -49,6 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <assimp/Importer.hpp>
 
+#include <fstream>
+#include <map>
+#include <sstream>
+
 using namespace Assimp;
 
 class utFBXImporterExporter : public AbstractImportExportBase {
@@ -547,4 +551,242 @@ TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
     scene = importer.ReadFileFromMemory(intMin.data(), intMin.size(), aiProcess_ValidateDataStructure, "fbx");
     ASSERT_NE(nullptr, scene);
     EXPECT_EQ(0u, scene->mNumMeshes);
+}
+
+// The skin_*.fbx files in FBX/skinning hold a mesh skinned to two bones, each vertex to one bone, with the skeleton at its bind pose.
+// Bone global transform * offset * vertex must then give the position the file describes at bind: the geometric transform,
+// then the mesh's transform at bind, which the cluster's Transform records.
+static void checkSkinnedBindPose(const aiScene *scene, const std::vector<aiVector3D> &expected) {
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    const aiMesh *mesh = scene->mMeshes[0];
+    ASSERT_EQ(2u, mesh->mNumBones);
+
+    unsigned int checked = 0;
+    for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+        const aiBone *bone = mesh->mBones[b];
+        const aiNode *node = scene->mRootNode->FindNode(bone->mName);
+        ASSERT_NE(nullptr, node);
+        aiMatrix4x4 global = node->mTransformation;
+        for (const aiNode *parent = node->mParent; parent != nullptr; parent = parent->mParent) {
+            global = parent->mTransformation * global;
+        }
+        const aiMatrix4x4 skin = global * bone->mOffsetMatrix;
+        for (unsigned int w = 0; w < bone->mNumWeights; ++w) {
+            const aiVector3D position = skin * mesh->mVertices[bone->mWeights[w].mVertexId];
+            ai_real nearest = std::numeric_limits<ai_real>::max();
+            for (const aiVector3D &e : expected) {
+                nearest = std::min(nearest, (position - e).Length());
+            }
+            EXPECT_LT(nearest, 1e-3) << "bone " << bone->mName.C_Str() << ", vertex at " << position.x << " " << position.y << " " << position.z;
+            ++checked;
+        }
+    }
+    EXPECT_EQ(mesh->mNumVertices, checked);
+}
+
+static const std::vector<aiVector3D> SkinnedBindPose = {
+    { 10.0f, 20.0f, 30.0f }, { 44.641f, 20.0f, 10.0f }, { 10.0f, 60.0f, 30.0f }, { 49.641f, 60.0f, 18.6603f },
+    { 50.0f, 20.0f, 99.282f }, { 84.641f, 20.0f, 79.282f }, { 55.0f, 60.0f, 107.9423f }, { 89.641f, 60.0f, 87.9423f }
+};
+
+TEST_F(utFBXImporterExporter, importSkinOfMeshMovedAfterBinding) {
+    // The mesh's node was moved after binding; the skin keeps the transform recorded at bind
+    for (const bool preservePivots : { true, false }) {
+        Assimp::Importer importer;
+        importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, preservePivots);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/skinning/skin_moved_mesh.fbx", aiProcess_ValidateDataStructure);
+        checkSkinnedBindPose(scene, SkinnedBindPose);
+    }
+}
+
+TEST_F(utFBXImporterExporter, importSkinWithGeometricTransform) {
+    // The geometric transform applies to the mesh before the skin, whether or not pivots are preserved
+    const std::vector<aiVector3D> expected = {
+        { 22.0622f, 17.0f, 36.8923f }, { 46.5571f, 45.2843f, 22.7502f }, { -2.4327f, 45.2843f, 51.0344f }, { 32.0622f, 73.5685f, 54.2128f },
+        { 102.0622f, 17.0f, 175.4564f }, { 126.5571f, 45.2843f, 161.3142f }, { 87.5673f, 45.2843f, 206.919f }, { 112.0622f, 73.5685f, 192.7769f }
+    };
+    for (const bool preservePivots : { true, false }) {
+        Assimp::Importer importer;
+        importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, preservePivots);
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/skinning/skin_geometric.fbx", aiProcess_ValidateDataStructure);
+        checkSkinnedBindPose(scene, expected);
+    }
+}
+
+// The files in FBX/skinning/ufbx were exported by Maya and Blender, each with the tool's own .obj export of the skinned mesh
+// (FBX/skinning/ufbx/LICENSE.md). Assimp's skinning, bone global transform * offset * vertex, must give the tool's result.
+namespace {
+
+std::vector<aiVector3D> readObjPositions(const std::string &path) {
+    std::vector<aiVector3D> positions;
+    std::ifstream file(path);
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.compare(0, 2, "v ") == 0) {
+            std::istringstream values(line.substr(2));
+            aiVector3D position;
+            values >> position.x >> position.y >> position.z;
+            positions.push_back(position);
+        }
+    }
+    return positions;
+}
+
+aiVector3D sampleKeys(const aiVectorKey *keys, unsigned int count, double ticks, const aiVector3D &none) {
+    if (count == 0) {
+        return none;
+    }
+    for (unsigned int i = 1; i < count; ++i) {
+        if (ticks <= keys[i].mTime) {
+            const ai_real t = static_cast<ai_real>(std::max(0.0, (ticks - keys[i - 1].mTime) / (keys[i].mTime - keys[i - 1].mTime)));
+            return keys[i - 1].mValue + (keys[i].mValue - keys[i - 1].mValue) * t;
+        }
+    }
+    return keys[count - 1].mValue;
+}
+
+aiQuaternion sampleKeys(const aiQuatKey *keys, unsigned int count, double ticks, const aiQuaternion &none) {
+    if (count == 0) {
+        return none;
+    }
+    for (unsigned int i = 1; i < count; ++i) {
+        if (ticks <= keys[i].mTime) {
+            const ai_real t = static_cast<ai_real>(std::max(0.0, (ticks - keys[i - 1].mTime) / (keys[i].mTime - keys[i - 1].mTime)));
+            aiQuaternion rotation;
+            aiQuaternion::Interpolate(rotation, keys[i - 1].mValue, keys[i].mValue, t);
+            return rotation.Normalize();
+        }
+    }
+    return keys[count - 1].mValue;
+}
+
+// Global transforms of all nodes at the given time, with the keys sampled linearly
+void collectGlobals(const aiNode *node, const aiMatrix4x4 &parent, const aiAnimation *animation, double ticks, std::map<const aiNode *, aiMatrix4x4> &globals) {
+    aiMatrix4x4 local = node->mTransformation;
+    for (unsigned int c = 0; animation != nullptr && c < animation->mNumChannels; ++c) {
+        const aiNodeAnim *channel = animation->mChannels[c];
+        if (channel->mNodeName == node->mName) {
+            aiVector3D scaling, position;
+            aiQuaternion rotation;
+            node->mTransformation.Decompose(scaling, rotation, position);
+            local = aiMatrix4x4(sampleKeys(channel->mScalingKeys, channel->mNumScalingKeys, ticks, scaling),
+                    sampleKeys(channel->mRotationKeys, channel->mNumRotationKeys, ticks, rotation),
+                    sampleKeys(channel->mPositionKeys, channel->mNumPositionKeys, ticks, position));
+        }
+    }
+    const aiMatrix4x4 global = parent * local;
+    globals[node] = global;
+    for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+        collectGlobals(node->mChildren[i], global, animation, ticks, globals);
+    }
+}
+
+// Positions of all meshes at the given time. Vertices with no weight follow their node.
+// The files Maya exports with its "transform skin" option also move the skinned result by the mesh node's move since its
+// bind pose: meshBindPose compensates it, as ufbx's tests do.
+std::vector<aiVector3D> skinnedPositions(const aiScene *scene, const aiAnimation *animation, double ticks, const aiMatrix4x4 *meshBindPose) {
+    std::map<const aiNode *, aiMatrix4x4> globals;
+    collectGlobals(scene->mRootNode, aiMatrix4x4(), animation, ticks, globals);
+
+    std::vector<aiVector3D> positions;
+    for (const auto &[node, global] : globals) {
+        for (unsigned int m = 0; m < node->mNumMeshes; ++m) {
+            const aiMesh *mesh = scene->mMeshes[node->mMeshes[m]];
+            std::vector<aiVector3D> sums(mesh->mNumVertices);
+            std::vector<ai_real> weights(mesh->mNumVertices);
+            for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+                const aiBone *bone = mesh->mBones[b];
+                const aiNode *boneNode = scene->mRootNode->FindNode(bone->mName);
+                EXPECT_NE(nullptr, boneNode) << bone->mName.C_Str();
+                if (boneNode == nullptr) {
+                    continue;
+                }
+                const aiMatrix4x4 skin = globals[boneNode] * bone->mOffsetMatrix;
+                for (unsigned int w = 0; w < bone->mNumWeights; ++w) {
+                    const aiVertexWeight &weight = bone->mWeights[w];
+                    sums[weight.mVertexId] += weight.mWeight * (skin * mesh->mVertices[weight.mVertexId]);
+                    weights[weight.mVertexId] += weight.mWeight;
+                }
+            }
+            aiMatrix4x4 move;
+            if (meshBindPose != nullptr && mesh->mNumBones > 0) {
+                move = global * aiMatrix4x4(*meshBindPose).Inverse();
+            }
+            for (unsigned int v = 0; v < mesh->mNumVertices; ++v) {
+                positions.push_back(weights[v] > 0 ? move * (sums[v] / weights[v]) : global * mesh->mVertices[v]);
+            }
+        }
+    }
+    return positions;
+}
+
+// The largest distance from a point of one set to the nearest point of the other, both ways, as Assimp splits vertices per face
+ai_real distanceBetween(const std::vector<aiVector3D> &a, const std::vector<aiVector3D> &b) {
+    ai_real largest = 0;
+    for (const auto &[from, to] : { std::make_pair(&a, &b), std::make_pair(&b, &a) }) {
+        for (const aiVector3D &p : *from) {
+            ai_real nearest = std::numeric_limits<ai_real>::max();
+            for (const aiVector3D &q : *to) {
+                nearest = std::min(nearest, (p - q).Length());
+            }
+            largest = std::max(largest, nearest);
+        }
+    }
+    return largest;
+}
+
+struct ToolFrame {
+    const char *obj;
+    double ticks; // Assimp moves each animation to start at 0, so this is the frame minus the frame the animation starts at
+};
+
+void checkAgainstTool(const char *fbx, std::initializer_list<ToolFrame> frames, const aiMatrix4x4 *meshBindPose = nullptr) {
+    const std::string folder = ASSIMP_TEST_MODELS_DIR "/FBX/skinning/ufbx/";
+    for (const bool preservePivots : { true, false }) {
+        Assimp::Importer importer;
+        importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, preservePivots);
+        // The .obj exports keep the file's own axes and units
+        importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_IGNORE_UP_DIRECTION, true);
+        const aiScene *scene = importer.ReadFile(folder + fbx, aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene) << fbx;
+        const aiAnimation *animation = scene->mNumAnimations > 0 ? scene->mAnimations[0] : nullptr;
+        for (const ToolFrame &frame : frames) {
+            const std::vector<aiVector3D> expected = readObjPositions(folder + frame.obj);
+            ASSERT_FALSE(expected.empty()) << frame.obj;
+            EXPECT_LT(distanceBetween(skinnedPositions(scene, animation, frame.ticks, meshBindPose), expected), 1e-3)
+                    << fbx << " against " << frame.obj << ", pivots preserved: " << preservePivots;
+        }
+    }
+}
+
+// The skinned mesh's bind pose in the two Maya files below, from their Pose object
+aiMatrix4x4 mayaSkinBindPose() {
+    aiMatrix4x4 pose;
+    return aiMatrix4x4::Translation(aiVector3D(4, 0, 0), pose);
+}
+
+} // namespace
+
+TEST_F(utFBXImporterExporter, importSkinOfMayaNodeMovedAfterBinding) {
+    const aiMatrix4x4 bindPose = mayaSkinBindPose();
+    checkAgainstTool("maya_transformed_skin_7700_ascii.fbx",
+            { { "maya_transformed_skin_0.obj", 0 }, { "maya_transformed_skin_4.obj", 4 }, { "maya_transformed_skin_8.obj", 8 } },
+            &bindPose);
+}
+
+TEST_F(utFBXImporterExporter, importSkinOfMayaInstancedMesh) {
+    // Two nodes share the skinned mesh; only the first one has a bind pose, which ufbx's tests use for both
+    const aiMatrix4x4 bindPose = mayaSkinBindPose();
+    checkAgainstTool("maya_instanced_skin_7700_ascii.fbx",
+            { { "maya_instanced_skin_0.obj", 0 }, { "maya_instanced_skin_4.obj", 4 }, { "maya_instanced_skin_8.obj", 8 } },
+            &bindPose);
+}
+
+TEST_F(utFBXImporterExporter, importSkinMatchesMayaAndBlender) {
+    checkAgainstTool("maya_skinned_pivot_7700_ascii.fbx", { { "maya_skinned_pivot.obj", 0 } });
+    checkAgainstTool("blender_293_half_skinned_7400_binary.fbx", { { "blender_293_half_skinned.obj", 0 } });
+    // This animation starts at frame 1
+    checkAgainstTool("maya_game_sausage_7500_ascii_wiggle.fbx",
+            { { "maya_game_sausage_wiggle_10.obj", 9 }, { "maya_game_sausage_wiggle_18.obj", 17 } });
 }

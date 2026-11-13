@@ -1,0 +1,54 @@
+; FBX 7.4.0 project file
+; A mesh skinned to two bones. Made by Stride's make_skin_fbx.py for Assimp's unit tests.
+FBXHeaderExtension: { FBXHeaderVersion: 1003 FBXVersion: 7400 }
+Objects: {
+Geometry: 10, "Geometry::skin", "Mesh" {
+Vertices: *24 { a: 0.0,0.0,0.0,40.0,0.0,0.0,0.0,40.0,0.0,40.0,40.0,10.0,0.0,0.0,80.0,40.0,0.0,80.0,0.0,40.0,90.0,40.0,40.0,90.0 }
+PolygonVertexIndex: *12 { a: 0,1,-3,1,3,-3,4,5,-7,5,7,-7 }
+GeometryVersion: 124
+}
+Model: 20, "Model::skin", "Mesh" { Version: 232 Properties70: {
+P: "Lcl Translation", "Lcl Translation", "", "A",-50.0,0.0,10.0
+P: "Lcl Rotation", "Lcl Rotation", "", "A",180.0,0.0,0.0
+P: "Lcl Scaling", "Lcl Scaling", "", "A",-1.0,1.0,1.0
+P: "GeometricTranslation", "Vector3D", "Vector", "",0.0,0.0,0.0
+P: "GeometricRotation", "Vector3D", "Vector", "",0.0,0.0,0.0
+P: "GeometricScaling", "Vector3D", "Vector", "",1.0,1.0,1.0
+} }
+Model: 30, "Model::root", "LimbNode" { Version: 232 Properties70: {
+P: "Lcl Translation", "Lcl Translation", "", "A",5.0,50.0,0.0
+P: "Lcl Rotation", "Lcl Rotation", "", "A",0.0,0.0,20.0
+P: "Lcl Scaling", "Lcl Scaling", "", "A",1.0,1.0,1.0
+} }
+Model: 31, "Model::child", "LimbNode" { Version: 232 Properties70: {
+P: "Lcl Translation", "Lcl Translation", "", "A",0.0,40.0,0.0
+P: "Lcl Rotation", "Lcl Rotation", "", "A",10.0,0.0,0.0
+P: "Lcl Scaling", "Lcl Scaling", "", "A",1.0,1.0,1.0
+} }
+Deformer: 50, "Deformer::", "Skin" { Version: 101 Link_DeformAcuracy: 50 }
+Deformer: 51, "SubDeformer::", "Cluster" {
+Version: 100
+Indexes: *4 { a: 0,1,2,3 }
+Weights: *4 { a: 1,1,1,1 }
+Transform: *16 { a: 0.8137976813493734,-0.29619813272602463,-0.49999999999999994,-7.263377100982773e-19,0.34202014332566844,0.9396926207859078,0.0,2.3043163037398764e-18,0.4698463103929539,-0.17101007166283477,0.8660254037844387,-4.1935127244781665e-19,-5.562141195840514,-29.90087934020558,30.0,0.9999999999999999 }
+TransformLink: *16 { a: 0.9396926207859084,0.3420201433256687,0.0,0.0,-0.3420201433256687,0.9396926207859084,0.0,0.0,0.0,0.0,1.0,0.0,5.0,50.0,0.0,1.0 }
+}
+Deformer: 52, "SubDeformer::", "Cluster" {
+Version: 100
+Indexes: *4 { a: 4,5,6,7 }
+Weights: *4 { a: 1,1,1,1 }
+Transform: *16 { a: 0.8137976813493729,-0.37852230636979345,-0.44096961052988215,0.0,0.3420201433256685,0.9254165783983229,-0.16317591116653474,0.0,0.46984631039295366,-0.018028311236297737,0.8825641192593859,0.0,-5.562141195840525,-63.62948258659743,41.682392905108934,1.0 }
+TransformLink: *16 { a: 0.9396926207859084,0.3420201433256687,0.0,0.0,-0.33682408883346515,0.9254165783983234,0.17364817766693033,0.0,0.0593911746138847,-0.16317591116653482,0.984807753012208,0.0,-8.680805733026748,87.58770483143634,0.0,1.0 }
+}
+}
+Connections: {
+C: "OO",20,0
+C: "OO",10,20
+C: "OO",30,0
+C: "OO",31,30
+C: "OO",50,10
+C: "OO",51,50
+C: "OO",52,50
+C: "OO",30,51
+C: "OO",31,52
+}

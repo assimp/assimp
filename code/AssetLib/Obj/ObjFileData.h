@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/mesh.h>
 #include <assimp/types.h>
+#include <assimp/SmallVector.h>
 #include <unordered_map>
 #include <vector>
 #include "Common/Maybe.h"
@@ -60,7 +61,10 @@ struct Material;
 /// @brief  Data structure for a simple obj-face, describes discredit,l.ation and materials
 // ------------------------------------------------------------------------------------------------
 struct Face {
-    using IndexArray = std::vector<unsigned int>;
+    // Faces are almost always triangles or quads, so keep their index arrays
+    // inline (no heap allocation for <= 4 vertices) and only spill to the heap
+    // for larger polygons.
+    using IndexArray = SmallVector<unsigned int, 4>;
 
     aiPrimitiveType mPrimitiveType{aiPrimitiveType_TRIANGLE};   ///< Primitive type
     IndexArray mVertices{};                                     ///< Vertex indices

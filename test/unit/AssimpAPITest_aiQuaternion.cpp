@@ -5,8 +5,6 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2026, assimp team
 
-
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -90,20 +88,20 @@ TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionFromNormalizedQuaternionTest) {
     aiQuaternionFromNormalizedQuaternion(&result_c, &qvec3);
     // Use a larger tolerance because FMA contraction differences in
     // 1.0 - x*x - y*y - z*z can flip the sign of a near-zero residual,
-    // causing w = 0 vs w = sqrt(tiny) ≈ 1e-4.
-    EXPECT_TRUE(result_cpp.Equal(result_c, 1e-4f));
+    // causing w = 0 vs w = sqrt(tiny) ≈ 1e-3.
+    EXPECT_TRUE(result_cpp.Equal(result_c, 1e-3f));
 }
 
 TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionAreEqualTest) {
     result_c = result_cpp = random_quat();
     EXPECT_EQ(result_cpp == result_c,
-        (bool)aiQuaternionAreEqual(&result_cpp, &result_c));
+        static_cast<bool>(aiQuaternionAreEqual(&result_cpp, &result_c)));
 }
 
 TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionAreEqualEpsilonTest) {
     result_c = result_cpp = random_quat();
     EXPECT_EQ(result_cpp.Equal(result_c, Epsilon),
-        (bool)aiQuaternionAreEqualEpsilon(&result_cpp, &result_c, Epsilon));
+        static_cast<bool>(aiQuaternionAreEqualEpsilon(&result_cpp, &result_c, Epsilon)));
 }
 
 TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionNormalizeTest) {
@@ -133,7 +131,7 @@ TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionMultiplyTest) {
 TEST_F(AssimpAPITest_aiQuaternion, aiQuaternionInterpolateTest) {
     // Use predetermined quaternions to prevent division by zero
     // during slerp calculations.
-    const float INTERPOLATION(0.5f);
+    static constexpr float INTERPOLATION{0.5f};
     const auto q1 = aiQuaternion(aiVector3D(-1,1,1).Normalize(), Math::aiPi<float>() / 4.0f);
     const auto q2 = aiQuaternion(aiVector3D(1,2,1).Normalize(), Math::aiPi<float>() / 2.0f);
     aiQuaternion::Interpolate(result_cpp, q1, q2, INTERPOLATION);

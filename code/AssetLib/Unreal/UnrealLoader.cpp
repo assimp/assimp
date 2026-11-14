@@ -320,7 +320,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
         std::vector<std::pair<std::string, std::string>> tempTextures;
 
         // do a quick search in the UC file for some known, usually texture-related, tags
-        for (; *data; ++data) {
+        for (; data < end && *data; ++data) {
             if (TokenMatchI(data, "#exec", 5)) {
                 SkipSpacesAndLineEnd(&data, end);
 
@@ -342,6 +342,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                                 for (; !IsSpaceOrNewLine(*data); ++data)
                                     ;
                                 me.second = std::string(d, (size_t)(data - d));
+                            }
+                            if (IsLineEnd(*data)) {
+                                break;
                             }
                         }
                         if (!me.first.length() || !me.second.length()) {
@@ -378,6 +381,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                                     }
                                 }
                             }
+                            if (IsLineEnd(*data)) {
+                                break;
+                            }
                         }
                     } else if (TokenMatchI(data, "SCALE", 5)) {
 
@@ -388,6 +394,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                                 data = fast_atoreal_move(data + 2, nd->mTransformation.b2);
                             } else if (data[0] == 'Z' && data[1] == '=') {
                                 data = fast_atoreal_move(data + 2, nd->mTransformation.c3);
+                            }
+                            if (IsLineEnd(*data)) {
+                                break;
                             }
                         }
                     }

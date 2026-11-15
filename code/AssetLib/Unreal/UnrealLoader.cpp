@@ -343,6 +343,10 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                                     ;
                                 me.second = std::string(d, (size_t)(data - d));
                             }
+                            // a value can end on the terminating zero, don't step past it
+                            if (*data == '\0') {
+                                break;
+                            }
                         }
                         if (!me.first.length() || !me.second.length()) {
                             tempTextures.pop_back();
@@ -378,6 +382,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                                     }
                                 }
                             }
+                            if (*data == '\0') {
+                                break;
+                            }
                         }
                     } else if (TokenMatchI(data, "SCALE", 5)) {
 
@@ -389,9 +396,15 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                             } else if (data[0] == 'Z' && data[1] == '=') {
                                 data = fast_atoreal_move(data + 2, nd->mTransformation.c3);
                             }
+                            if (*data == '\0') {
+                                break;
+                            }
                         }
                     }
                 }
+            }
+            if (*data == '\0') {
+                break;
             }
         }
     } else {

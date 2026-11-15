@@ -562,6 +562,12 @@ void NFFImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSys
 
                     // fill the mesh with data
                     if (!tempIdx.empty()) {
+                        // a polygon color can turn on hasColor after faces without one were
+                        // added to this mesh, give those the default white so colors stay
+                        // in step with vertices
+                        if (hasColor) {
+                            mesh->colors.resize(mesh->vertices.size(), aiColor4D(1.f, 1.f, 1.f, 1.f));
+                        }
                         mesh->faces.push_back((unsigned int)tempIdx.size());
                         for (std::vector<unsigned int>::const_iterator it = tempIdx.begin(), end = tempIdx.end();
                                 it != end; ++it) {

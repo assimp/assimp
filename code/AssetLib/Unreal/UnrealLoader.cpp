@@ -343,7 +343,9 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                                     ;
                                 me.second = std::string(d, (size_t)(data - d));
                             }
-                            if (IsLineEnd(*data)) {
+
+                            // a value can end on the terminating zero, don't step past it                          
+                            if (IsLineEnd(*data) || *data == '\0') {
                                 break;
                             }
                         }
@@ -381,7 +383,7 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                                     }
                                 }
                             }
-                            if (IsLineEnd(*data)) {
+                            if (IsLineEnd(*data) || *data == '\0') {
                                 break;
                             }
                         }
@@ -395,12 +397,15 @@ void UnrealImporter::InternReadFile(const std::string &pFile,
                             } else if (data[0] == 'Z' && data[1] == '=') {
                                 data = fast_atoreal_move(data + 2, nd->mTransformation.c3);
                             }
-                            if (IsLineEnd(*data)) {
+                            if (IsLineEnd(*data) || *data == '\0') {
                                 break;
                             }
                         }
                     }
                 }
+            }
+            if (*data == '\0') {
+                break;
             }
         }
     } else {

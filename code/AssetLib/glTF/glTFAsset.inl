@@ -128,12 +128,12 @@ Ref<T> LazyDict<T>::Get(const char *id) {
         throw DeadlyImportError("GLTF: Object with id \"", id, "\" is not a JSON object");
     }
 
-    // create an instance of the given type
-    T *inst = new T();
+    // Unique ptr prevents memory leak in case of Read throws an exception
+    auto inst = std::unique_ptr<T>(new T());
     inst->id = id;
     ReadMember(obj->value, "name", inst->name);
     inst->Read(obj->value, mAsset);
-    return Add(inst);
+    return Add(inst.release());
 }
 
 template <class T>

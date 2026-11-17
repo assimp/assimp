@@ -78,6 +78,20 @@ AI_WONT_RETURN void XFileParser::ThrowException(T&&... args) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Rejects counts that the remaining input cannot possibly satisfy. One item occupies at least
+// inBytesPerItem bytes, so the number of bytes left is a hard upper bound for the count. Without
+// this, a count such as 178956970 in a 55 byte file makes the importer allocate and zero fill
+// gigabytes before the reads that follow can fail.
+void XFileParser::CheckCount(unsigned int inCount, size_t inBytesPerItem) {
+    ai_assert(inBytesPerItem > 0);
+
+    const size_t remaining = static_cast<size_t>(mEnd - mP);
+    if (static_cast<size_t>(inCount) > remaining / inBytesPerItem) {
+        ThrowException("Too many elements requested by a count in the file");
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 // Constructor. Creates a data structure out of the XFile given in the memory block.
 XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         mMajorVersion(0), mMinorVersion(0), mIsBinaryFormat(false), mBinaryNumCount(0), mP(nullptr), mEnd(nullptr), mLineNumber(0), mScene(nullptr) {
@@ -392,6 +406,7 @@ void XFileParser::ParseDataObjectMesh(Mesh *pMesh) {
 
     // read vertex count
     unsigned int numVertices = ReadInt();
+    CheckCount(numVertices, mIsBinaryFormat ? 3 * mBinaryFloatSize : 1);
     pMesh->mPositions.resize(numVertices);
 
     // read vertices
@@ -400,6 +415,7 @@ void XFileParser::ParseDataObjectMesh(Mesh *pMesh) {
 
     // read position faces
     unsigned int numPosFaces = ReadInt();
+    CheckCount(numPosFaces, mIsBinaryFormat ? 4 : 1);
     pMesh->mPosFaces.resize(numPosFaces);
     for (unsigned int a = 0; a < numPosFaces; ++a) {
         // read indices
@@ -513,6 +529,7 @@ void XFileParser::ParseDataObjectMeshNormals(Mesh *pMesh) {
 
     // read count
     unsigned int numNormals = ReadInt();
+    CheckCount(numNormals, mIsBinaryFormat ? 3 * mBinaryFloatSize : 1);
     pMesh->mNormals.resize(numNormals);
 
     // read normal vectors
@@ -573,6 +590,7 @@ void XFileParser::ParseDataObjectMeshFVFData(Mesh *pMesh) {
     
     // Number of total values in FVF Data. 2 x Vertices x UV sets
     unsigned int numCoords = ReadInt();
+    CheckCount(numCoords, mIsBinaryFormat ? 4 : 1);
     
     // Number of additional UV Channels in FVFData (D3DFVF_TEX1 | D3DFVF_TEX2 | D3DFVF_TEX3)
     unsigned int channels = (flags & 0xF00) >> 8;

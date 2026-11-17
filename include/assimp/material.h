@@ -1584,7 +1584,11 @@ static inline aiReturn aiGetMaterialFloat(const C_STRUCT aiMaterial *pMat,
         unsigned int type,
         unsigned int index,
         ai_real *pOut) {
-    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, NULL);
+    // pOut points at a single value, so cap the array reader at one element.
+    // Without the cap it writes one value per float stored in the property,
+    // overrunning pOut when the key holds a multi-element value.
+    unsigned int iMax = 1;
+    return aiGetMaterialFloatArray(pMat, pKey, type, index, pOut, &iMax);
 }
 
 // ---------------------------------------------------------------------------
@@ -1609,7 +1613,11 @@ static inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial *pMat,
         unsigned int type,
         unsigned int index,
         int *pOut) {
-    return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, NULL);
+    // pOut points at a single value, so cap the array reader at one element.
+    // Without the cap it writes one value per int stored in the property,
+    // overrunning pOut when the key holds a multi-element value.
+    unsigned int iMax = 1;
+    return aiGetMaterialIntegerArray(pMat, pKey, type, index, pOut, &iMax);
 }
 
 // ---------------------------------------------------------------------------

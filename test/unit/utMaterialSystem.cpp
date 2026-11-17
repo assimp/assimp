@@ -195,6 +195,46 @@ TEST_F(MaterialSystemTest, testColorProperty) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// aiGetMaterialInteger documents a single output value, but a material loaded from a
+// file can store a multi-element value under that key (e.g. assbin preserves the raw
+// property length). The single-value getter must write only one element; before the fix
+// it wrote one int per stored int, running past pOut.
+TEST_F(MaterialSystemTest, testSingleIntGetterStopsAtOneValue) {
+    int many[16];
+    for (int &v : many) {
+        v = 3;
+    }
+    this->pcMat->AddProperty(many, 16, "multiInt");
+
+    const int sentinel = 0x5A5A5A5A;
+    int out[16];
+    for (int &v : out) {
+        v = sentinel;
+    }
+    EXPECT_EQ(AI_SUCCESS, aiGetMaterialInteger(this->pcMat, "multiInt", 0, 0, out));
+    EXPECT_EQ(3, out[0]);
+    EXPECT_EQ(sentinel, out[1]); // one past the single value must be untouched
+}
+
+// ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testSingleFloatGetterStopsAtOneValue) {
+    float many[16];
+    for (float &v : many) {
+        v = 0.25f;
+    }
+    this->pcMat->AddProperty(many, 16, "multiFloat");
+
+    const float sentinel = -123.0f;
+    float out[16];
+    for (float &v : out) {
+        v = sentinel;
+    }
+    EXPECT_EQ(AI_SUCCESS, aiGetMaterialFloat(this->pcMat, "multiFloat", 0, 0, out));
+    EXPECT_EQ(0.25f, out[0]);
+    EXPECT_EQ(sentinel, out[1]); // one past the single value must be untouched
+}
+
+// ------------------------------------------------------------------------------------------------
 TEST_F(MaterialSystemTest, testStringProperty) {
     aiString s;
     s.Set("Hello, this is a small test");

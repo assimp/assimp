@@ -75,6 +75,17 @@ TEST_F(utXImporterExporter, fvf_texcoord_index_out_of_range) {
     EXPECT_NO_THROW(importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/malformed_fvf_texcoord_oob.x", 0));
 }
 
+TEST_F(utXImporterExporter, vertex_count_larger_than_input_is_rejected) {
+    // A 55 byte file declaring 178956970 vertices. The count has to be rejected before the arrays
+    // are allocated, not after reading runs out of data, otherwise a handful of bytes makes the
+    // importer allocate gigabytes (issue #6944).
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/malformed_vertex_count.x", 0);
+    EXPECT_EQ(nullptr, scene);
+    const std::string error = importer.GetErrorString();
+    EXPECT_TRUE(error.find("Too many elements") != std::string::npos) << error;
+}
+
 TEST(utXImporter, importAnimTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/anim_test.x", aiProcess_ValidateDataStructure);

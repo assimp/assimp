@@ -132,6 +132,10 @@ protected:
     aiColor3D ReadRGB();
     aiColor4D ReadRGBA();
 
+    /** Throws an exception if a count read from the file is larger than the remaining input could
+     *  possibly hold, so that a handful of bytes cannot request gigabytes of memory. */
+    void CheckCount(unsigned int inCount, size_t inBytesPerItem);
+
     /** Throws an exception with a line number and the given text. */
     template<typename... T>
     AI_WONT_RETURN void ThrowException(T&&... args) AI_WONT_RETURN_SUFFIX;

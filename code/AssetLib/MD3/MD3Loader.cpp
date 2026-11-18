@@ -388,16 +388,17 @@ void MD3Importer::ValidateHeaderOffsets() {
 
 // ------------------------------------------------------------------------------------------------
 void MD3Importer::ValidateSurfaceHeaderOffsets(const MD3::Surface *pcSurf) {
-    // Calculate the relative offset of the surface
-    const int32_t ofs = int32_t((const unsigned char *)pcSurf - this->mBuffer);
-    if (ofs + sizeof(MD3::Surface) > fileSize) {
+    // Calculate the relative offset of the surface. The previous surface's
+    // OFS_END is signed, so this one may start in front of the buffer.
+    const ptrdiff_t ofs = (const unsigned char *)pcSurf - this->mBuffer;
+    if (ofs < 0 || static_cast<uint64_t>(ofs) + sizeof(MD3::Surface) > fileSize) {
         throw DeadlyImportError("Surface header is outside file bounds");
     }
 
+    // Use 64-bit arithmetic so ofs + rel_offset cannot wrap past 4 GiB.
     auto inRange = [this, ofs](uint32_t rel_offset, uint32_t count, size_t elem_size) -> bool {
-        size_t abs_offset = ofs + rel_offset;
-        if (count > 0 && elem_size > 0 && count > SIZE_MAX / elem_size) return false;
-        size_t total = abs_offset + size_t(count) * elem_size;
+        const uint64_t abs_offset = static_cast<uint64_t>(ofs) + rel_offset;
+        const uint64_t total = abs_offset + static_cast<uint64_t>(count) * elem_size;
         return abs_offset <= fileSize && total <= fileSize;
     };
     // Check whether all data chunks are inside the valid range

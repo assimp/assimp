@@ -59,6 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 
+#include <algorithm>
+#include <limits>
 #include <memory>
 
 namespace Assimp {
@@ -457,7 +459,7 @@ void COBImporter::ReadChunkInfo_Ascii(ChunkInfo &out, const LineSplitter &splitt
     out.version = (all_tokens[1][1] - '0') * 100 + (all_tokens[1][3] - '0') * 10 + (all_tokens[1][4] - '0');
     out.id = strtoul10(all_tokens[3]);
     out.parent_id = strtoul10(all_tokens[5]);
-    out.size = strtol10(all_tokens[7]);
+    out.size = strtoul10(all_tokens[7]);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -472,7 +474,12 @@ void COBImporter::UnsupportedChunk_Ascii(LineSplitter &splitter, const ChunkInfo
         // head line of the next chunk. That's fine, but the caller is going
         // to call ++ on `splitter`, which we need to swallow to avoid
         // missing the next line.
-        splitter.get_stream().IncPtr(nfo.size);
+        StreamReaderLE &stream = splitter.get_stream();
+        if (const size_t rem = stream.GetRemainingSizeToLimit(); static_cast<size_t>(nfo.size) > rem) {
+            stream.SkipToReadLimit();
+        } else {
+            stream.SetPtr(stream.GetPtr() + nfo.size);
+        }
         splitter.swallow_next_increment();
     } else {
         ThrowException(error);
@@ -844,7 +851,11 @@ void COBImporter::UnsupportedChunk_Binary(StreamReaderLE &reader, const ChunkInf
     // we can recover if the chunk size was specified.
     if (nfo.size != static_cast<unsigned int>(-1)) {
         ASSIMP_LOG_ERROR(error);
-        reader.IncPtr(nfo.size);
+        if (const size_t rem = reader.GetRemainingSizeToLimit(); static_cast<size_t>(nfo.size) > rem) {
+            reader.SkipToReadLimit();
+        } else {
+            reader.SetPtr(reader.GetPtr() + nfo.size);
+        }
     } else
         ThrowException(error);
 }
@@ -854,23 +865,24 @@ void COBImporter::UnsupportedChunk_Binary(StreamReaderLE &reader, const ChunkInf
 class chunk_guard {
 public:
     chunk_guard(const COB::ChunkInfo &nfo, StreamReaderLE &reader) :
-            nfo(nfo), reader(reader), cur(reader.GetCurrentPos()) {
+            nfo(nfo),
+            reader(reader),
+            start(reader.GetPtr()),
+            rem(reader.GetRemainingSizeToLimit()) {
         // empty
     }
 
     ~chunk_guard() {
         // don't do anything if the size is not given
         if (nfo.size != static_cast<unsigned int>(-1)) {
-            try {
-                reader.IncPtr(static_cast<int>(nfo.size) - reader.GetCurrentPos() + cur);
-            } catch (const DeadlyImportError &) {
-                // The chunk size points past the end of the buffer; clamp to the
-                // read limit. This must not throw: a destructor is implicitly
-                // noexcept, and the previous code called IncPtr(GetReadLimit()),
-                // which interprets the absolute limit as a relative offset and
-                // seeks out of bounds again -- the escaping exception then
-                // terminated the process. SkipToReadLimit() clamps without throwing.
+            if (static_cast<size_t>(nfo.size) > rem) {
                 reader.SkipToReadLimit();
+            } else {
+                try {
+                    reader.SetPtr(start + nfo.size);
+                } catch (...) {
+                    reader.SkipToReadLimit();
+                }
             }
         }
     }
@@ -878,7 +890,8 @@ public:
 private:
     const COB::ChunkInfo &nfo;
     StreamReaderLE &reader;
-    long cur;
+    int8_t *start;
+    size_t rem;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -918,10 +931,14 @@ void COBImporter::ReadBinaryFile(Scene &out, StreamReaderLE *reader) {
             ReadUnit_Binary(out, *reader, nfo);
         } else if (type == "OLay") {
             // ignore layer index silently.
-            if (nfo.size != static_cast<unsigned int>(-1)) {
-                reader->IncPtr(nfo.size);
-            } else
+            if (nfo.size == static_cast<unsigned int>(-1)) {
                 return UnsupportedChunk_Binary(*reader, nfo, type.c_str());
+            }
+            if (const size_t rem = reader->GetRemainingSizeToLimit(); static_cast<size_t>(nfo.size) > rem) {
+                reader->SkipToReadLimit();
+            } else {
+                reader->SetPtr(reader->GetPtr() + nfo.size);
+            }
         } else if (type == "END ") {
             return;
         } else {

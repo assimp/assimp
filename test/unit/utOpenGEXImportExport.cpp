@@ -46,6 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Importer.hpp>
 
+#include <array>
+#include <string>
+
 using namespace Assimp;
 
 class utOpenGEXImportExport : public AbstractImportExportBase {
@@ -72,4 +75,14 @@ TEST_F(utOpenGEXImportExport, Importissue1340_EmptyCameraObject) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/OpenGEX/empty_camera.ogex", 0);
     EXPECT_NE(nullptr, scene);
+}
+
+TEST_F(utOpenGEXImportExport, importPropertyAtEndOfFileNoCrash) {
+    // Each file ends inside a property value, and the number checks used to read
+    // the byte past the end of the buffer before checking for the end.
+    const std::array<std::string, 2> files = { "Metric (key =", "Metric (key = -" };
+    for (const std::string &data : files) {
+        Assimp::Importer importer;
+        importer.ReadFileFromMemory(data.data(), data.size(), 0, "ogex");
+    }
 }

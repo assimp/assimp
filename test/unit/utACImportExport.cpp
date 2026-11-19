@@ -66,6 +66,24 @@ TEST(utACImportExport, importOpenLine) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utACImportExport, importShortTriangleStrip) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/invalid/shortTriangleStrip.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(2u, scene->mMeshes[0]->mNumFaces);
+    EXPECT_EQ(10u, scene->mMeshes[0]->mNumVertices);
+}
+
+TEST(utACImportExport, importEmptyOpenLine) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/invalid/emptyOpenLine.ac", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(2u, scene->mMeshes[0]->mNumFaces);
+    EXPECT_EQ(8u, scene->mMeshes[0]->mNumVertices);
+}
+
 TEST(utACImportExport, importSampleSubdiv) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AC/sample_subdiv.ac", aiProcess_ValidateDataStructure);

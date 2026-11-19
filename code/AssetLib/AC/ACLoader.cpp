@@ -485,11 +485,17 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     break;
 
                 case Surface::OpenLine: // unclosed line
+                    if (it->entries.empty()) {
+                        break;
+                    }
                     needMat[idx].first += static_cast<unsigned int>(it->entries.size() - 1);
                     needMat[idx].second += static_cast<unsigned int>((it->entries.size() - 1) << 1u);
                     break;
 
                 case Surface::TriangleStrip: // triangle strip
+                    if (it->entries.size() < 3) {
+                        break;
+                    }
                     needMat[idx].first += static_cast<unsigned int>(it->entries.size() - 2) * doubleSidedFactor;
                     needMat[idx].second += static_cast<unsigned int>(it->entries.size() - 2) * 3 * doubleSidedFactor;
                     break;
@@ -588,7 +594,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                                     buildBacksideOfFace(faces[-1], faces, vertices, mesh->mVertices, uv, mesh->mTextureCoords[0], cur);
                             }
                         } else if (type == Surface::TriangleStrip) {
-                            for (unsigned int i = 0; i < (unsigned int)src.entries.size() - 2; ++i) {
+                            for (unsigned int i = 0; i + 2 < (unsigned int)src.entries.size(); ++i) {
                                 const Surface::SurfaceEntry &entry1 = src.entries[i];
                                 const Surface::SurfaceEntry &entry2 = src.entries[i + 1];
                                 const Surface::SurfaceEntry &entry3 = src.entries[i + 2];
@@ -648,7 +654,7 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
 
                             // either a closed or an unclosed line
                             unsigned int tmp = (unsigned int)(*it).entries.size();
-                            if (Surface::OpenLine == type) --tmp;
+                            if (Surface::OpenLine == type && tmp > 0) --tmp;
                             for (unsigned int m = 0; m < tmp; ++m) {
                                 if (static_cast<unsigned>(vertices - mesh->mVertices) + 2 > mesh->mNumVertices) {
                                     throw DeadlyImportError("AC3D: Invalid number of vertices");

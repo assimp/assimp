@@ -756,7 +756,6 @@ inline void Buffer::Grow(size_t amount) {
     // on every append, which makes exporting many meshes quadratic in the buffer size.
     capacity = std::max(byteLength + amount, capacity + capacity / 2);
 
-
     uint8_t *b = new uint8_t[capacity];
     if (nullptr != mData) {
         memcpy(b, mData.get(), byteLength);

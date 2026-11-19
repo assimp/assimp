@@ -749,6 +749,10 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent) {
     bool boneAssignments = src->HasBoneAssignments();
     bool normals = src->HasNormals();
     size_t uvs = src->NumUvs();
+    if (uvs > AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+        ASSIMP_LOG_WARN("Ogre: number of UV sets exceeds the supported maximum, ignoring the extra sets");
+        uvs = AI_MAX_NUMBER_OF_TEXTURECOORDS;
+    }
 
     // Prepare normals
     if (normals)

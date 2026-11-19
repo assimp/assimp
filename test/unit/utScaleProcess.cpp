@@ -67,5 +67,34 @@ TEST_F(utScaleProcess, accessScaleTest) {
     EXPECT_FLOAT_EQ(2.0f, process.getScale());
 }
 
+TEST_F(utScaleProcess, boneOffsetKeepsShearTest) {
+    // A bone under a rotated non-uniform scale has an offset matrix with shear.
+    // A change of units scales its translation and keeps the rest.
+    float opacity;
+    aiScene *scene = TestModelFactory::createDefaultTestModel(opacity);
+    aiMesh *mesh = scene->mMeshes[0];
+    mesh->mNumBones = 1;
+    mesh->mBones = new aiBone *[1];
+    mesh->mBones[0] = new aiBone;
+    mesh->mBones[0]->mOffsetMatrix = aiMatrix4x4(
+            1, 0.5f, 0, 2,
+            0, 1, 0, 3,
+            0, 0, 1, 4,
+            0, 0, 0, 1);
+
+    ScaleProcess process;
+    process.setScale(0.01f);
+    process.Execute(scene);
+
+    const aiMatrix4x4 expected(
+            1, 0.5f, 0, 0.02f,
+            0, 1, 0, 0.03f,
+            0, 0, 1, 0.04f,
+            0, 0, 0, 1);
+    EXPECT_TRUE(mesh->mBones[0]->mOffsetMatrix.Equal(expected, 1e-6f));
+
+    TestModelFactory::releaseDefaultTestModel(&scene);
+}
+
 } // Namespace UnitTest
 } // Namespace Assimp

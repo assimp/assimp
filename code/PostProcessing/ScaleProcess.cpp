@@ -87,12 +87,11 @@ void ScaleProcess::Execute( aiScene* pScene ) {
 
     ai_assert(mScale != 0 );
     ai_assert(nullptr != pScene );
-    ai_assert(nullptr != pScene->mRootNode );
-
     if ( nullptr == pScene ) {
         return;
     }
 
+    ai_assert(nullptr != pScene->mRootNode );
     if ( nullptr == pScene->mRootNode ) {
         return;
     }
@@ -128,20 +127,10 @@ void ScaleProcess::Execute( aiScene* pScene ) {
             // like when you want the modeller to see 1:1 compatibility.
             aiBone* bone = mesh->mBones[boneID];
 
-            aiVector3D pos, scale;
-            aiQuaternion rotation;
-
-            bone->mOffsetMatrix.Decompose( scale, rotation, pos);
-
-            aiMatrix4x4 translation;
-            aiMatrix4x4::Translation( pos * mScale, translation );
-
-            aiMatrix4x4 scaling;
-            aiMatrix4x4::Scaling( aiVector3D(scale), scaling );
-
-            const aiMatrix4x4 RotMatrix = aiMatrix4x4(rotation.GetMatrix());
-
-            bone->mOffsetMatrix = translation * RotMatrix * scaling;
+            // Only the translation: rebuilding the matrix from scale, rotation and translation would lose any shear
+            bone->mOffsetMatrix.a4 *= mScale;
+            bone->mOffsetMatrix.b4 *= mScale;
+            bone->mOffsetMatrix.c4 *= mScale;
         }
 
 

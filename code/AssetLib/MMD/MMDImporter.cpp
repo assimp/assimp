@@ -154,6 +154,11 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
 
     pScene->mNumMeshes = pModel->material_count;
     pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
+    // Null the pointer array: if a later CreateMesh throws (e.g. on a malformed index),
+    // the scene destructor would otherwise delete uninitialized pointers.
+    for (unsigned int mi = 0; mi < pScene->mNumMeshes; ++mi) {
+        pScene->mMeshes[mi] = nullptr;
+    }
     for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
         const int indexCount = pModel->materials[i].index_count;
 
@@ -238,8 +243,18 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
 
     // fill in contents and create bones
     for (int index = 0; index < indexCount; index++) {
-        const pmx::PmxVertex *v =
-                &pModel->vertices[pModel->indices[indexStart + index]];
+        // indexStart/indexCount come from the per-material index_count fields and each
+        // entry of pModel->indices is a vertex index read straight from the file; bound
+        // both against the actual array sizes before dereferencing.
+        const int globalIndex = indexStart + index;
+        if (globalIndex < 0 || globalIndex >= pModel->index_count) {
+            throw DeadlyImportError("MMD: index ", globalIndex, " out of range (", pModel->index_count, ").");
+        }
+        const int vertexIndex = pModel->indices[globalIndex];
+        if (vertexIndex < 0 || vertexIndex >= pModel->vertex_count) {
+            throw DeadlyImportError("MMD: vertex index ", vertexIndex, " out of range (", pModel->vertex_count, ").");
+        }
+        const pmx::PmxVertex *v = &pModel->vertices[vertexIndex];
         const float *position = v->position;
         pMesh->mVertices[index].Set(position[0], position[1], position[2]);
         const float *normal = v->normal;

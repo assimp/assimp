@@ -635,6 +635,7 @@ inline bool Buffer::LoadFromStream(IOStream &stream, size_t length, size_t baseO
     }
 
     mData.reset(new uint8_t[byteLength], std::default_delete<uint8_t[]>());
+    capacity = byteLength;
 
     if (stream.Read(mData.get(), byteLength, 1) != 1) {
         return false;
@@ -703,6 +704,7 @@ inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pB
     // Apply new data
     mData.reset(new_data, std::default_delete<uint8_t[]>());
     byteLength = new_data_size;
+    capacity = new_data_size;
 
     return true;
 }
@@ -723,6 +725,7 @@ inline bool Buffer::ReplaceData_joint(const size_t pBufferData_Offset, const siz
     // Apply new data
     mData.reset(new_data, std::default_delete<uint8_t[]>());
     byteLength = new_data_size;
+    capacity = new_data_size;
 
     return true;
 }
@@ -749,8 +752,10 @@ inline void Buffer::Grow(size_t amount) {
         return;
     }
 
-    // Just allocate data which we need
-    capacity = byteLength + amount;
+    // Grow geometrically: allocating only the missing amount copies the whole buffer
+    // on every append, which makes exporting many meshes quadratic in the buffer size.
+    capacity = std::max(byteLength + amount, capacity + capacity / 2);
+
 
     uint8_t *b = new uint8_t[capacity];
     if (nullptr != mData) {

@@ -45,7 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/mesh.h>
 #include <assimp/types.h>
-#include <map>
+#include <assimp/SmallVector.h>
+#include <unordered_map>
 #include <vector>
 #include "Common/Maybe.h"
 
@@ -60,7 +61,10 @@ struct Material;
 /// @brief  Data structure for a simple obj-face, describes discredit,l.ation and materials
 // ------------------------------------------------------------------------------------------------
 struct Face {
-    using IndexArray = std::vector<unsigned int>;
+    // Faces are almost always triangles or quads, so keep their index arrays
+    // inline (no heap allocation for <= 4 vertices) and only spill to the heap
+    // for larger polygons.
+    using IndexArray = SmallVector<unsigned int, 4>;
 
     aiPrimitiveType mPrimitiveType{aiPrimitiveType_TRIANGLE};   ///< Primitive type
     IndexArray mVertices{};                                     ///< Vertex indices
@@ -242,9 +246,9 @@ struct Mesh {
 /// @brief  Data structure to store all obj-specific model data
 // ------------------------------------------------------------------------------------------------
 struct Model {
-    using GroupMap = std::map<std::string, std::vector<unsigned int> *>;
-    using GroupMapIt = std::map<std::string, std::vector<unsigned int> *>::iterator;
-    using ConstGroupMapIt = std::map<std::string, std::vector<unsigned int> *>::const_iterator;
+    using GroupMap = std::unordered_map<std::string, std::vector<unsigned int> *>;
+    using GroupMapIt = std::unordered_map<std::string, std::vector<unsigned int> *>::iterator;
+    using ConstGroupMapIt = std::unordered_map<std::string, std::vector<unsigned int> *>::const_iterator;
 
     std::string mModelName{};                               ///< Model name
     std::vector<Object *> mObjects{};                       ///< List ob assigned objects
@@ -262,7 +266,7 @@ struct Model {
     unsigned int mTextureCoordDim{0};                       ///< Maximum dimension of texture coordinates
     Mesh *mCurrentMesh{nullptr};                            ///< Current mesh instance
     std::vector<Mesh *> mMeshes{};                          ///< Vector with stored meshes
-    std::map<std::string, Material*> mMaterialMap{};        ///< Material map
+    std::unordered_map<std::string, Material*> mMaterialMap{};        ///< Material map
 
     /// @brief  The default class constructor
     Model() = default;

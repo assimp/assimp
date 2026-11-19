@@ -652,6 +652,7 @@ int AssimpViewer::DeleteAssetData(bool bNoMaterials) {
             SafeRelease(g_pcAsset->apcMeshes[i]->piEmissiveTexture);
             SafeRelease(g_pcAsset->apcMeshes[i]->piOpacityTexture);
             SafeRelease(g_pcAsset->apcMeshes[i]->piShininessTexture);
+            SafeRelease(g_pcAsset->apcMeshes[i]->piLightmapTexture);
         }
     }
     return 1;

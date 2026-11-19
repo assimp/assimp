@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<mesh xmlns="http://irrlicht.sourceforge.net/IRRMESH_09_2007" version="1.0">
+	<buffer>
+		<material>
+			<enum name="Type" value="solid" />
+		</material>
+		<vertices type="standard" vertexCount="3">
+0 0 0 0 0 1 ffffffff 0 0
+1 0 0 0 0 1 ffffffff 1 0
+0 1 0 0 0 1 ffffffff 0 1
+</vertices>
+		<indices indexCount="9">
+0 1 2 0
+</indices>
+	</buffer>
+</mesh>

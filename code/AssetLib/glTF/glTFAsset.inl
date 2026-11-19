@@ -1197,7 +1197,7 @@ inline void Asset::Load(const std::string &pFile, bool isBinary) {
     // parse the JSON document
 
     Document doc;
-    doc.ParseInsitu(&sceneData[0]);
+    doc.ParseInsitu<rapidjson::kParseIterativeFlag>(&sceneData[0]);
 
     if (doc.HasParseError()) {
         char buffer[32];

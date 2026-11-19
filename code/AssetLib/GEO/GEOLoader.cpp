@@ -499,9 +499,12 @@ void GEOImporter::InternReadColor(unsigned int pos) {
     aiColor4D &c = tempColors[pos];
 
     SkipSpaces(&sz, line + sizeof(line));
-    if (!(color = static_cast<long>(strtoul10(sz, &sz)))) {
+    // Assign then test (MSVC C4706 /WX: assignment in conditional).
+    color = static_cast<long>(strtoul10(sz, &sz));
+    if (!color) {
         --sz;
-        if (!(color = static_cast<long>(hexstrtoul10(sz, &sz)))) {
+        color = static_cast<long>(hexstrtoul10(sz, &sz));
+        if (!color) {
             ASSIMP_LOG_ERROR("GEO: color read failed (sz) ", sz, " color ", color);
             return;
         }

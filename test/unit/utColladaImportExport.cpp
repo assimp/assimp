@@ -627,3 +627,69 @@ TEST_F(utColladaZaeImportExport, import_causes_heap_overflow_issue6373) {
     const aiScene *scene = importer.ReadFileFromMemory(kData, sizeof(kData), aiProcess_ValidateDataStructure);
     EXPECT_EQ(nullptr, scene);
 }
+
+// A crafted <accessor> whose param-derived size exceeds the 16-element key/transform
+// buffers overflowed aiMatrix4x4-sized storage while sampling the animation.
+static constexpr char kAnimValueAccessorOverflow[] = R"(<?xml version="1.0" encoding="utf-8"?>
+<COLLADA version="1.4.1">
+  <library_animations>
+    <animation id="a">
+      <source id="in">
+        <float_array id="in-a" count="2">0 1</float_array>
+        <technique_common><accessor source="#in-a" count="2" stride="1"><param name="TIME" type="float"/></accessor></technique_common>
+      </source>
+      <source id="out">
+        <float_array id="out-a" count="64">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</float_array>
+        <technique_common><accessor source="#out-a" count="2" stride="32"><param name="T" type="float4x4"/><param name="T2" type="float4x4"/></accessor></technique_common>
+      </source>
+      <sampler id="smp"><input semantic="INPUT" source="#in"/><input semantic="OUTPUT" source="#out"/></sampler>
+      <channel source="#smp" target="n/transform"/>
+    </animation>
+  </library_animations>
+  <library_visual_scenes>
+    <visual_scene id="s"><node id="n" name="n"><matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix></node></visual_scene>
+  </library_visual_scenes>
+  <scene><instance_visual_scene url="#s"/></scene>
+</COLLADA>)";
+
+TEST_F(utColladaImportExport, animValueAccessorSizeOutOfRange) {
+    Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(kAnimValueAccessorOverflow, sizeof(kAnimValueAccessorOverflow), 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
+// A color <source> accessor that reports more than four components read past the
+// fixed 4-element obj/sub-offset buffers while extracting per-index colors.
+static constexpr char kColorAccessorOverread[] = R"(<?xml version="1.0" encoding="utf-8"?>
+<COLLADA version="1.4.1">
+  <library_geometries>
+    <geometry id="g" name="g">
+      <mesh>
+        <source id="pos">
+          <float_array id="pos-a" count="9">0 0 0 1 0 0 0 1 0</float_array>
+          <technique_common><accessor source="#pos-a" count="3" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common>
+        </source>
+        <source id="col">
+          <float_array id="col-a" count="24">1 0 0 1 0 0 0 1 0 0 0 1 1 0 0 1 0 0 0 1 0 0 0 1</float_array>
+          <technique_common><accessor source="#col-a" count="3" stride="8"><param name="R" type="float"/><param name="G" type="float"/><param name="B" type="float"/><param name="A" type="float"/><param name="E" type="float"/><param name="F" type="float"/><param name="H" type="float"/><param name="I" type="float"/></accessor></technique_common>
+        </source>
+        <vertices id="v"><input semantic="POSITION" source="#pos"/></vertices>
+        <triangles count="1">
+          <input semantic="VERTEX" source="#v" offset="0"/>
+          <input semantic="COLOR" source="#col" offset="1" set="0"/>
+          <p>0 0 1 1 2 2</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="s"><node id="n" name="n"><instance_geometry url="#g"/></node></visual_scene>
+  </library_visual_scenes>
+  <scene><instance_visual_scene url="#s"/></scene>
+</COLLADA>)";
+
+TEST_F(utColladaImportExport, colorAccessorSizeOutOfRange) {
+    Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(kColorAccessorOverread, sizeof(kColorAccessorOverread), 0);
+    EXPECT_NE(nullptr, scene);
+}

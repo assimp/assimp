@@ -13,6 +13,9 @@
 #include <cstdio>
 #include <stdint.h>
 
+#include <string>
+#include <filesystem>
+
 static constexpr int32_t WINDOW_WIDTH = 800;
 static constexpr int32_t WINDOW_HEIGHT = 600;
 
@@ -38,6 +41,22 @@ void on_keyboard(unsigned char key, int, int)
 
 int main(int argc, char **argv)
 {
+    std::string res_dir_path = "./res";
+    if (argc > 1) {
+        res_dir_path = argv[1];
+    }
+    const std::string model_path = res_dir_path + "/models/character.glb";
+    const std::string vertex_shader_path = res_dir_path + "/shaders/skinned.vert";
+    const std::string fragment_shader_path = res_dir_path + "/shaders/skinned.frag";
+    if (!std::filesystem::is_directory(res_dir_path) ||
+        !std::filesystem::exists(model_path) ||
+        !std::filesystem::exists(vertex_shader_path) ||
+        !std::filesystem::exists(fragment_shader_path)
+    ) {
+        std::printf("[ERROR]: failed to find the 'res' dir.. try running '%s <path_to_res>'\n", argv[0]);
+        return -1;
+    }
+
     glutInit(&argc, argv);
 
     glutInitContextVersion(3, 3);

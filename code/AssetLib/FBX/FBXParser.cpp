@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 
 #include <iostream>
+#include <memory>
 
 using namespace Assimp;
 using namespace Assimp::FBX;
@@ -110,9 +111,25 @@ namespace {
 namespace Assimp {
 namespace FBX {
 
-// Maximum depth of nested scopes accepted by the parser. Valid FBX files nest only a
-// few levels deep; this bound keeps malformed input from overflowing the native stack.
-static const unsigned int kMaxScopeNestingDepth = 100;
+namespace {
+
+struct ElementDeleter {
+    void operator()(Element *element) const {
+        if (element) {
+            delete_Element(element);
+        }
+    }
+};
+
+struct ScopeDeleter {
+    void operator()(Scope *scope) const {
+        if (scope) {
+            delete_Scope(scope);
+        }
+    }
+};
+
+} // namespace
 
 // ------------------------------------------------------------------------------------------------
 Element::Element(const Token& key_token, Parser& parser) :
@@ -155,8 +172,9 @@ Element::Element(const Token& key_token, Parser& parser) :
             }
 
             ++parser.scopeDepth;
-            compound = new_Scope(parser);
+            std::unique_ptr<Scope, ScopeDeleter> parsedScope(new_Scope(parser));
             --parser.scopeDepth;
+            compound = parsedScope.get();
 
             // current token should be a TOK_CLOSE_BRACKET
             n = parser.CurrentToken();
@@ -167,6 +185,7 @@ Element::Element(const Token& key_token, Parser& parser) :
             }
 
             parser.AdvanceToNextToken();
+            parsedScope.release();
             return;
         }
     }
@@ -199,30 +218,40 @@ Scope::Scope(Parser& parser,bool topLevel)
     }
 
     // note: empty scopes are allowed
-    while(n->Type() != TokenType_CLOSE_BRACKET) {
-        if (n->Type() != TokenType_KEY) {
-            ParseError("unexpected token, expected TOK_KEY",n);
-        }
-
-        const std::string& str = n->StringContents();
-        if (str.empty()) {
-            ParseError("unexpected content: empty string.");
-        }
-
-        auto *element = new_Element(*n, parser);
-
-        // Element() should stop at the next Key token (or right after a Close token)
-        n = parser.CurrentToken();
-        if (n == nullptr) {
-            if (topLevel) {
-                elements.insert(ElementMap::value_type(str, element));
-                return;
+    try {
+        while(n->Type() != TokenType_CLOSE_BRACKET) {
+            if (n->Type() != TokenType_KEY) {
+                ParseError("unexpected token, expected TOK_KEY",n);
             }
-            delete_Element(element);
-            ParseError("unexpected end of file",parser.LastToken());
-        } else {
-            elements.insert(ElementMap::value_type(str, element));
+
+            const std::string& str = n->StringContents();
+            if (str.empty()) {
+                ParseError("unexpected content: empty string.");
+            }
+
+            std::unique_ptr<Element, ElementDeleter> element(new_Element(*n, parser));
+
+            // Element() should stop at the next Key token (or right after a Close token)
+            n = parser.CurrentToken();
+            if (n == nullptr) {
+                if (topLevel) {
+                    elements.insert(ElementMap::value_type(str, element.get()));
+                    element.release();
+                    return;
+                }
+                ParseError("unexpected end of file",parser.LastToken());
+            } else {
+                elements.insert(ElementMap::value_type(str, element.get()));
+                element.release();
+            }
         }
+    } catch (...) {
+        // A throwing constructor does not run this Scope's destructor.
+        // Destroy the elements that were inserted before the parse failed.
+        for (ElementMap::value_type &value : elements) {
+            delete_Element(value.second);
+        }
+        throw;
     }
 }
 

@@ -302,7 +302,11 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 
 // ------------------------------------------------------------------------------------------------
-bool ReadScope(TokenList &output_tokens, StackAllocator &token_allocator, const char *input, const char *&cursor, const char *end, bool const is64bits) {
+bool ReadScope(TokenList &output_tokens, StackAllocator &token_allocator, const char *input, const char *&cursor, const char *end, bool const is64bits, unsigned int scopeDepth) {
+    if (scopeDepth > kMaxScopeNestingDepth) {
+        TokenizeError("FBX binary scopes are nested too deeply", input, cursor);
+    }
+
     // the first word contains the offset at which this block ends
 	const uint64_t end_offset = is64bits ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
 
@@ -366,9 +370,8 @@ bool ReadScope(TokenList &output_tokens, StackAllocator &token_allocator, const 
 
         output_tokens.push_back(new_Token(cursor, cursor + 1, TokenType_OPEN_BRACKET, Offset(input, cursor) ));
 
-        // XXX this is vulnerable to stack overflowing ..
         while(Offset(input, cursor) < end_offset - sentinel_block_length) {
-            ReadScope(output_tokens, token_allocator, input, cursor, input + end_offset - sentinel_block_length, is64bits);
+            ReadScope(output_tokens, token_allocator, input, cursor, input + end_offset - sentinel_block_length, is64bits, scopeDepth + 1);
         }
         output_tokens.push_back(new_Token(cursor, cursor + 1, TokenType_CLOSE_BRACKET, Offset(input, cursor) ));
 
@@ -424,7 +427,7 @@ void TokenizeBinary(TokenList &output_tokens, const char *input, size_t length, 
     try
     {
         while (cursor < end ) {
-            if (!ReadScope(output_tokens, token_allocator, input, cursor, input + length, is64bits)) {
+            if (!ReadScope(output_tokens, token_allocator, input, cursor, input + length, is64bits, 0)) {
                 break;
             }
         }

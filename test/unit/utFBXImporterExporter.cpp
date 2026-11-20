@@ -548,3 +548,20 @@ TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
     ASSERT_NE(nullptr, scene);
     EXPECT_EQ(0u, scene->mNumMeshes);
 }
+
+TEST_F(utFBXImporterExporter, rejectExcessivelyNestedScopes) {
+    // Scopes nest recursively in the parser. A deeply nested file must be rejected
+    // with a parse error instead of overflowing the stack (OSS-Fuzz issue 442253768).
+    std::string nested = "; FBX 7.4.0 project file\n";
+    const size_t depth = 200;
+    for (size_t i = 0; i < depth; ++i) {
+        nested += "L: {\n";
+    }
+    for (size_t i = 0; i < depth; ++i) {
+        nested += "}\n";
+    }
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(nested.data(), nested.size(), 0, "fbx");
+    EXPECT_EQ(nullptr, scene);
+}

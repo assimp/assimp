@@ -110,6 +110,10 @@ namespace {
 namespace Assimp {
 namespace FBX {
 
+// Maximum depth of nested scopes accepted by the parser. Valid FBX files nest only a
+// few levels deep; this bound keeps malformed input from overflowing the native stack.
+static const unsigned int kMaxScopeNestingDepth = 100;
+
 // ------------------------------------------------------------------------------------------------
 Element::Element(const Token& key_token, Parser& parser) :
     key_token(key_token), compound(nullptr)
@@ -144,7 +148,15 @@ Element::Element(const Token& key_token, Parser& parser) :
         }
 
         if (n->Type() == TokenType_OPEN_BRACKET) {
+            // Scopes nest recursively (Scope -> Element -> Scope); reject
+            // pathological nesting before it exhausts the native stack.
+            if (parser.scopeDepth >= kMaxScopeNestingDepth) {
+                ParseError("FBX scopes are nested too deeply", n);
+            }
+
+            ++parser.scopeDepth;
             compound = new_Scope(parser);
+            --parser.scopeDepth;
 
             // current token should be a TOK_CLOSE_BRACKET
             n = parser.CurrentToken();

@@ -1020,7 +1020,10 @@ void glTFExporter::ExportAnimations()
             Ref<Animation> animRef = mAsset->animations.Create(name);
 
             /******************* Parameters ********************/
-            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, static_cast<float>(anim->mTicksPerSecond));
+            // A zero ticks-per-second rate means "not specified" - treat
+            // key times as seconds instead of dividing by zero.
+            const float ticksPerSecond = anim->mTicksPerSecond != 0.0 ? static_cast<float>(anim->mTicksPerSecond) : 1.0f;
+            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, ticksPerSecond);
 
             for (unsigned int j = 0; j < 3; ++j) {
                 std::string channelType;

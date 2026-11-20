@@ -198,10 +198,35 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 	als.Depth = depth;
 	als.Tiled = tiled;
 	ParseHelper_Decode_Base64(enc64_data, als.Data);
-    if (depth == 0) {
-        depth = (uint32_t)(als.Data.size() / (width * height));
+    // Validate dimensions and guard against overflow before any multiplication or division
+    if (width == 0 || height == 0) {
+        throw DeadlyImportError("Texture has invalid dimensions.");
     }
-    // check data size
+    if (height > UINT_MAX / width) {
+        throw DeadlyImportError("Texture dimensions overflow");
+    }
+    if (depth == 0) {
+        // Safely compute width * height to avoid integer overflow
+        uint64_t safe_product{0};
+        if (!Assimp::Math::SafeMultiply<uint64_t>(width, height, safe_product)) {
+            throw DeadlyImportError("Invalid texture dimensions: width * height overflow.");
+        }
+        depth = (uint32_t)(als.Data.size() / safe_product);
+    }
+    
+    // check data size - use safe multiplication to prevent overflow bypassing the check
+    uint64_t expected_size{0};
+    if (!Assimp::Math::SafeMultiply<uint64_t>(width, height, expected_size)) {
+        throw DeadlyImportError("Invalid texture dimensions: width * height overflow.");
+    }
+    if (!Assimp::Math::SafeMultiply<uint64_t>(expected_size, depth, expected_size)) {
+        throw DeadlyImportError("Invalid texture dimensions: width * height * depth overflow.");
+    }
+    if (depth > 0 && (uint64_t)width * height > UINT_MAX / depth) {
+        throw DeadlyImportError("Texture data size overflow");
+    }
+
+  // check data size
     if ((width * height * depth) != als.Data.size()) {
         throw DeadlyImportError("Texture has incorrect data size.");
     }

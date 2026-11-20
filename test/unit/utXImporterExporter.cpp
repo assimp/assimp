@@ -70,6 +70,11 @@ TEST_F(utXImporterExporter, skinweights_vertex_index_out_of_range) {
     EXPECT_NO_THROW(importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/malformed_skinweights_oob.x", 0));
 }
 
+TEST_F(utXImporterExporter, fvf_texcoord_index_out_of_range) {
+    Assimp::Importer importer;
+    EXPECT_NO_THROW(importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/malformed_fvf_texcoord_oob.x", 0));
+}
+
 TEST(utXImporter, importAnimTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/anim_test.x", aiProcess_ValidateDataStructure);

@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
 
+#include <array>
 #include <memory>
 #include <unordered_map>
 
@@ -72,12 +73,11 @@ using namespace glTF2;
 using namespace glTFCommon;
 
 namespace {
-
-// generate bi-tangents from normals and tangents according to spec
-struct Tangent {
-    aiVector3D xyz;
-    ai_real w;
-};
+    // generate bi-tangents from normals and tangents according to spec
+    struct Tangent {
+        aiVector3D xyz;
+        ai_real w;
+    };
 } // namespace
 
 //
@@ -180,13 +180,17 @@ static void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
             // A change of coordinates is required to map glTF UV transformations into the space used by
             // Assimp. In glTF all UV origins are at 0,1 (top left of texture) in Assimp space. In Assimp
             // rotation occurs around the image center (0.5,0.5) where as in glTF rotation is around the
-            // texture origin. All three can be corrected for solely by a change of the translation since
-            // the transformations available are shape preserving. Note the importer already flips the V
-            // coordinate of the actual meshes during import.
-            const ai_real rcos(cos(-transform.mRotation));
-            const ai_real rsin(sin(-transform.mRotation));
-            transform.mTranslation.x = (static_cast<ai_real>(0.5) * transform.mScaling.x) * (-rcos + rsin + 1) + prop.TextureTransformExt_t.offset[0];
-            transform.mTranslation.y = ((static_cast<ai_real>(0.5) * transform.mScaling.y) * (rsin + rcos - 1)) + 1 - transform.mScaling.y - prop.TextureTransformExt_t.offset[1];
+            // texture origin. Furthermore, Assimp's TextureTransformProcess applies translation BEFORE scaling
+            // and rotation, whereas glTF applies translation AFTER scaling and rotation.
+            // Note the importer already flips the V coordinate of the actual meshes during import.
+            const ai_real rcos(std::cos(-transform.mRotation));
+            const ai_real rsin(std::sin(-transform.mRotation));
+            const ai_real Sx = transform.mScaling.x != 0.0 ? transform.mScaling.x : 1.0;
+            const ai_real Sy = transform.mScaling.y != 0.0 ? transform.mScaling.y : 1.0;
+            const ai_real Vx = (prop.TextureTransformExt_t.offset[0] - static_cast<ai_real>(0.5)) / Sx;
+            const ai_real Vy = (prop.TextureTransformExt_t.offset[1] - static_cast<ai_real>(0.5)) / Sy;
+            transform.mTranslation.x = rcos * Vx - rsin * Vy + static_cast<ai_real>(0.5);
+            transform.mTranslation.y = -rsin * Vx - rcos * Vy - static_cast<ai_real>(0.5);
 
             mat->AddProperty(&transform, 1, _AI_MATKEY_UVTRANSFORM_BASE, texType, texSlot);
         }
@@ -397,6 +401,7 @@ void glTF2Importer::ImportMaterials(Asset &r) {
     const unsigned int numImportedMaterials = unsigned(r.materials.Size());
     ASSIMP_LOG_DEBUG("Importing ", numImportedMaterials, " materials");
     Material defaultMaterial;
+    defaultMaterial.name = AI_DEFAULT_MATERIAL_NAME;
 
     mScene->mNumMaterials = numImportedMaterials + 1;
     mScene->mMaterials = new aiMaterial *[mScene->mNumMaterials];
@@ -470,6 +475,49 @@ aiColor4D *GetVertexColorsForType(Ref<Accessor> input, std::vector<unsigned int>
     }
     delete[] colors;
     return output;
+}
+
+template <typename T>
+aiQuaternion *GetQuaternionsForType(Ref<Accessor> input) {
+    constexpr float max = std::numeric_limits<T>::max();
+    std::array<T, 4> *quats;
+    input->ExtractData(quats);
+    std::unique_ptr<std::array<T, 4>[]> quatsPtr(quats);
+    auto output = std::make_unique<aiQuaternion[]>(input->count);
+    if constexpr (std::is_signed_v<T>) {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = aiQuaternion(
+                    std::max(quats[i][0] / max, -1.0F), std::max(quats[i][1] / max, -1.0F),
+                    std::max(quats[i][2] / max, -1.0F), std::max(quats[i][3] / max, -1.0F));
+        }
+    } else {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = aiQuaternion(
+                    quats[i][0] / max, quats[i][1] / max,
+                    quats[i][2] / max, quats[i][3] / max);
+        }
+    }
+    return output.release();
+}
+
+template <typename T>
+float *GetMorphWeightsForType(Ref<Accessor> input) {
+    constexpr float max = std::numeric_limits<T>::max();
+    T *weights;
+    input->ExtractData(weights);
+    std::unique_ptr<T[]> weightsPtr(weights);
+    auto output = std::make_unique<float[]>(input->count);
+    if constexpr (std::is_signed_v<T>) {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = std::max(weights[i] / max, -1.0F);
+        }
+    }
+    else {
+        for (size_t i = 0; i < input->count; i++) {
+            output[i] = weights[i] / max;
+        }
+    }
+    return output.release();
 }
 
 void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
@@ -715,9 +763,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
             }
 
-            aiFace *faces = nullptr;
-            aiFace *facePtr = nullptr;
-            size_t nFaces = 0;
+            aiFace *faces{nullptr};
+            aiFace *facePtr{nullptr};
+            size_t nFaces{0};
 
             if (useIndexBuffer) {
                 size_t count = indexBuffer.size();
@@ -747,6 +795,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
+                    if (count < 2) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the LINE_LOOP/LINE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1]);
@@ -754,7 +806,9 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[i - 1], indexBuffer[i]);
                     }
                     if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[static_cast<int>(count) - 1], faces[0].mIndices[0]);
+                        // Use the first index directly: the first face is dropped when its
+                        // indices are out of range, which would leave faces[0].mIndices null.
+                        SetFaceAndAdvance2(facePtr, aim->mNumVertices, indexBuffer[count - 1], indexBuffer[0]);
                     }
                     break;
                 }
@@ -775,6 +829,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the TRIANGLE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < nFaces; ++i) {
@@ -790,6 +848,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of indices was not compatible with the TRIANGLE_FAN mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance3(facePtr, aim->mNumVertices, indexBuffer[0], indexBuffer[1], indexBuffer[2]);
@@ -828,6 +890,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
 
                 case PrimitiveMode_LINE_LOOP:
                 case PrimitiveMode_LINE_STRIP: {
+                    if (count < 2) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the LINE_LOOP/LINE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance2(facePtr, aim->mNumVertices, 0, 1);
@@ -853,6 +919,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_STRIP: {
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLE_STRIP mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     for (unsigned int i = 0; i < nFaces; ++i) {
@@ -868,6 +938,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
+                    if (count < 3) {
+                        ASSIMP_LOG_WARN("The number of vertices was not compatible with the TRIANGLE_FAN mode. The primitive was dropped.");
+                        break;
+                    }
                     nFaces = count - 2;
                     facePtr = faces = new aiFace[nFaces];
                     SetFaceAndAdvance3(facePtr, aim->mNumVertices, 0, 1, 2);
@@ -1032,56 +1106,130 @@ static void GetNodeTransform(aiMatrix4x4 &matrix, const glTF2::Node &node) {
 }
 
 static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std::vector<aiVertexWeight>> &map, std::vector<unsigned int>* vertexRemappingTablePtr) {
-
     Mesh::Primitive::Attributes &attr = primitive.attributes;
     if (attr.weight.empty() || attr.joint.empty()) {
         return;
     }
-    if (attr.weight[0]->count != attr.joint[0]->count) {
-        return;
+    if (attr.weight.size() != attr.joint.size()) {
+        throw DeadlyImportError("GLTF: JOINTS_n and WEIGHTS_n attribute counts must match");
+    }
+    for (size_t w = 0; w < attr.weight.size(); ++w) {
+        if (attr.weight[w]->count != attr.joint[w]->count) {
+            throw DeadlyImportError("GLTF: JOINTS_n and WEIGHTS_n accessor counts must match");
+        }
+        if (attr.weight[w]->componentType != ComponentType_FLOAT &&
+                attr.weight[w]->componentType != ComponentType_UNSIGNED_BYTE &&
+                attr.weight[w]->componentType != ComponentType_UNSIGNED_SHORT) {
+            throw DeadlyImportError(
+                    "GLTF: unsupported skin weight componentType ", attr.weight[w]->componentType);
+        }
+        if (attr.joint[w]->componentType != ComponentType_UNSIGNED_BYTE &&
+                attr.joint[w]->componentType != ComponentType_UNSIGNED_SHORT &&
+                attr.joint[w]->componentType != ComponentType_UNSIGNED_INT) {
+            throw DeadlyImportError(
+                    "GLTF: unsupported skin joint componentType ", attr.joint[w]->componentType);
+        }
     }
 
-    size_t num_vertices = 0;
+    size_t numVertices = 0;
 
     struct Weights {
         float values[4];
     };
-    Weights **weights = new Weights*[attr.weight.size()];
-    for (size_t w = 0; w < attr.weight.size(); ++w) {
-        num_vertices = attr.weight[w]->ExtractData(weights[w], vertexRemappingTablePtr);
-    }
 
-    struct Indices8 {
-        uint8_t values[4];
-    };
-    struct Indices16 {
-        uint16_t values[4];
-    };
-    Indices8 **indices8 = nullptr;
-    Indices16 **indices16 = nullptr;
-    if (attr.joint[0]->GetElementSize() == 4) {
-        indices8 = new Indices8*[attr.joint.size()];
-        for (size_t j = 0; j < attr.joint.size(); ++j) {
-            attr.joint[j]->ExtractData(indices8[j], vertexRemappingTablePtr);
+    auto extractWeights = [vertexRemappingTablePtr](Accessor &accessor, std::unique_ptr<Weights[]> &outWeights) -> size_t {
+        if (accessor.componentType == ComponentType_FLOAT) {
+            Weights *weights = nullptr;
+            const size_t count = accessor.ExtractData(weights, vertexRemappingTablePtr);
+            outWeights.reset(weights);
+            return count;
         }
-    } else {
-        indices16 = new Indices16 *[attr.joint.size()];
-        for (size_t j = 0; j < attr.joint.size(); ++j) {
-            attr.joint[j]->ExtractData(indices16[j], vertexRemappingTablePtr);
+
+        auto extractPackedWeights = [&](auto packedZero, float scale) -> size_t {
+            using PackedType = decltype(packedZero);
+            struct PackedWeights {
+                PackedType values[4];
+            };
+            PackedWeights *packedWeights = nullptr;
+            const size_t count = accessor.ExtractData(packedWeights, vertexRemappingTablePtr);
+            std::unique_ptr<PackedWeights[]> packedWeightsPtr(packedWeights);
+            outWeights.reset(new Weights[count]);
+            for (size_t i = 0; i < count; ++i) {
+                for (size_t j = 0; j < 4; ++j) {
+                    outWeights[i].values[j] = static_cast<float>(packedWeightsPtr[i].values[j]) * scale;
+                }
+            }
+            return count;
+        };
+
+        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+            return extractPackedWeights(uint8_t{}, accessor.normalized ? 1.0f / 255.0f : 1.0f);
+        }
+
+        if (accessor.componentType == ComponentType_UNSIGNED_SHORT) {
+            return extractPackedWeights(uint16_t{}, accessor.normalized ? 1.0f / 65535.0f : 1.0f);
+        }
+
+        throw DeadlyImportError("GLTF: unsupported skin weight componentType ", accessor.componentType);
+    };
+
+    struct Indices {
+        unsigned int values[4];
+    };
+
+    auto extractIndices = [vertexRemappingTablePtr](Accessor &accessor, std::vector<Indices> &outIndices) -> size_t {
+        auto extractPackedIndices = [&](auto packedZero) -> size_t {
+            using PackedType = decltype(packedZero);
+            struct PackedIndices {
+                PackedType values[4];
+            };
+            PackedIndices *packedIndices = nullptr;
+            const size_t count = accessor.ExtractData(packedIndices, vertexRemappingTablePtr);
+            std::unique_ptr<PackedIndices[]> packedIndicesPtr(packedIndices);
+            outIndices.resize(count);
+            for (size_t i = 0; i < count; ++i) {
+                for (size_t j = 0; j < 4; ++j) {
+                    outIndices[i].values[j] = static_cast<unsigned int>(packedIndicesPtr[i].values[j]);
+                }
+            }
+            return count;
+        };
+
+        if (accessor.componentType == ComponentType_UNSIGNED_BYTE) {
+            return extractPackedIndices(uint8_t{});
+        }
+
+        if (accessor.componentType == ComponentType_UNSIGNED_SHORT) {
+            return extractPackedIndices(uint16_t{});
+        }
+
+        if (accessor.componentType == ComponentType_UNSIGNED_INT) {
+            return extractPackedIndices(uint32_t{});
+        }
+
+        throw DeadlyImportError("GLTF: unsupported skin joint componentType ", accessor.componentType);
+    };
+
+    std::vector<std::unique_ptr<Weights[]>> weights(attr.weight.size());
+    std::vector<std::vector<Indices>> indices(attr.joint.size());
+    for (size_t w = 0; w < attr.weight.size(); ++w) {
+        const size_t weightCount = extractWeights(*attr.weight[w], weights[w]);
+        const size_t jointCount = extractIndices(*attr.joint[w], indices[w]);
+        if (weightCount != jointCount) {
+            throw DeadlyImportError("GLTF: extracted JOINTS_n and WEIGHTS_n counts must match");
+        }
+        if (w == 0) {
+            numVertices = weightCount;
+        } else if (weightCount != numVertices) {
+            throw DeadlyImportError(
+                    "GLTF: all JOINTS_n and WEIGHTS_n attributes must have the same count");
         }
     }
 
-    // No indices are an invalid usecase
-    if (nullptr == indices8 && nullptr == indices16) {
-        // Something went completely wrong!
-        ai_assert(false);
-        return;
-    }
-
     for (size_t w = 0; w < attr.weight.size(); ++w) {
-        for (size_t i = 0; i < num_vertices; ++i) {
+        for (size_t i = 0; i < numVertices; ++i) {
             for (int j = 0; j < 4; ++j) {
-                const unsigned int bone = (indices8 != nullptr) ? indices8[w][i].values[j] : indices16[w][i].values[j];
+                const unsigned int bone = indices[w][i].values[j];
                 const float weight = weights[w][i].values[j];
                 if (weight > 0 && bone < map.size()) {
                     map[bone].reserve(8);
@@ -1090,17 +1238,6 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
             }
         }
     }
-
-    for (size_t w = 0; w < attr.weight.size(); ++w) {
-        delete[] weights[w];
-        if(indices8)
-            delete[] indices8[w];
-        if (indices16)
-            delete[] indices16[w];
-    }
-    delete[] weights;
-    delete[] indices8;
-    delete[] indices16;
 }
 
 static std::string GetNodeName(const Node &node) {
@@ -1301,18 +1438,12 @@ void glTF2Importer::ImportNodes(glTF2::Asset &r) {
 }
 
 struct AnimationSamplers {
-    AnimationSamplers() :
-            translation(nullptr),
-            rotation(nullptr),
-            scale(nullptr),
-            weight(nullptr) {
-        // empty
-    }
+    AnimationSamplers() = default;
 
-    Animation::Sampler *translation;
-    Animation::Sampler *rotation;
-    Animation::Sampler *scale;
-    Animation::Sampler *weight;
+    Animation::Sampler *translation = nullptr;
+    Animation::Sampler *rotation = nullptr;
+    Animation::Sampler *scale = nullptr;
+    Animation::Sampler *weight = nullptr;
 };
 
 struct vec4f {
@@ -1389,7 +1520,29 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             float *times = nullptr;
             samplers.rotation->input->ExtractData(times);
             aiQuaternion *values = nullptr;
-            samplers.rotation->output->ExtractData(values);
+            if (samplers.rotation->output->normalized) {
+                switch (samplers.rotation->output->componentType) {
+                case ComponentType_BYTE:
+                    values = GetQuaternionsForType<int8_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_UNSIGNED_BYTE:
+                    values = GetQuaternionsForType<uint8_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_SHORT:
+                    values = GetQuaternionsForType<int16_t>(samplers.rotation->output);
+                    break;
+                case ComponentType_UNSIGNED_SHORT:
+                    values = GetQuaternionsForType<uint16_t>(samplers.rotation->output);
+                    break;
+                default:
+                    throw DeadlyImportError("GLTF: Invalid component type for normalized quaternion ", ai_to_string(samplers.rotation->output->componentType));
+                }
+            } else if (samplers.rotation->output->componentType == ComponentType_FLOAT) {
+                samplers.rotation->output->ExtractData(values);
+            } else {
+                throw DeadlyImportError("GLTF: Invalid component type for quaternion ", ai_to_string(samplers.rotation->output->componentType));
+            }
+
             const bool isCubic = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE);
             const aiAnimInterpolation interpType = MapInterpolation(samplers.rotation->interpolation);
             const unsigned int numLogicalKeys = static_cast<unsigned int>(samplers.rotation->input->count);
@@ -1493,7 +1646,31 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSample
             float *times = nullptr;
             samplers.weight->input->ExtractData(times);
             float *values = nullptr;
-            samplers.weight->output->ExtractData(values);
+
+            if (samplers.weight->output->normalized) {
+                switch (samplers.weight->output->componentType) {
+                case ComponentType_BYTE:
+                    values = GetMorphWeightsForType<int8_t>(samplers.weight->output);
+                    break;
+                case ComponentType_UNSIGNED_BYTE:
+                    values = GetMorphWeightsForType<uint8_t>(samplers.weight->output);
+                    break;
+                case ComponentType_SHORT:
+                    values = GetMorphWeightsForType<int16_t>(samplers.weight->output);
+                    break;
+                case ComponentType_UNSIGNED_SHORT:
+                    values = GetMorphWeightsForType<uint16_t>(samplers.weight->output);
+                    break;
+                default:
+                    throw DeadlyImportError("GLTF: Invalid component type for normalized morph weights ", ai_to_string(samplers.weight->output->componentType));
+                }
+
+            } else if (samplers.weight->output->componentType == ComponentType_FLOAT) {
+                samplers.weight->output->ExtractData(values);
+            } else {
+                throw DeadlyImportError("GLTF: Invalid component type for morph weights ", ai_to_string(samplers.weight->output->componentType));
+            }
+           
             anim->mNumKeys = static_cast<uint32_t>(samplers.weight->input->count);
 
             // for Interpolation_CUBICSPLINE can have more outputs
@@ -1729,6 +1906,9 @@ void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset &r) {
         void *data = img.StealData();
 
         tex->mFilename = img.name;
+        if (img.name.empty() && img.bufferView) {
+            tex->mFilename = img.bufferView->name;
+        }
         tex->mWidth = static_cast<unsigned int>(length);
         tex->mHeight = 0;
         tex->pcData = reinterpret_cast<aiTexel *>(data);

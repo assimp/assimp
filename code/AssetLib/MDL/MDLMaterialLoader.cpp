@@ -156,16 +156,19 @@ aiColor4D MDLImporter::ReplaceTextureWithColor(const aiTexture *pcTexture) {
 // Read a texture from a MDL3 file
 void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char *szData) {
     const MDL::Header *pcHeader = (const MDL::Header *)mBuffer; //the endianness is already corrected in the InternReadFile_3DGS_MDL345 function
-    const size_t len = pcHeader->skinwidth * pcHeader->skinheight;
+    if (pcHeader->skinwidth <= 0 || pcHeader->skinheight <= 0) {
+        throw DeadlyImportError("Invalid MDL3 file. Skin dimensions must be positive.");
+    }
+    const size_t len = (size_t)pcHeader->skinwidth * (size_t)pcHeader->skinheight;
     VALIDATE_FILE_SIZE(szData + len);
 
     // allocate a new texture object
     aiTexture *pcNew = new aiTexture();
-    pcNew->mWidth = pcHeader->skinwidth;
-    pcNew->mHeight = pcHeader->skinheight;
+    pcNew->mWidth = (unsigned int)pcHeader->skinwidth;
+    pcNew->mHeight = (unsigned int)pcHeader->skinheight;
 
-    if(pcNew->mWidth != 0 && pcNew->mHeight > UINT_MAX/pcNew->mWidth) {
-        throw DeadlyImportError("Invalid MDL file. A texture is too big.");
+    if (len > AI_MAX_ALLOC(aiTexel)) {
+        throw DeadlyImportError("Invalid MDL3 file. Texture allocation would exceed resource limit.");
     }
     pcNew->pcData = new aiTexel[pcNew->mWidth * pcNew->mHeight];
 
@@ -254,6 +257,14 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
 
     // allocate storage for the texture image
     if (do_read) {
+        // a zero-height texture must be a compressed blob of mWidth bytes,
+        // but this path produces an mWidth*mHeight pixel array - the
+        // resulting object would violate the aiTexture contract and read
+        // out of bounds when the scene is copied (e.g. on export)
+        if (pcNew->mHeight == 0 && pcNew->mWidth != 0) {
+            throw DeadlyImportError("Invalid MDL file. A texture has zero height.");
+        }
+
         // check for max texture sizes
         if (pcNew->mWidth > MaxTextureSize || pcNew->mHeight > MaxTextureSize) {
             throw DeadlyImportError("Invalid MDL file. A texture is too big.");

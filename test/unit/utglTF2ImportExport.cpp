@@ -1295,8 +1295,9 @@ TEST_F(utglTF2ImportExport, importMalformedNodeScaleIsRejected) {
     // the way a wrong-sized or non-array value already is, leaving the node at
     // its default transform rather than at 2 on x and 3 on z with the y
     // component never assigned.
-    aiVector3D scaling, position;
-    aiQuaternion rotation;
+    aiVector3D scaling{};
+    aiVector3D position{};
+    aiQuaternion rotation{};
     bad->mTransformation.Decompose(scaling, rotation, position);
     EXPECT_FLOAT_EQ(1.0f, scaling.x);
     EXPECT_FLOAT_EQ(1.0f, scaling.y);

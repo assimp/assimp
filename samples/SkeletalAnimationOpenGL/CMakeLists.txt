@@ -32,6 +32,7 @@ LINK_DIRECTORIES(
 
 ADD_EXECUTABLE( assimp_skeletalanimationogl
   SkeletalAnimationOpenGL/main.cpp
+  SkeletalAnimationOpenGL/app.cpp
   glad/src/glad.c
 )
 

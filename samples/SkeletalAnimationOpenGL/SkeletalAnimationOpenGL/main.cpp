@@ -6,41 +6,21 @@
 // Written by Aravinda Samarathunga (I-A-S)
 // ----------------------------------------------------------------------------
 
-#include <glad/glad.h>
+#include "app.hpp"
 
 #include <GL/freeglut.h>
 
 #include <cstdio>
-#include <stdint.h>
 
-#include <string>
 #include <filesystem>
 
-static constexpr int32_t WINDOW_WIDTH = 800;
-static constexpr int32_t WINDOW_HEIGHT = 600;
-
-void on_display()
-{
-    glClearColor(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glutSwapBuffers();
-}
-
-void on_reshape(int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
-void on_keyboard(unsigned char key, int, int)
-{
-    if (key == 27) { // Escape
-        glutLeaveMainLoop();
-    }
-}
+App* g_app{};
 
 int main(int argc, char **argv)
 {
+    static constexpr int32_t WINDOW_WIDTH = 800;
+    static constexpr int32_t WINDOW_HEIGHT = 600;
+
     std::string res_dir_path = "./res";
     if (argc > 1) {
         res_dir_path = argv[1];
@@ -53,7 +33,7 @@ int main(int argc, char **argv)
         !std::filesystem::exists(vertex_shader_path) ||
         !std::filesystem::exists(fragment_shader_path)
     ) {
-        std::printf("[ERROR]: failed to find the 'res' dir.. try running '%s <path_to_res>'\n", argv[0]);
+        std::fprintf(stderr, "[ERROR]: failed to find the 'res' dir.. try running '%s <path_to_res>'\n", argv[0]);
         return -1;
     }
 
@@ -70,18 +50,40 @@ int main(int argc, char **argv)
     glutCreateWindow("Assimp - Skeletal Animation OpenGL sample");
 
     if (!gladLoadGL()) {
-        std::fprintf(stderr, "Failed to load OpenGL functions with glad.\n");
+        std::fprintf(stderr, "[ERROR]: failed to load OpenGL functions with glad.\n");
         return 1;
     }
 
     std::printf("OpenGL version: %s\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
     std::printf("Renderer:       %s\n", reinterpret_cast<const char *>(glGetString(GL_RENDERER)));
 
-    glutDisplayFunc(on_display);
-    glutReshapeFunc(on_reshape);
-    glutKeyboardFunc(on_keyboard);
+    g_app = new App();
+    if (!g_app->on_create(model_path, vertex_shader_path, fragment_shader_path)) {
+        std::fprintf(stderr, "[ERROR]: failed to initialize the App.\n");
+        return 1;
+    }
+
+    glutDisplayFunc([]()
+    {
+        if (g_app)
+            g_app->on_render();
+        glutSwapBuffers();
+    });
+    glutReshapeFunc([](int width, int height)
+    {
+        if (g_app)
+            g_app->on_resize(width, height);
+    });
+    glutKeyboardFunc([](unsigned char key, int, int)
+    {
+        if (key == 27) { // Escape
+            glutLeaveMainLoop();
+        }
+    });
 
     glutMainLoop();
+
+    delete g_app;
 
     return 0;
 }

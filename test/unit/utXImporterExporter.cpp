@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
@@ -73,6 +74,17 @@ TEST_F(utXImporterExporter, skinweights_vertex_index_out_of_range) {
 TEST_F(utXImporterExporter, fvf_texcoord_index_out_of_range) {
     Assimp::Importer importer;
     EXPECT_NO_THROW(importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/malformed_fvf_texcoord_oob.x", 0));
+}
+
+TEST_F(utXImporterExporter, frame_name_longer_than_aistring) {
+    const std::string longName(2 * AI_MAXLEN, 'a');
+    const std::string text = "xof 0303txt 0032\nFrame " + longName + " {\n}\n";
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(text.data(), text.size(), 0, "x");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_NE(nullptr, scene->mRootNode);
+    EXPECT_EQ(static_cast<ai_uint32>(AI_MAXLEN - 1), scene->mRootNode->mName.length);
 }
 
 TEST(utXImporter, importAnimTest) {

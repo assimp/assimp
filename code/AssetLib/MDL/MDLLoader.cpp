@@ -1253,7 +1253,7 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInf
             return false;
         }
         // our output frame?
-        if (configFrameID == iFrame) {
+        if (configFrameID == iFrame && pcHeader->framevertex_stc_size >= offsetof(MDL::Vertex_MDL7, norm) + sizeof(uint8_t)) {
             BE_NCONST MDL::Vertex_MDL7 *pcFrameVertices = (BE_NCONST MDL::Vertex_MDL7 *)(szCurrent + pcHeader->frame_stc_size);
 
             for (unsigned int qq = 0; qq < frame.pcFrame->vertices_count; ++qq) {
@@ -1276,7 +1276,7 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInf
                 AI_SWAP4(vPosition.z);
 
                 // now read the normal vector
-                if (AI_MDL7_FRAMEVERTEX030305_STCSIZE <= pcHeader->mainvertex_stc_size) {
+                if (AI_MDL7_FRAMEVERTEX030305_STCSIZE <= pcHeader->framevertex_stc_size) {
                     // read the full normal vector
                     vNormal.x = _AI_MDL7_ACCESS_VERT(pcFrameVertices, qq, pcHeader->framevertex_stc_size).norm[0];
                     AI_SWAP4(vNormal.x);
@@ -1284,7 +1284,7 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7 &groupInf
                     AI_SWAP4(vNormal.y);
                     vNormal.z = _AI_MDL7_ACCESS_VERT(pcFrameVertices, qq, pcHeader->framevertex_stc_size).norm[2];
                     AI_SWAP4(vNormal.z);
-                } else if (AI_MDL7_FRAMEVERTEX120503_STCSIZE <= pcHeader->mainvertex_stc_size) {
+                } else if (AI_MDL7_FRAMEVERTEX120503_STCSIZE <= pcHeader->framevertex_stc_size) {
                     // read the normal vector from Quake2's smart table
                     MD2::LookupNormalIndex(_AI_MDL7_ACCESS_VERT(pcFrameVertices, qq,
                                                    pcHeader->framevertex_stc_size)

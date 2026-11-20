@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "AssetLib/glTFCommon/glTFCommon.h"
 
+#include <cstddef>
+
 using namespace glTFCommon::Util;
 
 namespace glTFCommon::Util {
@@ -108,3 +110,54 @@ bool ParseDataURI(const char *const_uri, size_t uriLen, DataURI &out) {
 }
 
 } // namespace glTFCommon::Uti
+
+namespace {
+
+// Relative path with no ".." segment, drive prefix, or URI scheme.
+bool IsSafeRelativeUri(const char *uri) {
+    if (uri == nullptr || uri[0] == '\0') {
+        return false;
+    }
+    if (uri[0] == '/' || uri[0] == '\\') {
+        return false;
+    }
+
+    const char *segment = uri;
+    for (const char *ch = uri;; ++ch) {
+        const bool atEnd = (*ch == '\0');
+        if (!atEnd && *ch != '/' && *ch != '\\') {
+            continue;
+        }
+
+        const size_t length = static_cast<size_t>(ch - segment);
+        if (length == 2 && segment[0] == '.' && segment[1] == '.') {
+            return false;
+        }
+        for (size_t i = 0; i < length; ++i) {
+            if (segment[i] == ':') {
+                return false;
+            }
+        }
+
+        if (atEnd) {
+            return true;
+        }
+        segment = ch + 1;
+    }
+}
+
+} // namespace
+
+namespace glTFCommon {
+
+void ValidateExternalUri(const char *uri, bool fromMemory) {
+    const char *shown = uri != nullptr ? uri : "";
+    if (fromMemory) {
+        throw DeadlyImportError("GLTF: external file reference \"", shown, "\" is not allowed when loading from memory");
+    }
+    if (!IsSafeRelativeUri(uri)) {
+        throw DeadlyImportError("GLTF: external URI \"", shown, "\" must stay inside the asset directory");
+    }
+}
+
+} // namespace glTFCommon

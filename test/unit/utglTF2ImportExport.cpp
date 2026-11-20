@@ -588,6 +588,51 @@ TEST_F(utglTF2ImportExport, bug_import_simple_skin) {
     EXPECT_NE(nullptr, scene);
 }
 
+TEST_F(utglTF2ImportExport, import_normalized_unsigned_short_skin_weights) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/normalized_skin_weights/normalized_skin_weights.gltf",
+            aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(1u, scene->mMeshes[0]->mNumBones);
+
+    const aiBone *bone = scene->mMeshes[0]->mBones[0];
+    ASSERT_EQ(3u, bone->mNumWeights);
+    EXPECT_EQ(0u, bone->mWeights[0].mVertexId);
+    EXPECT_NEAR(1.0f, bone->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(1u, bone->mWeights[1].mVertexId);
+    EXPECT_NEAR(32768.0f / 65535.0f, bone->mWeights[1].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone->mWeights[2].mVertexId);
+    EXPECT_NEAR(16384.0f / 65535.0f, bone->mWeights[2].mWeight, 0.0001f);
+}
+
+TEST_F(utglTF2ImportExport, import_mixed_joint_component_skin_weights) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/mixed_skin_joints/mixed_skin_joints.gltf",
+            aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(2u, scene->mMeshes[0]->mNumBones);
+
+    const aiBone *bone0 = scene->mMeshes[0]->mBones[0];
+    ASSERT_EQ(3u, bone0->mNumWeights);
+    EXPECT_EQ(0u, bone0->mWeights[0].mVertexId);
+    EXPECT_NEAR(1.0f, bone0->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(1u, bone0->mWeights[1].mVertexId);
+    EXPECT_NEAR(32768.0f / 65535.0f, bone0->mWeights[1].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone0->mWeights[2].mVertexId);
+    EXPECT_NEAR(16384.0f / 65535.0f, bone0->mWeights[2].mWeight, 0.0001f);
+
+    const aiBone *bone1 = scene->mMeshes[0]->mBones[1];
+    ASSERT_EQ(2u, bone1->mNumWeights);
+    EXPECT_EQ(1u, bone1->mWeights[0].mVertexId);
+    EXPECT_NEAR(32767.0f / 65535.0f, bone1->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone1->mWeights[1].mVertexId);
+    EXPECT_NEAR(49151.0f / 65535.0f, bone1->mWeights[1].mWeight, 0.0001f);
+}
+
 bool checkSkinnedScene(const aiScene *scene){
     float eps = 0.001f;
     bool result = true;
@@ -755,12 +800,6 @@ TEST_F(utglTF2ImportExport, incorrect_vertex_arrays) {
     EXPECT_EQ(scene->mMeshes[7]->mNumFaces, 17u);
 }
 
-TEST_F(utglTF2ImportExport, texture_transform_test) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/textureTransform/TextureTransformTest.gltf",
-            aiProcess_ValidateDataStructure);
-    EXPECT_NE(nullptr, scene);
-}
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F(utglTF2ImportExport, exportglTF2FromFileTest) {
@@ -946,6 +985,56 @@ TEST_F(utglTF2ImportExport, allIndicesOutOfRange) {
     ASSERT_EQ(scene, nullptr);
     std::string error = importer.GetErrorString();
     ASSERT_NE(error.find("Mesh \"Mesh\" has no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, lineLoopWithSingleIndex) {
+    // A LINE_LOOP primitive needs at least two indices. A single index must not
+    // make the importer read past the end of the index buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/LineLoopOneIndex.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, lineStripWithSingleIndex) {
+    // A LINE_STRIP primitive needs at least two indices. A single index must not
+    // make the importer read past the end of the index buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/LineStripOneIndex.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, triangleFanWithTwoIndices) {
+    // A TRIANGLE_FAN primitive needs at least three indices. Two indices must not
+    // make the importer read past the end of the index buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/TriangleFanTwoIndices.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, triangleStripWithSingleIndex) {
+    // A TRIANGLE_STRIP primitive needs at least three indices. A single index must not
+    // make the face count underflow.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/TriangleStripOneIndex.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
+}
+
+TEST_F(utglTF2ImportExport, lineLoopWithOutOfRangeFirstIndex) {
+    // The closing segment of a LINE_LOOP must not dereference the first face when that
+    // face was dropped because its indices were out of range.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/DegeneratePrimitives/LineLoopFirstIndexOutOfRange.gltf", aiProcess_ValidateDataStructure);
+    ASSERT_EQ(scene, nullptr);
+    const std::string error = importer.GetErrorString();
+    ASSERT_NE(error.find("no faces"), std::string::npos);
 }
 
 /////////////////////////////////

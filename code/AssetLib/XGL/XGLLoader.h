@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 #include <memory>
+#include <unordered_map>
 
 struct aiNode;
 
@@ -118,8 +119,8 @@ private:
             materials.clear();
         }
 
-        std::multimap<unsigned int, aiMesh *> meshes;
-        std::map<unsigned int, aiMaterial *> materials;
+        std::unordered_multimap<unsigned int, aiMesh *> meshes;
+        std::unordered_map<unsigned int, aiMaterial *> materials;
 
         std::vector<aiMesh *> meshes_linear;
         std::vector<aiMaterial *> materials_linear;
@@ -140,9 +141,9 @@ private:
     };
 
     struct TempMesh {
-        std::map<unsigned int, aiVector3D> points;
-        std::map<unsigned int, aiVector3D> normals;
-        std::map<unsigned int, aiVector2D> uvs;
+        std::unordered_map<unsigned int, aiVector3D> points;
+        std::unordered_map<unsigned int, aiVector3D> normals;
+        std::unordered_map<unsigned int, aiVector2D> uvs;
     };
 
     struct TempMaterialMesh {
@@ -182,7 +183,7 @@ private:
     aiLight *ReadDirectionalLight(XmlNode &node);
     aiNode *ReadObject(XmlNode &node, TempScope &scope);
     bool ReadMesh(XmlNode &node, TempScope &scope);
-    void AppendOutputMeshes(std::map<unsigned int, TempMaterialMesh> bymat, TempScope &scope, const unsigned int mesh_id);
+    void AppendOutputMeshes(const std::unordered_map<unsigned int, TempMaterialMesh> &bymat, TempScope &scope, const unsigned int mesh_id);
     unsigned int ReadVertices(XmlNode &child, TempMesh t, TempFace *tf, bool *has, unsigned int mid, TempScope &scope);
     unsigned int ReadMaterial(XmlNode &node, TempScope &scope);
     aiVector2D ReadVec2(XmlNode &node);

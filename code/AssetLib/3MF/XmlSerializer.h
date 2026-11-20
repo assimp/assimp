@@ -60,11 +60,19 @@ class Texture2DGroup;
 class EmbeddedTexture;
 class ColorGroup;
 
-/// @brief his class implements ther 3mf serialization.
+/// @brief his class implements the 3mf-based xml serialization.
 class XmlSerializer final {
 public:
+    /// @brief Constructor.
+    /// @param [in] xmlParser The xml parser.
+    /// @param [in] package the 3mf package
     XmlSerializer(XmlParser &xmlParser, D3MFOpcPackage *package);
+
+    /// @brief Destructor.
     ~XmlSerializer();
+
+    /// @brief This function imports the xml data.
+    /// @param [in] scene The aiScene to import.
     void ImportXml(aiScene *scene);
 
 private:

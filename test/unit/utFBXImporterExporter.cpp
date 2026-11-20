@@ -48,6 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/types.h>
 #include <assimp/Importer.hpp>
+#include <assimp/Exceptional.h>
+
+#include "AssetLib/FBX/FBXTokenizer.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <vector>
 
 using namespace Assimp;
 
@@ -503,6 +510,43 @@ TEST_F(utFBXImporterExporter, importSkeletonTest) {
 
 namespace {
 
+void appendLittleEndian32(std::vector<char> &data, std::uint32_t value) {
+    for (unsigned int i = 0; i < 4; ++i) {
+        data.push_back(static_cast<char>((value >> (i * 8)) & 0xff));
+    }
+}
+
+void writeLittleEndian32(std::vector<char> &data, std::size_t offset, std::uint32_t value) {
+    for (unsigned int i = 0; i < 4; ++i) {
+        data[offset + i] = static_cast<char>((value >> (i * 8)) & 0xff);
+    }
+}
+
+void appendBinaryScope(std::vector<char> &data, unsigned int depth, unsigned int maxDepth) {
+    const std::size_t nodeStart = data.size();
+    appendLittleEndian32(data, 0); // end offset
+    appendLittleEndian32(data, 0); // property count
+    appendLittleEndian32(data, 0); // property list length
+    data.push_back(1); // name length
+    data.push_back('N');
+
+    if (depth < maxDepth) {
+        appendBinaryScope(data, depth + 1, maxDepth);
+        data.insert(data.end(), 13, '\0'); // nested block sentinel
+    }
+
+    writeLittleEndian32(data, nodeStart, static_cast<std::uint32_t>(data.size()));
+}
+
+std::vector<char> binaryFbxWithNestedScopes(unsigned int nestedDepth) {
+    std::vector<char> data;
+    const char header[] = "Kaydara FBX Binary  \0\x1a\0";
+    data.insert(data.end(), header, header + 23);
+    appendLittleEndian32(data, 7400);
+    appendBinaryScope(data, 0, nestedDepth);
+    return data;
+}
+
 std::string fbxTriangleWithLastIndex(const char *lastIndex) {
     return std::string(
             "; FBX 7.4.0 project file\n"
@@ -547,4 +591,63 @@ TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
     scene = importer.ReadFileFromMemory(intMin.data(), intMin.size(), aiProcess_ValidateDataStructure, "fbx");
     ASSERT_NE(nullptr, scene);
     EXPECT_EQ(0u, scene->mNumMeshes);
+}
+
+TEST_F(utFBXImporterExporter, rejectExcessivelyNestedScopes) {
+    // Scopes nest recursively in the parser. A deeply nested file must be rejected
+    // with a parse error instead of overflowing the stack (OSS-Fuzz issue 442253768).
+    std::string nested = "; FBX 7.4.0 project file\n";
+    const size_t depth = 200;
+    for (size_t i = 0; i < depth; ++i) {
+        nested += "L: {\n";
+    }
+    for (size_t i = 0; i < depth; ++i) {
+        nested += "}\n";
+    }
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(nested.data(), nested.size(), 0, "fbx");
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, importer.GetErrorString().find("FBX scopes are nested too deeply"));
+
+    // A valid file with ordinary nested scopes is still imported successfully.
+    std::string shallow = fbxTriangleWithLastIndex("-3");
+    const std::string headerVersion = "FBXHeaderVersion: 1003\n";
+    const std::size_t insertAt = shallow.find(headerVersion);
+    ASSERT_NE(std::string::npos, insertAt);
+    std::string customScope = "\tCustom: {\n";
+    for (unsigned int i = 0; i < 8; ++i) {
+        customScope += "\tLayer: {\n";
+    }
+    for (unsigned int i = 0; i < 8; ++i) {
+        customScope += "\t}\n";
+    }
+    customScope += "\t}\n";
+    shallow.insert(insertAt + headerVersion.size(), customScope);
+
+    Assimp::Importer shallowImporter;
+    scene = shallowImporter.ReadFileFromMemory(shallow.data(), shallow.size(), aiProcess_ValidateDataStructure, "fbx");
+    ASSERT_NE(nullptr, scene) << shallowImporter.GetErrorString();
+}
+
+TEST_F(utFBXImporterExporter, rejectExcessivelyNestedBinaryScopes) {
+    const std::vector<char> nested = binaryFbxWithNestedScopes(101);
+    Assimp::StackAllocator tokenAllocator;
+    Assimp::FBX::TokenList tokens;
+
+    try {
+        Assimp::FBX::TokenizeBinary(tokens, nested.data(), nested.size(), tokenAllocator);
+        FAIL() << "Expected binary scope depth to be rejected";
+    } catch (const DeadlyImportError &error) {
+        EXPECT_NE(std::string::npos, std::string(error.what()).find("FBX binary scopes are nested too deeply"));
+    }
+}
+
+TEST_F(utFBXImporterExporter, tokenizeBinaryScopesBelowNestingLimit) {
+    const std::vector<char> shallow = binaryFbxWithNestedScopes(8);
+    Assimp::StackAllocator tokenAllocator;
+    Assimp::FBX::TokenList tokens;
+
+    EXPECT_NO_THROW(Assimp::FBX::TokenizeBinary(tokens, shallow.data(), shallow.size(), tokenAllocator));
+    EXPECT_FALSE(tokens.empty());
 }

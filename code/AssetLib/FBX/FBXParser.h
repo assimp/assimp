@@ -189,6 +189,9 @@ private:
     TokenList::const_iterator cursor;
     Scope *root;
 
+    // Number of Scopes currently being parsed; bounds recursion depth.
+    unsigned int scopeDepth = 0;
+
     const bool is_binary;
 };
 

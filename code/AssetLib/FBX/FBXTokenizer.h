@@ -55,6 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
+inline constexpr unsigned int kMaxScopeNestingDepth = 100;
+
 /** Rough classification for text FBX tokens used for constructing the
  *  basic scope hierarchy. */
 enum TokenType

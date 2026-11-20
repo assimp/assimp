@@ -36,6 +36,21 @@
 #include <variant>
 #include <stdexcept>
 
+#define CHECK_RESULT(_result)                                                                                          \
+  {                                                                                                                    \
+    const auto result = _result;                                                                                       \
+    if (result.is_error())                                                                                             \
+      return result.get_error();                                                                                       \
+  }
+
+#define CHECK_ASSIGN_RESULT(_result, _var)                                                                             \
+  {                                                                                                                    \
+    auto result = _result;                                                                                             \
+    if (result.is_error())                                                                                             \
+      return result.get_error();                                                                                       \
+    _var = std::move(result).take_value();                                                                             \
+  }
+
 struct Ok
 {
 };

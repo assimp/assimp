@@ -14,7 +14,7 @@
 
 namespace TextureLoader
 {
-    GLuint create_from_pixels(const void *pixels, GLsizei width, GLsizei height, GLenum format)
+    Result<GLuint> from_pixels(const void *pixels, GLsizei width, GLsizei height, GLenum format)
     {
         GLuint texture = 0;
 
@@ -29,41 +29,49 @@ namespace TextureLoader
 
         if (glGetError() != GL_NO_ERROR) {
             glDeleteTextures(1, &texture);
-            return 0;
+            return "failed to create the texture from pixels";
         }
 
         return texture;
     }
 
-    GLuint create_from_memory(const uint8_t *data, size_t dataSize)
+    Result<GLuint> from_memory(const uint8_t *data, size_t dataSize)
     {
         if (data == nullptr || dataSize == 0 || dataSize > static_cast<size_t>(INT_MAX))
-            return 0;
+            return "invalid arguments";
 
         stbi_set_flip_vertically_on_load(1);
 
         int w = 0, h = 0, n = 0;
         const auto pixels = stbi_load_from_memory(data, static_cast<int>(dataSize), &w, &h, &n, STBI_rgb_alpha);
         if (pixels == nullptr)
-            return 0;
+            return "failed to load the image";
 
-        const GLuint texture = create_from_pixels(pixels, w, h, GL_RGBA);
+        GLuint texture{};
+        CHECK_ASSIGN_RESULT(
+            from_pixels(pixels, w, h, GL_RGBA),
+            texture
+        );
 
         stbi_image_free(pixels);
 
         return texture;
     }
 
-    GLuint create_from_file(const char *fileName)
+    Result<GLuint> from_file(const char *fileName)
     {
         stbi_set_flip_vertically_on_load(1);
         
         int w = 0, h = 0, n = 0;
         const auto pixels = stbi_load(fileName, &w, &h, &n, STBI_rgb_alpha);
         if (pixels == nullptr)
-            return 0;
+            return "failed to load the image";
 
-        const GLuint texture = create_from_pixels(pixels, w, h, GL_RGBA);
+        GLuint texture;
+        CHECK_ASSIGN_RESULT(
+            from_pixels(pixels, w, h, GL_RGBA),
+            texture
+        );
 
         stbi_image_free(pixels);
 

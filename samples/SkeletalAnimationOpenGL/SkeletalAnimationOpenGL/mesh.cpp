@@ -8,7 +8,7 @@
 
 #include "mesh.hpp"
 
-Result<Box<Mesh>> Mesh::create(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<Texture> &textures)
+Result<Box<Mesh>> Mesh::create(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<GLuint> &textures)
 {
     Box<Mesh> mesh(new Mesh());
 
@@ -67,7 +67,7 @@ void Mesh::draw()
     glBindVertexArray(m_vao);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_textures.empty() ? 0 : m_textures[0].texture);
+    glBindTexture(GL_TEXTURE_2D, m_textures.empty() ? 0 : m_textures[0]);
 
     glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, nullptr);
 

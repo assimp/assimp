@@ -16,17 +16,10 @@ struct Vertex
     GLfloat u{}, v{};
 };
 
-struct Texture
-{
-    GLuint texture{};
-    std::string type{};
-    std::string path{};
-};
-
 class Mesh
 {
 public:
-    static Result<Box<Mesh>> create(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<Texture> &textures);
+    static Result<Box<Mesh>> create(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<GLuint> &textures);
 
     ~Mesh();
 
@@ -41,5 +34,5 @@ private:
 private:
     GLsizei m_index_count{};
     GLuint m_vao{}, m_vbo{}, m_ibo{};
-    std::vector<Texture> m_textures{};
+    std::vector<GLuint> m_textures{};
 };

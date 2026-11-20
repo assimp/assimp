@@ -509,6 +509,13 @@ ADD_ASSIMP_IMPORTER( OBJ
   AssetLib/Obj/ObjTools.h
 )
 
+ADD_ASSIMP_IMPORTER( GEO
+  AssetLib/GEO/GEOLoader.cpp
+  AssetLib/GEO/GEOLoader.h
+  AssetLib/GEO/GEOHelper.h
+  AssetLib/GEO/GEOColorTable.h
+)
+
 IF(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION EQUAL 14)
   message(STATUS "GCC14 detected disabling \"-Wmaybe-uninitialized\" for"
       " AssetLib/Obj/ObjFileParser.cpp as it appears to be a false positive")

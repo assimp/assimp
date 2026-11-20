@@ -85,6 +85,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 #include "AssetLib/Obj/ObjFileImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_GEO_IMPORTER
+#include "AssetLib/GEO/GEOLoader.h"
+#endif
 #ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
 #include "AssetLib/HMP/HMPLoader.h"
 #endif
@@ -241,6 +244,9 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #endif
 #if (!defined ASSIMP_BUILD_NO_OBJ_IMPORTER)
     out.push_back(new ObjFileImporter());
+#endif
+#if (!defined ASSIMP_BUILD_NO_GEO_IMPORTER)
+    out.push_back(new GEOImporter());
 #endif
 #ifndef ASSIMP_BUILD_NO_AMF_IMPORTER
     out.push_back(new AMFImporter());

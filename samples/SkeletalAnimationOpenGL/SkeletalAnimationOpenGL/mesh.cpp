@@ -8,29 +8,22 @@
 
 #include "mesh.hpp"
 
-void Texture::release() 
+Result<Box<Mesh>> Mesh::create(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<Texture> &textures)
 {
-    if (texture)
-    {
-        glDeleteTextures(1, &texture);
-        texture = 0;
-    }
-}
+    Box<Mesh> mesh(new Mesh());
 
-Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<Texture> &textures): m_textures(textures)
-{
     if (vertices.empty() || indices.empty())
-        throw std::runtime_error("mesh has no vertices or indices.");
+        return "mesh has no vertices or indices";
 
-    glGenVertexArrays(1, &m_vao);
-    glBindVertexArray(m_vao);
+    glGenVertexArrays(1, &mesh->m_vao);
+    glBindVertexArray(mesh->m_vao);
 
-    glGenBuffers(1, &m_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glGenBuffers(1, &mesh->m_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo);
     glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(Vertex) * vertices.size()), vertices.data(), GL_STATIC_DRAW);
 
-    glGenBuffers(1, &m_ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+    glGenBuffers(1, &mesh->m_ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(GLuint) * indices.size()), indices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
@@ -41,20 +34,14 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indic
     glBindVertexArray(0);
 
     if (glGetError() != GL_NO_ERROR)
-    {
-        destroy();
-        throw std::runtime_error("failed to create vertex/index buffers.");
-    }
+        return "failed to create vertex/index buffers";
 
-    m_index_count = (GLsizei)indices.size();
+    mesh->m_index_count = (GLsizei)indices.size();
+
+    return mesh;
 }
 
 Mesh::~Mesh()
-{
-    destroy();
-}
-
-void Mesh::destroy()
 {
     if (m_ibo)
     {

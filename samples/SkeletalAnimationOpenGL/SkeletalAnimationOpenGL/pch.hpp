@@ -34,7 +34,6 @@
 #include <vector>
 #include <memory>
 #include <variant>
-#include <stdexcept>
 
 #define CHECK_RESULT(_result)                                                                                          \
   {                                                                                                                    \

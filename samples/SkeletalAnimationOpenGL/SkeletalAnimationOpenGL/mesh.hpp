@@ -21,22 +21,22 @@ struct Texture
     GLuint texture{};
     std::string type{};
     std::string path{};
-
-    void release();
 };
 
 class Mesh
 {
 public:
-    Mesh(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<Texture> &textures);
+    static Result<Box<Mesh>> create(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<Texture> &textures);
+
     ~Mesh();
 
     Mesh(const Mesh &) = delete;
     Mesh &operator=(const Mesh &) = delete;
 
-    void destroy();
-
     void draw();
+
+private:
+    Mesh() = default;
 
 private:
     GLsizei m_index_count{};

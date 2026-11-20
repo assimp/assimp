@@ -1,0 +1,46 @@
+FIND_PACKAGE(OpenGL REQUIRED)
+FIND_PACKAGE(GLUT)
+
+IF ( NOT GLUT_FOUND )
+  MESSAGE( FATAL_ERROR "Please install glut." )
+ENDIF ()
+
+if ( MSVC )
+  ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+  ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+  REMOVE_DEFINITIONS( -DUNICODE -D_UNICODE )
+  if ( MSVC_VERSION GREATER_EQUAL 1930 )
+    ADD_DEFINITIONS( -D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING=1 )
+  endif ()
+endif ()
+
+ADD_COMPILE_DEFINITIONS(SHADER_PATH="${CMAKE_CURRENT_SOURCE_DIR}/SkeletalAnimationOpenGL/")
+
+INCLUDE_DIRECTORIES(
+  ${Assimp_SOURCE_DIR}/include
+  ${Assimp_SOURCE_DIR}/code
+  ${SAMPLES_SHARED_CODE_DIR}
+  ${Assimp_SOURCE_DIR}/contrib/utf8cpp/source
+)
+
+LINK_DIRECTORIES(
+  ${Assimp_BINARY_DIR}
+  ${Assimp_BINARY_DIR}/lib
+)
+
+ADD_EXECUTABLE( assimp_skeletalanimationogl WIN32
+  SkeletalAnimationOpenGL/main.cpp
+)
+
+TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_skeletalanimationogl)
+
+SET_PROPERTY(TARGET assimp_skeletalanimationogl PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
+TARGET_LINK_LIBRARIES( assimp_skeletalanimationogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} )
+SET_TARGET_PROPERTIES( assimp_skeletalanimationogl PROPERTIES
+  OUTPUT_NAME assimp_skeletalanimationogl
+)
+
+INSTALL( TARGETS assimp_skeletalanimationogl
+  DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-dev
+)

@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>
+#include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
@@ -548,3 +549,53 @@ TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
     ASSERT_NE(nullptr, scene);
     EXPECT_EQ(0u, scene->mNumMeshes);
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+TEST_F(utFBXImporterExporter, exportSkipsTextureItCannotRead) {
+    // The glTF importer files a specular colour texture in slot 1 and leaves slot 0 empty, so
+    // GetTextureCount counts two while GetTexture(0) fails. The export must carry on without it.
+    const std::string front =
+            R"({
+  "asset": { "version": "2.0" },
+  "extensionsUsed": [ "KHR_materials_specular" ],
+  "scene": 0,
+  "scenes": [ { "nodes": [ 0 ] } ],
+  "nodes": [ { "mesh": 0 } ],
+  "meshes": [ { "primitives": [ { "attributes": { "POSITION": 0 }, "material": 0 } ] } ],
+  "materials": [ { "extensions": { "KHR_materials_specular": { "specularColorTexture": { "index": 0 } } } } ],
+  "textures": [ { "source": 0 } ],
+  "images": [ { )";
+    const std::string back =
+            R"("uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAHnOcQAAAAABJRU5ErkJggg==" } ],
+  "buffers": [ { "byteLength": 36, "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAA" } ],
+  "bufferViews": [ { "buffer": 0, "byteLength": 36 } ],
+  "accessors": [ { "bufferView": 0, "componentType": 5126, "count": 3, "type": "VEC3", "min": [ 0, 0, 0 ], "max": [ 1, 1, 0 ] } ]
+})";
+
+    // A named and an unnamed image: the writer looks the image up by name when it embeds it.
+    for (const char *imageName : { "\"name\": \"Specular\", ", "" }) {
+        SCOPED_TRACE(imageName);
+        const std::string gltf = front + imageName + back;
+        Assimp::Importer importer;
+        const aiScene *source = importer.ReadFileFromMemory(gltf.data(), gltf.size(), 0, "gltf");
+        ASSERT_NE(nullptr, source) << importer.GetErrorString();
+
+        Assimp::Exporter exporter;
+        const aiExportDataBlob *blob = exporter.ExportToBlob(source, "fbx");
+        ASSERT_NE(nullptr, blob) << exporter.GetErrorString();
+
+        Assimp::Importer reimporter;
+        const aiScene *exported = reimporter.ReadFileFromMemory(blob->data, blob->size, aiProcess_ValidateDataStructure, "fbx");
+        ASSERT_NE(nullptr, exported) << reimporter.GetErrorString();
+        ASSERT_EQ(1u, exported->mNumMeshes);
+        EXPECT_EQ(1u, exported->mMeshes[0]->mNumFaces);
+
+        // Definitions count only what is written: the embedded image and no Texture object.
+        const aiExportDataBlob *ascii = exporter.ExportToBlob(source, "fbxa");
+        ASSERT_NE(nullptr, ascii) << exporter.GetErrorString();
+        const std::string text(static_cast<const char *>(ascii->data), ascii->size);
+        EXPECT_NE(std::string::npos, text.find("ObjectType: \"Video\" {\n\t\tCount: 1\n"));
+        EXPECT_EQ(std::string::npos, text.find("ObjectType: \"Texture\""));
+    }
+}
+#endif // ASSIMP_BUILD_NO_EXPORT

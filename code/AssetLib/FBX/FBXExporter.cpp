@@ -567,7 +567,9 @@ static size_t count_images(const aiScene* scene) {
             const aiTextureType textype = static_cast<aiTextureType>(tt);
             const size_t texcount = mat->GetTextureCount(textype);
             for (unsigned int j = 0; j < texcount; ++j) {
-                mat->GetTexture(textype, j, &texpath);
+                if (mat->GetTexture(textype, j, &texpath) != aiReturn_SUCCESS) {
+                    continue; // skipped where the images are written, too
+                }
                 images.insert(std::string(texpath.C_Str()));
             }
         }
@@ -586,7 +588,10 @@ static size_t count_textures(const aiScene* scene) {
             ++tt
         ){
             // TODO: handle layered textures
-            if (mat->GetTextureCount(static_cast<aiTextureType>(tt)) > 0) {
+            // only slot 0 is written, and skipped when it cannot be read
+            aiString texpath;
+            if (mat->GetTextureCount(static_cast<aiTextureType>(tt)) > 0 &&
+                    mat->GetTexture(static_cast<aiTextureType>(tt), 0, &texpath) == aiReturn_SUCCESS) {
                 count += 1;
             }
         }
@@ -1655,7 +1660,9 @@ void FBXExporter::WriteObjects () {
             const aiTextureType textype = static_cast<aiTextureType>(tt);
             const size_t texcount = mat->GetTextureCount(textype);
             for (size_t j = 0; j < texcount; ++j) {
-                mat->GetTexture(textype, (unsigned int)j, &texpath);
+                if (mat->GetTexture(textype, (unsigned int)j, &texpath) != aiReturn_SUCCESS) {
+                    continue; // an empty slot, reported where the textures are written
+                }
                 const std::string texstring = texpath.C_Str();
                 auto elem = uid_by_image.find(texstring);
                 if (elem == uid_by_image.end()) {
@@ -1773,8 +1780,9 @@ void FBXExporter::WriteObjects () {
                 std::stringstream err;
                 err << "Failed to get texture 0 for texture of type " << tt;
                 err << " on material " << i;
-                err << ", however GetTextureCount returned 1.";
-                throw DeadlyExportError(err.str());
+                err << ", however GetTextureCount returned " << n << ", skipping it.";
+                ASSIMP_LOG_WARN(err.str());
+                continue;
             }
             const std::string texture_path(tpath.C_Str());
 

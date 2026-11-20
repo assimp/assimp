@@ -69,11 +69,13 @@ int main(int argc, char **argv)
             g_app->on_render();
         glutSwapBuffers();
     });
+
     glutReshapeFunc([](int width, int height)
     {
         if (g_app)
             g_app->on_resize(width, height);
     });
+
     glutKeyboardFunc([](unsigned char key, int, int)
     {
         if (key == 27) { // Escape
@@ -81,9 +83,21 @@ int main(int argc, char **argv)
         }
     });
 
+    glutIdleFunc([]()
+    {
+        glutPostRedisplay();
+    });
+    
+    glutCloseFunc([]()
+    {
+        delete g_app;
+        g_app = nullptr;
+    });
+
     glutMainLoop();
 
     delete g_app;
+    g_app = nullptr;
 
     return 0;
 }

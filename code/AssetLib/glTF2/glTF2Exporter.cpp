@@ -1587,7 +1587,7 @@ unsigned int glTF2Exporter::ExportNode(const aiNode *n, Ref<Node> &parent) {
             if (!reinterpret_cast<aiVector3D *>(&node->scale.value)->Equal(vector)) {
                 node->scale.isPresent = true;
             }
-            if (!reinterpret_cast<aiVector3D *>(&node->translation.value)->Equal(vector)) {
+            if (!reinterpret_cast<aiVector3D *>(&node->translation.value)->Equal(aiVector3D(), 0)) {
                 node->translation.isPresent = true;
             }
             node->rotation.isPresent = true;

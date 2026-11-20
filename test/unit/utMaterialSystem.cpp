@@ -225,8 +225,8 @@ TEST_F(MaterialSystemTest, testSingleFloatGetterStopsAtOneValue) {
     this->pcMat->AddProperty(many, 16, "multiFloat");
 
     const float sentinel = -123.0f;
-    float out[16];
-    for (float &v : out) {
+    ai_real out[16];
+    for (ai_real &v : out) {
         v = sentinel;
     }
     EXPECT_EQ(AI_SUCCESS, aiGetMaterialFloat(this->pcMat, "multiFloat", 0, 0, out));

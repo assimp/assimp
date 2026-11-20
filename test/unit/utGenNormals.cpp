@@ -40,6 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
+#include "PostProcessing/GenFaceNormalsProcess.h"
 #include "PostProcessing/GenVertexNormalsProcess.h"
 
 using namespace ::std;
@@ -83,4 +87,33 @@ void GenNormalsTest::TearDown() {
 TEST_F(GenNormalsTest, testSimpleTriangle) {
     piProcess->GenMeshVertexNormals(pcMesh, 0);
     EXPECT_TRUE(pcMesh->mNormals != nullptr);
+}
+
+// With aiProcess_ForceGenNormals the existing normals are freed first, then line/point meshes
+// are skipped. The freed pointer must not stay in the mesh, or it is deleted twice later.
+TEST(GenFaceNormalsTest, forceOnLineMeshDoesNotLeaveDanglingNormals) {
+    GenFaceNormalsProcess process;
+    ASSERT_TRUE(process.IsActive(aiProcess_GenNormals | aiProcess_ForceGenNormals));
+
+    aiScene scene;
+    scene.mNumMeshes = 1;
+    scene.mMeshes = new aiMesh *[1];
+    aiMesh *mesh = scene.mMeshes[0] = new aiMesh();
+    mesh->mPrimitiveTypes = aiPrimitiveType_LINE;
+    mesh->mNumVertices = 2;
+    mesh->mVertices = new aiVector3D[2];
+    mesh->mVertices[0] = aiVector3D(0.0f, 0.0f, 0.0f);
+    mesh->mVertices[1] = aiVector3D(1.0f, 0.0f, 0.0f);
+    mesh->mNormals = new aiVector3D[2];
+    mesh->mNormals[0] = aiVector3D(0.0f, 0.0f, 1.0f);
+    mesh->mNormals[1] = aiVector3D(0.0f, 0.0f, 1.0f);
+    mesh->mNumFaces = 1;
+    mesh->mFaces = new aiFace[1];
+    mesh->mFaces[0].mIndices = new unsigned int[mesh->mFaces[0].mNumIndices = 2];
+    mesh->mFaces[0].mIndices[0] = 0;
+    mesh->mFaces[0].mIndices[1] = 1;
+
+    process.Execute(&scene);
+
+    EXPECT_EQ(nullptr, mesh->mNormals);
 }

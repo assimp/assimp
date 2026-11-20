@@ -52,6 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/fast_atof.h>
 #include <assimp/DefaultLogger.hpp>
 
+#include <algorithm>
+
 using namespace Assimp;
 using namespace Assimp::XFile;
 using namespace Assimp::Formatter;
@@ -158,55 +160,88 @@ XFileParser::XFileParser(const std::vector<char> &pBuffer) :
         // skip unknown data (checksum, flags?)
         mP += 6;
 
-        // First find out how much storage we'll need. Count sections.
-        const char *P1 = mP;
-        unsigned int est_out = 0;
+        /* Read the next MSZIP chunk header.
+         *
+         * A chunk is introduced by a 16 bit payload size followed by the 'CK'
+         * magic word, and its payload follows directly behind those four bytes.
+         * The size is taken verbatim from the file, so it has to be clamped to
+         * the number of bytes that are really left in the buffer: inflate()
+         * trusts avail_in and reads past the end of the allocation otherwise
+         * (oss-fuzz issue 513256645).  A truncated payload is not fatal, the
+         * original code tolerated it as well, but it must never be announced to
+         * zlib as being longer than it is. */
+        auto nextMszipChunk = [&](const char *&p, const char *&payload, size_t &chunkSize) -> bool {
+            // a chunk header is four bytes long
+            if (p > mEnd - 3) {
+                return false;
+            }
 
-        while (P1 + 3 < mEnd) {
-            // read next offset
-            uint16_t ofs = *((uint16_t *)P1);
+            uint16_t ofs = *((const uint16_t *)p);
             AI_SWAP2(ofs);
-            P1 += 2;
+            p += 2;
 
-            if (ofs >= MSZIP_BLOCK)
-                throw DeadlyImportError("X: Invalid offset to next MSZIP compressed block");
-
-            // check magic word
-            uint16_t magic = *((uint16_t *)P1);
+            uint16_t magic = *((const uint16_t *)p);
             AI_SWAP2(magic);
-            P1 += 2;
+            p += 2;
 
-            if (magic != MSZIP_MAGIC)
+            if (ofs >= MSZIP_BLOCK) {
+                throw DeadlyImportError("X: Invalid offset to next MSZIP compressed block");
+            }
+
+            if (magic != MSZIP_MAGIC) {
                 throw DeadlyImportError("X: Unsupported compressed format, expected MSZIP header");
+            }
 
-            // and advance to the next offset
-            P1 += ofs;
-            est_out += MSZIP_BLOCK; // one decompressed block is 327861 in size
-        }
+            // mEnd points at the last byte of the buffer, so mEnd + 1 - p is
+            // what is left for the payload.
+            const size_t remaining = (size_t)(mEnd + 1 - p);
+            chunkSize = std::min<size_t>(ofs, remaining);
+            payload = p;
 
-        // Allocate storage and terminating zero and do the actual uncompressing
+            // always step over the announced payload so that we make progress
+            p += chunkSize;
+            if (chunkSize < (size_t)ofs) {
+                p = mEnd + 1; // truncated chunk, stop after this one
+            }
+
+            return true;
+        };
+
+        /* Decompress the chunks.  The output buffer grows as we go instead of
+         * being sized up front from a separate pass over the chunk table: that
+         * pass accumulated one MSZIP_BLOCK per chunk in a 32 bit integer, which
+         * wrapped around for an input of roughly 770 KiB and left the buffer far
+         * too small for the data that decompressBlock() wrote into it
+         * (heap-buffer-overflow write).  Growing the buffer also guarantees that
+         * the space handed to inflate() is really there. */
         Compression compression;
-        uncompressed.resize(est_out + 1);
-        char *out = &uncompressed.front();
         if (compression.open(mIsBinaryFormat ? Compression::Format::Binary : Compression::Format::ASCII,
                 Compression::FlushMode::SyncFlush, -Compression::MaxWBits)) {
-            while (mP + 3 < mEnd) {
-                uint16_t ofs = *((uint16_t *)mP);
-                AI_SWAP2(ofs);
-                mP += 4;
+            size_t chunkSize = 0;
+            const char *payload = nullptr;
+            while (nextMszipChunk(mP, payload, chunkSize)) {
+                const size_t oldSize = uncompressed.size();
+                const size_t newSize = oldSize + MSZIP_BLOCK;
 
-                if (mP + ofs > mEnd + 2) {
-                    throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
+                if (newSize > uncompressed.capacity()) {
+                    uncompressed.reserve(newSize * 2); // amortized, avoids O(n^2)
                 }
-                out += compression.decompressBlock(mP, ofs, out, MSZIP_BLOCK);
-                mP += ofs;
+
+                uncompressed.resize(newSize);
+                const size_t produced = compression.decompressBlock(
+                        payload, chunkSize, uncompressed.data() + oldSize, MSZIP_BLOCK);
+                uncompressed.resize(oldSize + produced);
             }
             compression.close();
         }
 
+        // and a terminating zero, just like the uncompressed path gets from
+        // the extra byte that XFileImporter keeps behind the file contents
+        uncompressed.push_back('\0');
+
         // ok, update pointers to point to the uncompressed file data
-        mP = &uncompressed[0];
-        mEnd = out;
+        mP = uncompressed.data();
+        mEnd = mP + uncompressed.size() - 1;
 
         // FIXME: we don't need the compressed data anymore, could release
         // it already for better memory usage. Consider breaking const-co.

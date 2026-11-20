@@ -2838,7 +2838,9 @@ void FBXExporter::WriteModelNodes(
         WriteModelNode(
             outstream, binary, node, node_uid, "Mesh", transform_chain
         );
-    } else if (limbnodes.count(node)) {
+    } else if (limbnodes.count(node) && node->mNumMeshes == 0) {
+        // a skeleton node that also carries meshes is written as a mesh below,
+        // as a skeleton node with a single mesh is above.
         WriteModelNode(
             outstream, binary, node, node_uid, "LimbNode", transform_chain
         );

@@ -384,7 +384,8 @@ void GEOImporter::InternReadVertices(unsigned int count, bool colored) {
             colored ? " colored vertex/vertices" : " not colored vertex/vertices");
 
     if (colored) {
-        tempColors.resize(count);
+        tempColors.assign(count, aiColor4D());
+        tempColorValid.assign(count, 0);
     }
 
     for (unsigned int i = 0; i < count; i++) {
@@ -403,7 +404,7 @@ void GEOImporter::InternReadVertices(unsigned int count, bool colored) {
         sz = fast_atoreal_move<float>(sz, (float &)v.z);
 
         if (colored) {
-            InternReadColor(i);
+            (void)InternReadColor(i);
         }
     }
 }
@@ -414,9 +415,21 @@ void GEOImporter::InternReadFaces(unsigned int count, bool faceColors) {
             faceColors ? " colored face(s)" : " not colored face(s)");
 
     if (faceColors) {
-        tempColors.resize(count);
+        tempColors.assign(count, aiColor4D());
+        tempColorValid.assign(count, 0);
     }
 
+    const bool wantVertColors = !faceColors && !tempColors.empty();
+    std::vector<unsigned int> srcPosPerOutVert;
+    if (wantVertColors) {
+        srcPosPerOutVert.reserve(mesh->mNumVertices);
+    }
+    std::vector<unsigned int> faceColorOfOutVert;
+    if (faceColors) {
+        faceColorOfOutVert.reserve(mesh->mNumVertices);
+    }
+
+    bool anyColorFail = false;
     for (unsigned int i = 0, p = 0; i < count;) {
         if (!GetNextLine(buffer, line)) {
             return;
@@ -430,36 +443,53 @@ void GEOImporter::InternReadFaces(unsigned int count, bool faceColors) {
         }
 
         faces->mIndices = new unsigned int[faces->mNumIndices = idx];
-        if (!mesh->mColors[0]) {
-            mesh->mColors[0] = new aiColor4D[mesh->mNumVertices];
-            ASSIMP_LOG_DEBUG("GEO: got new mesh");
-        }
         for (unsigned int m = 0; m < faces->mNumIndices; m++) {
             SkipSpaces(&sz, line + sizeof(line));
             const unsigned int pos = strtoul10(sz, &sz);
-            // Same class of bug as NDO/Q3D: authored indices must be in-range.
             if (pos >= tempPositions.size()) {
                 throw DeadlyImportError("GEO: face vertex index out of range");
             }
-            if (!faceColors && pos >= tempColors.size()) {
+            if (wantVertColors && pos >= tempColors.size()) {
                 throw DeadlyImportError("GEO: face vertex color index out of range");
             }
             faces->mIndices[m] = p++;
             *verts++ = tempPositions[pos];
-            if (!faceColors) {
-                mesh->mColors[0][faces->mIndices[m]] = tempColors[pos];
+            if (wantVertColors) {
+                srcPosPerOutVert.push_back(pos);
+                if (pos >= tempColorValid.size() || !tempColorValid[pos]) {
+                    anyColorFail = true;
+                }
             }
         }
 
         if (faceColors) {
-            InternReadColor(i);
-            for (unsigned int l = 0; l < faces->mNumIndices; l++) {
-                mesh->mColors[0][faces->mIndices[l]] = tempColors[i];
+            if (!InternReadColor(i)) {
+                anyColorFail = true;
+            }
+            for (unsigned int m = 0; m < faces->mNumIndices; m++) {
+                faceColorOfOutVert.push_back(i);
             }
         }
-        // Face material splits from palette high-bits are not implemented yet.
         ++i;
         ++faces;
+    }
+
+    if (wantVertColors || faceColors) {
+        if (anyColorFail) {
+            ASSIMP_LOG_WARN("GEO: omitting colors - some color tokens were unreadable");
+        } else {
+            mesh->mColors[0] = new aiColor4D[mesh->mNumVertices];
+            ASSIMP_LOG_DEBUG("GEO: got new mesh colors");
+            if (wantVertColors) {
+                for (unsigned int v = 0; v < srcPosPerOutVert.size(); ++v) {
+                    mesh->mColors[0][v] = tempColors[srcPosPerOutVert[v]];
+                }
+            } else {
+                for (unsigned int v = 0; v < faceColorOfOutVert.size(); ++v) {
+                    mesh->mColors[0][v] = tempColors[faceColorOfOutVert[v]];
+                }
+            }
+        }
     }
 }
 
@@ -495,25 +525,40 @@ void GEOImporter::InternReadFinish() {
 }
 
 // ------------------------------------------------------------------------------------------------
-void GEOImporter::InternReadColor(unsigned int pos) {
+bool GEOImporter::InternReadColor(unsigned int pos) {
+    if (pos >= tempColors.size()) {
+        return false;
+    }
+    if (tempColorValid.size() != tempColors.size()) {
+        tempColorValid.assign(tempColors.size(), 0);
+    }
     aiColor4D &c = tempColors[pos];
 
     SkipSpaces(&sz, line + sizeof(line));
-    // Assign then test (MSVC C4706 /WX: assignment in conditional).
-    color = static_cast<long>(strtoul10(sz, &sz));
-    if (!color) {
-        --sz;
-        color = static_cast<long>(hexstrtoul10(sz, &sz));
-        if (!color) {
-            ASSIMP_LOG_ERROR("GEO: color read failed (sz) ", sz, " color ", color);
-            return;
-        }
-        rgbH = true;
-    } else {
+    // Parse success must not treat authored palette/hex value 0 as failure.
+    const char *begin = sz;
+    const char *after = begin;
+    color = static_cast<long>(strtoul10(begin, &after));
+    if (after != begin) {
         rgbH = false;
+        sz = after;
+        LookupColor(color, c);
+        tempColorValid[pos] = 1;
+        return true;
+    }
+    after = begin;
+    color = static_cast<long>(hexstrtoul10(begin, &after));
+    if (after != begin) {
+        rgbH = true;
+        sz = after;
+        LookupColor(color, c);
+        tempColorValid[pos] = 1;
+        return true;
     }
 
-    LookupColor(color, c);
+    ASSIMP_LOG_ERROR("GEO: color read failed (sz) ", sz);
+    tempColorValid[pos] = 0;
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------

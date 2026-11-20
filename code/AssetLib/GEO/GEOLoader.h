@@ -87,7 +87,8 @@ protected:
     void InternReadLamp(unsigned int count);
     [[noreturn]] void InternReadFbS(unsigned int count);
     void InternReadFinish();
-    void InternReadColor(unsigned int pos);
+    /// @return true when a palette index or hex color was parsed (authored).
+    bool InternReadColor(unsigned int pos);
     void LookupColor(long index, aiColor4D &cOut);
 
 private:
@@ -105,6 +106,7 @@ private:
     char line[4096];
     std::vector<aiVector3D> tempPositions;
     std::vector<aiColor4D> tempColors;
+    std::vector<char> tempColorValid; // 1 = authored color at index, 0 = missing
     aiMesh *mesh;
     aiFace *faces;
     // Reserved for future per-face material splits when the palette high bits change.

@@ -111,6 +111,16 @@ TEST(utXImporter, importTestCubeCompressed) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utXImporter, importCompressedChunkPastEndOfFile) {
+    // The MSZIP chunk table of this file announces a payload that reaches past
+    // the end of the buffer.  The size used to be handed to inflate() without
+    // being clamped, so zlib read one byte past the heap allocation
+    // (oss-fuzz issue 513256645).  The file must be rejected instead.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/invalid/mszip_chunk_past_eof.x", 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
 TEST(utXImporter, importTestCubeText) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test_cube_text.x", aiProcess_ValidateDataStructure);

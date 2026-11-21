@@ -44,13 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 //#define ASSIMP_BUILD_NO_COMPRESSED_BLEND
-// Uncomment this to disable support for (gzip)compressed .BLEND files
+// Uncomment this to disable support for (gzip/zstd)compressed .BLEND files
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 
 #include "BlenderBMesh.h"
 #include "BlenderCustomData.h"
 #include "BlenderIntermediate.h"
+#include "BlenderMeshAttributes.h"
 #include "BlenderModifier.h"
 #include <assimp/StringUtils.h>
 #include <assimp/importerdesc.h>
@@ -61,8 +62,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 
 #include <cctype>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <memory>
 #include <utility>
+#include <vector>
+
+#if !defined(ASSIMP_BUILD_NO_COMPRESSED_BLEND) && defined(ASSIMP_BLEND_SUPPORT_ZSTD)
+#include <zstd.h>
+#endif
 
 // zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
@@ -139,15 +148,92 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
     }
     std::shared_ptr<IOStream> stream = std::move(streamOrError.stream);
 
-    char version[4] = { 0 };
-    file.i64bit = (stream->Read(version, 1, 1), version[0] == '-');
-    file.little = (stream->Read(version, 1, 1), version[0] == 'v');
+    // After "BLENDER" magic: format v0 is 5 more bytes (12 total), v1 is 10 more (17 total).
+    // Spec: Blender BLO_core_blend_header.hh (BLEND_FILE_FORMAT_VERSION_0 / _1).
+    char hdr[16] = { 0 };
+    if (stream->Read(hdr, 1, 5) != 5) {
+        ThrowException("BLEND: truncated file header");
+    }
 
-    stream->Read(version, 3, 1);
-    version[3] = '\0';
+    char blenderVersionStr[16] = { 0 };
+    if (hdr[0] == '_' || hdr[0] == '-') {
+        // Format v0: ptr, endian, 3-digit BLENDER_FILE_VERSION
+        file.file_format_version = 0;
+        file.i64bit = (hdr[0] == '-');
+        if (hdr[1] != 'v' && hdr[1] != 'V') {
+            ThrowException("BLEND: invalid endian marker in v0 header");
+        }
+        file.little = (hdr[1] == 'v');
+        if (!std::isdigit(static_cast<unsigned char>(hdr[2])) ||
+                !std::isdigit(static_cast<unsigned char>(hdr[3])) ||
+                !std::isdigit(static_cast<unsigned char>(hdr[4]))) {
+            ThrowException("BLEND: invalid version digits in v0 header");
+        }
+        file.blender_file_version = (hdr[2] - '0') * 100 + (hdr[3] - '0') * 10 + (hdr[4] - '0');
+        blenderVersionStr[0] = hdr[2];
+        blenderVersionStr[1] = '.';
+        blenderVersionStr[2] = hdr[3];
+        blenderVersionStr[3] = hdr[4];
+        blenderVersionStr[4] = '\0';
+    } else if (std::isdigit(static_cast<unsigned char>(hdr[0])) &&
+            std::isdigit(static_cast<unsigned char>(hdr[1]))) {
+        // Format v1: ASCII header size ("17"), then 5 more bytes already partially read...
+        // Bytes read so far after magic: [0]=size tens, [1]=size ones, need rest of 17-byte header.
+        const int header_size = (hdr[0] - '0') * 10 + (hdr[1] - '0');
+        if (header_size != 17) {
+            ThrowException("BLEND: unsupported header size ", header_size,
+                    " (expected 12 for v0 or 17 for v1)");
+        }
+        // Already have 5 bytes after magic (positions 7..11 of full header). Need bytes 12..16.
+        char hdr_rest[8] = { 0 };
+        if (stream->Read(hdr_rest, 1, 5) != 5) {
+            ThrowException("BLEND: truncated format-v1 file header");
+        }
+        // Full after-magic: hdr[0..4] + hdr_rest[0..4] == bytes 7..16
+        // 7-8 size, 9 '-', 10-11 format ver, 12 'v', 13-16 file version
+        if (hdr[2] != '-') {
+            ThrowException("BLEND: format-v1 header missing '-' separator");
+        }
+        if (!std::isdigit(static_cast<unsigned char>(hdr[3])) ||
+                !std::isdigit(static_cast<unsigned char>(hdr[4]))) {
+            ThrowException("BLEND: invalid format-version digits in v1 header");
+        }
+        file.file_format_version = (hdr[3] - '0') * 10 + (hdr[4] - '0');
+        if (file.file_format_version != 1) {
+            char dump[24];
+            std::snprintf(dump, sizeof(dump), "BLENDER%c%c%c%c%c%c%c%c%c%c",
+                    hdr[0], hdr[1], hdr[2], hdr[3], hdr[4],
+                    hdr_rest[0], hdr_rest[1], hdr_rest[2], hdr_rest[3], hdr_rest[4]);
+            ThrowException("BLEND: unsupported file format version ", file.file_format_version,
+                    " (header ", dump, ")");
+        }
+        if (hdr_rest[0] != 'v') {
+            ThrowException("BLEND: format-v1 requires little-endian marker 'v'");
+        }
+        file.little = true;
+        file.i64bit = true; // LargeBHead8 always 8-byte pointers
+        if (!std::isdigit(static_cast<unsigned char>(hdr_rest[1])) ||
+                !std::isdigit(static_cast<unsigned char>(hdr_rest[2])) ||
+                !std::isdigit(static_cast<unsigned char>(hdr_rest[3])) ||
+                !std::isdigit(static_cast<unsigned char>(hdr_rest[4]))) {
+            ThrowException("BLEND: invalid BLENDER_FILE_VERSION digits in v1 header");
+        }
+        file.blender_file_version =
+                (hdr_rest[1] - '0') * 1000 + (hdr_rest[2] - '0') * 100 +
+                (hdr_rest[3] - '0') * 10 + (hdr_rest[4] - '0');
+        // "0500" -> "5.00" for generator string
+        std::snprintf(blenderVersionStr, sizeof(blenderVersionStr), "%d.%02d",
+                file.blender_file_version / 100, file.blender_file_version % 100);
+    } else {
+        char dump[8];
+        std::snprintf(dump, sizeof(dump), "%c%c%c%c%c", hdr[0], hdr[1], hdr[2], hdr[3], hdr[4]);
+        ThrowException("BLEND: unrecognized header after BLENDER magic: ", dump);
+    }
 
-    LogInfo("Blender version is ", version[0], ".", version + 1,
-            " (64bit: ", file.i64bit ? "true" : "false",
+    LogInfo("Blender version is ", blenderVersionStr,
+            " (format: ", file.file_format_version,
+            ", file_version: ", file.blender_file_version,
+            ", 64bit: ", file.i64bit ? "true" : "false",
             ", little endian: ", file.little ? "true" : "false", ")");
 
     ParseBlendFile(file, std::move(stream));
@@ -167,7 +253,8 @@ void BlenderImporter::ParseBlendFile(FileDatabase &out, std::shared_ptr<IOStream
 
     out.entries.reserve(128);
     { // even small BLEND files tend to consist of many file blocks
-        SectionParser parser(*out.reader, out.i64bit);
+        const bool largeBHead = (out.file_format_version >= 1);
+        SectionParser parser(*out.reader, out.i64bit, largeBHead);
 
         // first parse the file in search for the DNA and insert all other sections into the database
         while ((parser.Next(), 1)) {
@@ -186,6 +273,22 @@ void BlenderImporter::ParseBlendFile(FileDatabase &out, std::shared_ptr<IOStream
     }
     if (!dna) {
         ThrowException("SDNA not found");
+    }
+
+    // Tag DATA blocks with their owning ID (file order), matching Blender's
+    // read_data_into_datamap: DATA following an ID belongs to that ID until the
+    // next non-DATA block. Required because `old` addresses can collide across IDs.
+    {
+        Pointer owner;
+        owner.val = 0;
+        for (FileBlockHead &e : out.entries) {
+            if (e.id != "DATA") {
+                owner = e.address;
+                e.owner_id.val = 0;
+            } else {
+                e.owner_id = owner;
+            }
+        }
     }
 
     std::sort(out.entries.begin(), out.entries.end());
@@ -218,7 +321,10 @@ void BlenderImporter::ExtractScene(Scene &out, const FileDatabase &file) {
     }
 
     file.reader->SetCurrentPos(block->start);
+    // Scene Convert is not entered via ResolvePointer - set ID datamap scope.
+    file.active_id_scope = block->address;
     ss.Convert(out, file);
+    file.active_id_scope.val = 0;
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
     ASSIMP_LOG_INFO(
@@ -247,6 +353,11 @@ void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root,
         }
     }
     root->mNumChildren = static_cast<unsigned int>(root_objects.size() + root_children.size());
+    // ValidateDataStructure requires nullptr when empty (not new aiNode*[0]).
+    if (root->mNumChildren == 0) {
+        root->mChildren = nullptr;
+        return;
+    }
     root->mChildren = new aiNode *[root->mNumChildren]();
 
     for (unsigned int i = 0; i < static_cast<unsigned int>(root_objects.size()); ++i) {
@@ -257,11 +368,12 @@ void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root,
     // For each subcollection create a new node to represent it
     unsigned int iterator = static_cast<unsigned int>(root_objects.size());
     for (std::shared_ptr<CollectionChild> cur = std::static_pointer_cast<CollectionChild>(collection->children.first); cur; cur = cur->next) {
-        if (cur->collection) {
-            root->mChildren[iterator] = new aiNode(cur->collection->id.name + 2); // skip over the name prefix 'OB'
-            root->mChildren[iterator]->mParent = root;
-            ParseSubCollection(in, root->mChildren[iterator], cur->collection, conv_data);
+        if (!cur->collection) {
+            continue;
         }
+        root->mChildren[iterator] = new aiNode(cur->collection->id.name + 2); // skip over the name prefix 'OB'
+        root->mChildren[iterator]->mParent = root;
+        ParseSubCollection(in, root->mChildren[iterator], cur->collection, conv_data);
         iterator += 1;
     }
 }
@@ -425,30 +537,16 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::AddSentinelTexture(aiMaterial *out, const Material *mat, const MTex *tex, ConversionData &conv_data) {
-    (void)mat;
-    (void)tex;
-    (void)conv_data;
-
-    aiString name;
-    name.length = ai_snprintf(name.data, AI_MAXLEN, "Procedural,num=%i,type=%s", conv_data.sentinel_cnt++,
-            GetTextureTypeDisplayString(tex->tex->type));
-    out->AddProperty(&name, AI_MATKEY_TEXTURE_DIFFUSE(
-                                    conv_data.next_texture[aiTextureType_DIFFUSE]++));
-}
-
-// ------------------------------------------------------------------------------------------------
 void BlenderImporter::ResolveTexture(aiMaterial *out, const Material *mat, const MTex *tex, ConversionData &conv_data) {
     const Tex *rtex = tex->tex.get();
     if (!rtex || !rtex->type) {
         return;
     }
 
-    // We can't support most of the texture types because they're mostly procedural.
-    // These are substituted by a dummy texture.
-    const char *dispnam = "";
+    // Only Type_IMAGE becomes a real $tex.file / embedded aiTexture.
+    // Procedural BI types (EnvMap, Clouds, ...) are not inventable paths (presence):
+    // skip the slot and record honesty in skipped[].
     switch (rtex->type) {
-        // these are listed in blender's UI
     case Tex::Type_CLOUDS:
     case Tex::Type_WOOD:
     case Tex::Type_MARBLE:
@@ -461,14 +559,13 @@ void BlenderImporter::ResolveTexture(aiMaterial *out, const Material *mat, const
     case Tex::Type_VORONOI:
     case Tex::Type_DISTNOISE:
     case Tex::Type_ENVMAP:
-
-        // these do no appear in the UI, why?
     case Tex::Type_POINTDENSITY:
-    case Tex::Type_VOXELDATA:
-
-        LogWarn("Encountered a texture with an unsupported type: ", dispnam);
-        AddSentinelTexture(out, mat, tex, conv_data);
+    case Tex::Type_VOXELDATA: {
+        const char *disp = GetTextureTypeDisplayString(rtex->type);
+        LogWarn("BLEND: skipping procedural texture type ", disp,
+                " (no Image datablock; not inventing $tex.file)");
         break;
+    }
 
     case Tex::Type_IMAGE:
         if (!rtex->ima) {
@@ -485,33 +582,27 @@ void BlenderImporter::ResolveTexture(aiMaterial *out, const Material *mat, const
 
 // ------------------------------------------------------------------------------------------------
 void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData &conv_data) {
-    // add a default material if necessary
+    // Assimp DefaultMaterial policy (BaseImporter / ScenePreprocessor):
+    // name AI_DEFAULT_MATERIAL_NAME + diffuse (0.6,0.6,0.6). Needed here because
+    // ScenePreprocessor only injects when mNumMaterials==0; Blender often has other
+    // mats while some meshes still lack a slot.
     unsigned int index = static_cast<unsigned int>(-1);
     for (aiMesh *mesh : conv_data.meshes.get()) {
         if (mesh->mMaterialIndex == static_cast<unsigned int>(-1)) {
 
             if (index == static_cast<unsigned int>(-1)) {
-                // Setup a default material.
                 std::shared_ptr<Material> p(new Material());
                 const size_t len = ::strlen(AI_DEFAULT_MATERIAL_NAME);
                 ai_assert(len < sizeof(p->id.name) - 2);
                 memcpy(p->id.name + 2, AI_DEFAULT_MATERIAL_NAME, len);
 
                 // Note: MSVC11 does not zero-initialize Material here, although it should.
-                // Thus all relevant fields should be explicitly initialized. We cannot add
-                // a default constructor to Material since the DNA codegen does not support
-                // parsing it.
+                // Marker stub only - BuildMaterials emits Assimp-minimal keys (no blend.* invent).
                 p->r = p->g = p->b = 0.6f;
-                p->specr = p->specg = p->specb = 0.6f;
-                p->ambr = p->ambg = p->ambb = 0.0f;
-                p->mirr = p->mirg = p->mirb = 0.0f;
-                p->emit = 0.f;
-                p->alpha = 0.f;
-                p->har = 0;
 
                 index = static_cast<unsigned int>(conv_data.materials_raw.size());
                 conv_data.materials_raw.push_back(p);
-                LogInfo("Adding default material");
+                LogInfo("Adding Assimp default material '", AI_DEFAULT_MATERIAL_NAME, "'");
             }
             mesh->mMaterialIndex = index;
         }
@@ -528,8 +619,7 @@ void BlenderImporter::AddBlendParams(aiMaterial *result, const Material *source)
     int diffuseShader = source->diff_shader;
     result->AddProperty(&diffuseShader, 1, "$mat.blend.diffuse.shader", 0, 0);
 
-    int diffuseRamp = 0;
-    result->AddProperty(&diffuseRamp, 1, "$mat.blend.diffuse.ramp", 0, 0);
+    // No invent for missing DNA ramp fields (presence).
 
     aiColor3D specularColor(source->specr, source->specg, source->specb);
     result->AddProperty(&specularColor, 1, "$mat.blend.specular.color", 0, 0);
@@ -539,9 +629,6 @@ void BlenderImporter::AddBlendParams(aiMaterial *result, const Material *source)
 
     int specularShader = source->spec_shader;
     result->AddProperty(&specularShader, 1, "$mat.blend.specular.shader", 0, 0);
-
-    int specularRamp = 0;
-    result->AddProperty(&specularRamp, 1, "$mat.blend.specular.ramp", 0, 0);
 
     int specularHardness = source->har;
     result->AddProperty(&specularHardness, 1, "$mat.blend.specular.hardness", 0, 0);
@@ -631,6 +718,10 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
     BuildDefaultMaterial(conv_data);
 
     for (const std::shared_ptr<Material> &mat : conv_data.materials_raw) {
+        // Sparse mesh->mat slots can push empty shared_ptrs; skip them.
+        if (!mat) {
+            continue;
+        }
 
         // reset per material global counters
         for (size_t i = 0; i < sizeof(conv_data.next_texture) / sizeof(conv_data.next_texture[0]); ++i) {
@@ -639,11 +730,18 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
 
         aiMaterial *mout = new aiMaterial();
         conv_data.materials->push_back(mout);
-        // For any new material field handled here, the default material above must be updated with an appropriate default value.
 
         // set material name
         aiString name = aiString(mat->id.name + 2); // skip over the name prefix 'MA'
         mout->AddProperty(&name, AI_MATKEY_NAME);
+
+        // Assimp DefaultMaterial policy (ScenePreprocessor): name + diffuse 0.6 only.
+        // Do not invent $mat.blend.* / Ka / Ks / procedural $tex.file for this placeholder.
+        if (std::strcmp(mat->id.name + 2, AI_DEFAULT_MATERIAL_NAME) == 0) {
+            aiColor3D clr(0.6f, 0.6f, 0.6f);
+            mout->AddProperty(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
+            continue;
+        }
 
         // basic material colors
         aiColor3D col(mat->r, mat->g, mat->b);
@@ -728,12 +826,28 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         ThrowException("Number of faces is larger than the corresponding array");
     }
 
-    if (static_cast<size_t>(mesh->totvert) > mesh->mvert.size()) {
-        ThrowException("Number of vertices is larger than the corresponding array");
+    // Classic *mvert/*mloop may be empty depending on Blender file version:
+    // CustomData generic attrs (~2.90-4.x) or AttributeStorage (~4.5+/5.x).
+    if (static_cast<size_t>(mesh->totvert) > mesh->mvert.size() ||
+            (mesh->totloop > 0 && static_cast<size_t>(mesh->totloop) > mesh->mloop.size()) ||
+            (mesh->totpoly > 0 && static_cast<size_t>(mesh->totpoly) > mesh->mpoly.size())) {
+        Mesh *mutableMesh = const_cast<Mesh *>(mesh);
+        if (!HydrateMeshGeometry(*mutableMesh, conv_data.db)) {
+            LogWarn("mesh '", mesh->id.name + 2,
+                    "' has no classic arrays and geometry hydrate failed "
+                    "(file_version=", conv_data.db.blender_file_version,
+                    " totvert=", mesh->totvert, " mvert=", mesh->mvert.size(),
+                    " totloop=", mesh->totloop, " mloop=", mesh->mloop.size(), ")");
+            return;
+        }
+        LogInfo("hydrated mesh '", mesh->id.name + 2,
+                "' (file_version=", conv_data.db.blender_file_version,
+                " verts=", mesh->mvert.size(),
+                " loops=", mesh->mloop.size(), " polys=", mesh->mpoly.size(), ")");
     }
-
-    if (static_cast<size_t>(mesh->totloop) > mesh->mloop.size()) {
-        ThrowException("Number of vertices is larger than the corresponding array");
+    if (static_cast<size_t>(mesh->totvert) > mesh->mvert.size() ||
+            (mesh->totloop > 0 && static_cast<size_t>(mesh->totloop) > mesh->mloop.size())) {
+        return;
     }
 
     // collect per-submesh numbers
@@ -780,20 +894,27 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         // of the material entry within the list of resolved materials.
         if (mesh->mat) {
 
-            if (static_cast<size_t>(it.first) >= mesh->mat.size()) {
-                ThrowException("Material index is out of range");
-            }
-
-            std::shared_ptr<Material> mat = mesh->mat[it.first];
-            const std::deque<std::shared_ptr<Material>>::iterator has = std::find(
-                    conv_data.materials_raw.begin(),
-                    conv_data.materials_raw.end(), mat);
-
-            if (has != conv_data.materials_raw.end()) {
-                out->mMaterialIndex = static_cast<unsigned int>(std::distance(conv_data.materials_raw.begin(), has));
+            std::shared_ptr<Material> mat;
+            if (it.first >= 0 && static_cast<size_t>(it.first) < mesh->mat.size()) {
+                mat = mesh->mat[it.first];
             } else {
-                out->mMaterialIndex = static_cast<unsigned int>(conv_data.materials_raw.size());
-                conv_data.materials_raw.push_back(mat);
+                LogWarn("mesh '", mesh->id.name + 2,
+                        "' material index ", it.first, " out of range (mat.size=",
+                        mesh->mat.size(), "); using default");
+            }
+            if (!mat) {
+                out->mMaterialIndex = static_cast<unsigned int>(-1);
+            } else {
+                const std::deque<std::shared_ptr<Material>>::iterator has = std::find(
+                        conv_data.materials_raw.begin(),
+                        conv_data.materials_raw.end(), mat);
+
+                if (has != conv_data.materials_raw.end()) {
+                    out->mMaterialIndex = static_cast<unsigned int>(std::distance(conv_data.materials_raw.begin(), has));
+                } else {
+                    out->mMaterialIndex = static_cast<unsigned int>(conv_data.materials_raw.size());
+                    conv_data.materials_raw.push_back(mat);
+                }
             }
         } else
             out->mMaterialIndex = static_cast<unsigned int>(-1);
@@ -904,8 +1025,14 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         for (int j = 0; j < mf.totloop; ++j) {
             const MLoop &loop = mesh->mloop[mf.loopstart + j];
 
-            if (loop.v >= mesh->totvert) {
-                ThrowException("Vertex index out of range");
+            if (loop.v < 0 || loop.v >= mesh->totvert) {
+                LogWarn("mesh '", mesh->id.name + 2,
+                        "' has out-of-range corner vertex index; skipping mesh");
+                while (temp->size() > old) {
+                    delete temp->back();
+                    temp->pop_back();
+                }
+                return;
             }
 
             const MVert &v = mesh->mvert[loop.v];
@@ -928,56 +1055,34 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
         }
     }
 
-    // TODO should we create the TextureUVMapping map in Convert<Material> to prevent redundant processing?
-
-    // create texture <-> uvname mapping for all materials
-    // key is texture number, value is data *
-    typedef std::map<uint32_t, const MLoopUV *> TextureUVMapping;
-    // key is material number, value is the TextureUVMapping for the material
-    typedef std::map<uint32_t, TextureUVMapping> MaterialTextureUVMappings;
-    MaterialTextureUVMappings matTexUvMappings;
-    const uint32_t maxMat = static_cast<uint32_t>(mesh->mat.size());
-    for (uint32_t m = 0; m < maxMat; ++m) {
-        // get material by index
-        const std::shared_ptr<Material> pMat = mesh->mat[m];
-        TextureUVMapping texuv;
-        const uint32_t maxTex = sizeof(pMat->mtex) / sizeof(pMat->mtex[0]);
-        for (uint32_t t = 0; t < maxTex; ++t) {
-            if (pMat->mtex[t] && pMat->mtex[t]->uvname[0]) {
-                // get the CustomData layer for given uvname and correct type
-                const ElemBase *pLoop = getCustomDataLayerData(mesh->ldata, CD_MLOOPUV, pMat->mtex[t]->uvname);
-                if (pLoop) {
-                    texuv.insert(std::make_pair(t, dynamic_cast<const MLoopUV *>(pLoop)));
-                }
-            }
-        }
-        if (texuv.size()) {
-            matTexUvMappings.insert(std::make_pair(m, texuv));
-        }
-    }
+    // Named UV maps: CustomData CD_MLOOPUV / CD_PROP_FLOAT2 + AttributeStorage.
+    std::vector<BlendUVLayer> uvLayers;
+    CollectMeshUVLayers(*mesh, conv_data.db, uvLayers, AI_MAX_NUMBER_OF_TEXTURECOORDS);
 
     // collect texture coordinates, they're stored in a separate per-face buffer
-    if (mesh->mtface || mesh->mloopuv) {
-        if (mesh->totface > static_cast<int>(mesh->mtface.size())) {
+    if (mesh->mtface || !uvLayers.empty() || !mesh->mloopuv.empty()) {
+        if (mesh->totface > 0 && mesh->totface > static_cast<int>(mesh->mtface.size()) && mesh->mtface.size() > 0) {
             ThrowException("Number of UV faces is larger than the corresponding UV face array (#1)");
         }
+        // If only mtface (no loop UVs), allocate a single channel.
+        const unsigned int numUV = !uvLayers.empty() ? static_cast<unsigned int>(uvLayers.size()) : 1u;
         for (std::vector<aiMesh *>::iterator it = temp->begin() + old; it != temp->end(); ++it) {
             ai_assert(0 != (*it)->mNumVertices);
             ai_assert(0 != (*it)->mNumFaces);
-            const auto itMatTexUvMapping = matTexUvMappings.find((*it)->mMaterialIndex);
-            if (itMatTexUvMapping == matTexUvMappings.end()) {
-                // default behaviour like before
-                (*it)->mTextureCoords[0] = new aiVector3D[(*it)->mNumVertices];
-            } else {
-                // create texture coords for every mapped tex
-                for (uint32_t i = 0; i < itMatTexUvMapping->second.size(); ++i) {
-                    (*it)->mTextureCoords[i] = new aiVector3D[(*it)->mNumVertices];
+            for (unsigned int u = 0; u < numUV; ++u) {
+                (*it)->mTextureCoords[u] = new aiVector3D[(*it)->mNumVertices];
+                (*it)->mNumUVComponents[u] = 2;
+                if (u < uvLayers.size() && !uvLayers[u].name.empty()) {
+                    (*it)->SetTextureCoordsName(u, aiString(uvLayers[u].name));
                 }
             }
             (*it)->mNumFaces = (*it)->mNumVertices = 0;
         }
 
         for (int i = 0; i < mesh->totface; ++i) {
+            if (mesh->mtface.empty()) {
+                break;
+            }
             const MTFace *v = &mesh->mtface[i];
 
             aiMesh *const out = temp[mat_num_to_mesh_idx[mesh->mface[i].mat_nr]];
@@ -995,9 +1100,19 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
             aiMesh *const out = temp[mat_num_to_mesh_idx[v.mat_nr]];
             const aiFace &f = out->mFaces[out->mNumFaces++];
 
-            const auto itMatTexUvMapping = matTexUvMappings.find(v.mat_nr);
-            if (itMatTexUvMapping == matTexUvMappings.end()) {
-                // old behavior
+            if (!uvLayers.empty()) {
+                for (unsigned int u = 0; u < numUV; ++u) {
+                    aiVector3D *vo = &out->mTextureCoords[u][out->mNumVertices];
+                    const BlendUVLayer &layer = uvLayers[u];
+                    for (unsigned int j = 0; j < f.mNumIndices; ++j, ++vo) {
+                        const size_t li = static_cast<size_t>(v.loopstart + static_cast<int>(j));
+                        vo->x = layer.uv[li * 2 + 0];
+                        vo->y = layer.uv[li * 2 + 1];
+                        vo->z = 0.f;
+                    }
+                }
+                out->mNumVertices += f.mNumIndices;
+            } else if (!mesh->mloopuv.empty()) {
                 aiVector3D *vo = &out->mTextureCoords[0][out->mNumVertices];
                 for (unsigned int j = 0; j < f.mNumIndices; ++j, ++vo, ++out->mNumVertices) {
                     const MLoopUV &uv = mesh->mloopuv[v.loopstart + j];
@@ -1005,22 +1120,9 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
                     vo->y = uv.uv[1];
                 }
             } else {
-                // create textureCoords for every mapped tex
-                for (uint32_t m = 0; m < itMatTexUvMapping->second.size(); ++m) {
-                    const MLoopUV *tm = itMatTexUvMapping->second[m];
-                    aiVector3D *vo = &out->mTextureCoords[m][out->mNumVertices];
-                    uint32_t j = 0;
-                    for (; j < f.mNumIndices; ++j, ++vo) {
-                        const MLoopUV &uv = tm[v.loopstart + j];
-                        vo->x = uv.uv[0];
-                        vo->y = uv.uv[1];
-                    }
-                    // only update written mNumVertices in last loop
-                    // TODO why must the numVertices be incremented here?
-                    if (m == itMatTexUvMapping->second.size() - 1) {
-                        out->mNumVertices += j;
-                    }
-                }
+                // mtface-only path already advanced counters in the totface loop;
+                // poly without UV data: keep vertex index alignment with positions.
+                out->mNumVertices += f.mNumIndices;
             }
         }
     }
@@ -1299,31 +1401,77 @@ BlenderImporter::StreamOrError BlenderImporter::ParseMagicToken(const std::strin
         return {stream, {}, {}};
     }
 
-    // Check for presence of the gzip header. If yes, assume it is a
-    // compressed blend file and try uncompressing it, else fail. This is to
-    // avoid uncompressing random files which our loader might end up with.
+    // Check for gzip (legacy) or zstd (Blender 3+ default) compressed blend files.
 #ifdef ASSIMP_BUILD_NO_COMPRESSED_BLEND
     return {{}, {}, "BLENDER magic bytes are missing, is this file compressed (Assimp was built without decompression support)?"};
 #else
-    if (magic[0] != 0x1f || static_cast<uint8_t>(magic[1]) != 0x8b) {
-        return {{}, {}, "BLENDER magic bytes are missing, couldn't find GZIP header either"};
+    const bool isGzip = (magic[0] == 0x1f && static_cast<uint8_t>(magic[1]) == 0x8b);
+    // Zstandard magic: 0x28 0xB5 0x2F 0xFD (little-endian frame header)
+    const bool isZstd = (static_cast<uint8_t>(magic[0]) == 0x28 &&
+            static_cast<uint8_t>(magic[1]) == 0xb5 &&
+            static_cast<uint8_t>(magic[2]) == 0x2f &&
+            static_cast<uint8_t>(magic[3]) == 0xfd);
+
+    if (!isGzip && !isZstd) {
+        return {{}, {}, "BLENDER magic bytes are missing, couldn't find GZIP or Zstandard header either"};
     }
 
-    LogDebug("Found no BLENDER magic word but a GZIP header, might be a compressed file");
-    if (magic[2] != 8) {
-        return {{}, {}, "Unsupported GZIP compression method"};
-    }
-
-    // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
     stream->Seek(0L, aiOrigin_SET);
-    std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
-
-    size_t total = 0;
-    Compression compression;
     auto uncompressed = std::make_shared<std::vector<char>>();
-    if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, 16 + Compression::MaxWBits)) {
-        total = compression.decompress((unsigned char *)reader->GetPtr(), reader->GetRemainingSize(), *uncompressed);
-        compression.close();
+    size_t total = 0;
+
+    if (isGzip) {
+        LogDebug("Found no BLENDER magic word but a GZIP header, might be a compressed file");
+        if (magic[2] != 8) {
+            return {{}, {}, "Unsupported GZIP compression method"};
+        }
+
+        // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
+        std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
+        Compression compression;
+        if (compression.open(Compression::Format::Binary, Compression::FlushMode::NoFlush, 16 + Compression::MaxWBits)) {
+            total = compression.decompress((unsigned char *)reader->GetPtr(), reader->GetRemainingSize(), *uncompressed);
+            compression.close();
+        }
+    } else {
+#if defined(ASSIMP_BLEND_SUPPORT_ZSTD)
+        // Blender often writes multi-frame ZSTD (not a single frame). Always stream
+        // the whole input; ZSTD_getFrameContentSize only describes the first frame.
+        LogDebug("Found no BLENDER magic word but a Zstandard header, might be a compressed file");
+        std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
+        const void *src = reader->GetPtr();
+        const size_t srcSize = reader->GetRemainingSize();
+        ZSTD_DCtx *dctx = ZSTD_createDCtx();
+        if (dctx == nullptr) {
+            return {{}, {}, "Failed to allocate Zstandard decompression context"};
+        }
+        uncompressed->resize(srcSize * 8 + 256 * 1024);
+        ZSTD_inBuffer input{ src, srcSize, 0 };
+        ZSTD_outBuffer output{ uncompressed->data(), uncompressed->size(), 0 };
+        while (input.pos < input.size) {
+            if (output.pos == output.size) {
+                const size_t newSize = uncompressed->size() * 2;
+                if (newSize > (1ull << 31)) {
+                    ZSTD_freeDCtx(dctx);
+                    return {{}, {}, "Zstandard BLEND payload is unreasonably large"};
+                }
+                uncompressed->resize(newSize);
+                output.dst = uncompressed->data();
+                output.size = uncompressed->size();
+            }
+            const size_t ret = ZSTD_decompressStream(dctx, &output, &input);
+            if (ZSTD_isError(ret)) {
+                ZSTD_freeDCtx(dctx);
+                return {{}, {}, std::string("Zstandard decompress failed: ") + ZSTD_getErrorName(ret)};
+            }
+            // ret==0 means a frame finished; continue for further frames / skippable frames.
+        }
+        ZSTD_freeDCtx(dctx);
+        total = output.pos;
+        uncompressed->resize(total);
+#else
+        return {{}, {}, "BLENDER file appears Zstandard-compressed, but Assimp was built without ZSTD support"};
+#endif
     }
 
     // replace the input stream with a memory stream
@@ -1334,7 +1482,7 @@ BlenderImporter::StreamOrError BlenderImporter::ParseMagicToken(const std::strin
     if (strcmp(magic, Token) == 0) {
         return {stream, uncompressed, {}};
     }
-    return {{}, {}, "Found no BLENDER magic word in decompressed GZIP file"};
+    return {{}, {}, isGzip ? "Found no BLENDER magic word in decompressed GZIP file" : "Found no BLENDER magic word in decompressed Zstandard file"};
 #endif
 }
 

@@ -173,13 +173,6 @@ private:
             const Blender::Image *img,
             Blender::ConversionData &conv_data);
 
-    // --------------------
-    void AddSentinelTexture(
-            aiMaterial *out,
-            const Blender::Material *mat,
-            const Blender::MTex *tex,
-            Blender::ConversionData &conv_data);
-
     // TODO: Move to a std::variant, once c++17 is supported.
     struct StreamOrError {
         std::shared_ptr<IOStream> stream;

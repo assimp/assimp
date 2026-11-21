@@ -85,6 +85,23 @@ TEST(utBlenderImporter, importBlenderDefault250) {
     ASSERT_NE(nullptr, scene);
 }
 
+TEST(utBlenderImporter, importBlenderDefault250ZstdCompressed) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_250_zstd.blend", aiProcess_ValidateDataStructure);
+    EXPECT_NE(nullptr, scene);
+}
+
+TEST(utBlenderImporter, importBlenderFormatV1Header) {
+    // Blender 5.0 format-v1 container (ZSTD + BLENDER17-01v0500). Must not hit
+    // "invalid size of file block". Mesh count depends on AttributeStorage hydrate.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderFormatV1_Header.blend", 0);
+    ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+    EXPECT_EQ(std::string::npos, std::string(importer.GetErrorString()).find("invalid size of file block"));
+    EXPECT_GE(scene->mNumMeshes, 1u);
+}
+
 TEST(utBlenderImporter, importBlenderDefault250Compressed) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_250_Compressed.blend", aiProcess_ValidateDataStructure);
@@ -94,8 +111,8 @@ TEST(utBlenderImporter, importBlenderDefault250Compressed) {
 TEST(utBlenderImporter, importBlenderDefault262) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BLEND/BlenderDefault_262.blend", aiProcess_ValidateDataStructure);
-    // FIXME: this is probably not right, loading this should succeed
-    ASSERT_EQ(nullptr, scene);
+    // Previously aborted on dangling DNA pointers; now treated as null like Blender.
+    ASSERT_NE(nullptr, scene) << importer.GetErrorString();
 }
 
 TEST(utBlenderImporter, importBlenderDefault269) {

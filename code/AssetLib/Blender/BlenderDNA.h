@@ -550,6 +550,12 @@ struct FileBlockHead {
     // original memory address of the data
     Pointer address;
 
+    // ID block (`old`) that owns this DATA chunk in file order.
+    // Blender resolves DATA pointers via a per-ID datamap (readfile.cc);
+    // the same `old` may be reused across IDs when writing (heap recycle /
+    // pre-stable-pointer files). Empty/zero for ID blocks themselves.
+    Pointer owner_id;
+
     // index into DNA
     unsigned int dna_index;
 
@@ -581,9 +587,11 @@ public:
     /** @param stream Inout stream, must point to the
      *  first section in the file. Call Next() once
      *  to have it read.
-     *  @param ptr64 Pointer size in file is 64 bits? */
-    SectionParser(StreamReaderAny &stream, bool ptr64) :
-            stream(stream), ptr64(ptr64) {
+     *  @param ptr64 Pointer size in file is 64 bits?
+     *  @param largeBHead Format v1 uses Blender LargeBHead8
+     *  (code, SDNAnr, old, len64, nr64) instead of SmallBHead8/BHead4. */
+    SectionParser(StreamReaderAny &stream, bool ptr64, bool largeBHead = false) :
+            stream(stream), ptr64(ptr64), largeBHead(largeBHead) {
         current.size = current.start = 0;
     }
 
@@ -603,6 +611,7 @@ public:
     FileBlockHead current;
     StreamReaderAny &stream;
     bool ptr64;
+    bool largeBHead;
 };
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
@@ -636,9 +645,6 @@ public:
 template <template <typename> class TOUT>
 class ObjectCache {
 public:
-    typedef std::map<Pointer, TOUT<ElemBase>> StructureCache;
-
-public:
     explicit ObjectCache(const FileDatabase &db) : db(db) {
         // currently there are only ~400 structure records per blend file.
         // we read only a small part of them and don't cache objects
@@ -651,9 +657,10 @@ public:
      *  @param s Data type of the item
      *  @param out Output pointer. Unchanged if the
      *   cache doesn't know the item yet.
-     *  @param ptr Item address to look for. */
+     *  @param ptr Item address to look for.
+     *  @param owner_id Per-ID datamap key for DATA (0 for ID blocks). */
     template <typename T>
-    void get( const Structure &s,TOUT<T> &out, const Pointer &ptr) const;
+    void get(const Structure &s, TOUT<T> &out, const Pointer &ptr, uint64_t owner_id = 0) const;
 
     // --------------------------------------------------------
     /** Add an item to the cache after the item has
@@ -662,13 +669,20 @@ public:
      * to abort.
      *  @param s Data type of the item
      *  @param out Item to insert into the cache
-     *  @param ptr address (cache key) of the item. */
+     *  @param ptr address (cache key) of the item.
+     *  @param owner_id Per-ID datamap key for DATA (0 for ID blocks). */
     template <typename T>
     void set(const Structure &s,
             const TOUT<T> &out,
-            const Pointer &ptr);
+            const Pointer &ptr,
+            uint64_t owner_id = 0);
 
 private:
+    // Cache key: (owner_id_old, pointer). DATA blocks share `old` across IDs;
+    // owner disambiguates like Blender's per-ID datamap.
+    typedef std::pair<uint64_t, uint64_t> CacheKey;
+    typedef std::map<CacheKey, TOUT<ElemBase>> StructureCache;
+
     mutable vector<StructureCache> caches;
     const FileDatabase &db;
 };
@@ -681,9 +695,9 @@ public:
     explicit ObjectCache(const FileDatabase &) {}
 
     template <typename T>
-    void get(const Structure &, vector<T> &, const Pointer &) {}
+    void get(const Structure &, vector<T> &, const Pointer &, uint64_t = 0) {}
     template <typename T>
-    void set(const Structure &, const vector<T> &, const Pointer &) {}
+    void set(const Structure &, const vector<T> &, const Pointer &, uint64_t = 0) {}
 };
 
 #ifdef _MSC_VER
@@ -724,10 +738,18 @@ public:
     // publicly accessible fields
     bool i64bit;
     bool little;
+    /// Blender low-level file format: 0 = classic 12-byte header, 1 = 17-byte + LargeBHead8.
+    int file_format_version = 0;
+    /// BLENDER_FILE_VERSION from header (3 digits for v0, 4 for v1, e.g. 500).
+    int blender_file_version = 0;
 
     DNA dna;
     std::shared_ptr<StreamReaderAny> reader;
     vector<FileBlockHead> entries;
+
+    // Active ID datablock for DATA pointer resolution (Blender datamap scope).
+    // Mutable: Convert/ResolvePointer take const FileDatabase&.
+    mutable Pointer active_id_scope;
 
 private:
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS

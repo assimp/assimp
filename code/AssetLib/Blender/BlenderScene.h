@@ -389,18 +389,8 @@ struct Material final : ElemBase {
 };
 
 /*
-CustomDataLayer 104
-
-    int type 0 4
-    int offset 4 4
-    int flag 8 4
-    int active 12 4
-    int active_rnd 16 4
-    int active_clone 20 4
-    int active_mask 24 4
-    int uid 28 4
-    char name 32 64
-    void *data 96 8
+CustomDataLayer — DNA sizes evolve; Convert uses file DNA offsets.
+MAX_CUSTOMDATA_LAYER_NAME = 68 (DNA_customdata_types.h).
 */
 struct CustomDataLayer final : ElemBase {
     int type;
@@ -411,8 +401,9 @@ struct CustomDataLayer final : ElemBase {
     int active_clone;
     int active_mask;
     int uid;
-    char name[64];
-    std::shared_ptr<ElemBase> data; // must be converted to real type according type member
+    char name[68];
+    std::shared_ptr<ElemBase> data; // DNA struct array or RawCustomData for CD_PROP_*
+    Pointer data_ptr; // *data old address (for scoped re-read / debug)
 
     CustomDataLayer() :
             type(0),
@@ -425,31 +416,19 @@ struct CustomDataLayer final : ElemBase {
             uid(0),
             data(nullptr) {
         memset(name, 0, sizeof name);
+        data_ptr.val = 0;
     }
 };
 
 /*
-CustomData 208
-
-    CustomDataLayer *layers 0 8
-    int typemap 8 168
-    int pad_i1 176 4
-    int totlayer 180 4
-    int maxlayer 184 4
-    int totsize 188 4
-    BLI_mempool *pool 192 8
-    CustomDataExternal *external 200 8
+CustomData — typemap length follows CD_NUMTYPES in the file (53 in Blender 4.x).
 */
 struct CustomData final : ElemBase {
     vector<std::shared_ptr<struct CustomDataLayer>> layers;
-    int typemap[42]; // CD_NUMTYPES
+    int typemap[64]; // >= CD_NUMTYPES (53); ReadFieldArray copies min(file,64)
     int totlayer;
     int maxlayer;
     int totsize;
-    /*
-    std::shared_ptr<BLI_mempool> pool;
-    std::shared_ptr<CustomDataExternal> external;
-    */
 };
 
 // -------------------------------------------------------------------------------
@@ -487,6 +466,21 @@ struct Mesh final : ElemBase {
     struct CustomData fdata;
     struct CustomData pdata;
     struct CustomData ldata;
+
+    // Blender 5+ AttributeStorage (filled during Convert; used to hydrate classic arrays)
+    Pointer poly_offset_ptr;
+    vector<int> poly_offset_indices;
+    Pointer attribute_dna_ptr;
+    int attribute_dna_num = 0;
+    // ME block `old` (FileDatabase::active_id_scope during Convert) for per-ID DATA lookup.
+    Pointer blend_id_address;
+};
+
+/** DNA subset of blender::AttributeStorage (DNA_attribute_types.h, file read only). */
+struct AttributeStorageDna final : ElemBase {
+    Pointer dna_attributes; // Attribute *dna_attributes
+    int dna_attributes_num = 0;
+    // char _pad[4]; runtime* - ignored
 };
 
 // -------------------------------------------------------------------------------

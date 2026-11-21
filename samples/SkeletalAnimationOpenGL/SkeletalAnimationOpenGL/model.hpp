@@ -60,5 +60,5 @@ private:
     Result<Box<Mesh>> process_mesh(const aiScene *scene, aiMesh *mesh, std::vector<GLuint>& textures);
 
     Result<GLuint> load_embedded_texture(const aiTexture *embedded_texture);
-    Result<std::vector<TextureData>> load_material_textures(aiMaterial *mat, aiTextureType type, const std::string &type_name, const aiScene *scene);
+    Result<std::vector<GLuint>> load_material_textures(aiMaterial *mat, aiTextureType type, const std::string &type_name, const aiScene *scene);
 };

@@ -56,7 +56,7 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
             mesh
         );
 
-        meshes.push_back(mesh);
+        meshes.emplace_back(std::move(mesh));
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -102,7 +102,7 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh, 
     {
         aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-        std::vector<TextureData> diffuse_maps;
+        std::vector<GLuint> diffuse_maps;
         CHECK_ASSIGN_RESULT(
             this->load_material_textures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene),
             diffuse_maps
@@ -115,9 +115,9 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh, 
     return Mesh::create(vertices, indices, mesh_textures);
 }
 
-Result<std::vector<ModelLoader::TextureData>> ModelLoader::load_material_textures(aiMaterial *mat, aiTextureType type, const std::string &type_name, const aiScene *scene)
+Result<std::vector<GLuint>> ModelLoader::load_material_textures(aiMaterial *mat, aiTextureType type, const std::string &type_name, const aiScene *scene)
 {
-    std::vector<TextureData> textures;
+    std::vector<GLuint> textures;
 
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
@@ -128,7 +128,7 @@ Result<std::vector<ModelLoader::TextureData>> ModelLoader::load_material_texture
         {
             if (std::strcmp(m_textures_loaded[j].path.c_str(), str.C_Str()) == 0)
             {
-                textures.push_back(m_textures_loaded[j]);
+                textures.push_back(m_textures_loaded[j].texture);
                 skip = true;
                 break;
             }
@@ -157,7 +157,7 @@ Result<std::vector<ModelLoader::TextureData>> ModelLoader::load_material_texture
 
         texture.type = type_name;
         texture.path = str.C_Str();
-        textures.push_back(texture);
+        textures.push_back(texture.texture);
         m_textures_loaded.push_back(texture);
     }
 

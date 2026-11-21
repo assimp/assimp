@@ -12,7 +12,7 @@
 
 namespace TextureLoader
 {
-  Result<GLuint> from_file(const char *fileName);
-  Result<GLuint> from_memory(const uint8_t *data, size_t dataSize);
+  Result<GLuint> from_file(const std::string& fileName);
+  Result<GLuint> from_memory(const uint8_t *data, size_t size);
   Result<GLuint> from_pixels(const void *pixels, GLsizei width, GLsizei height, GLenum format);
 }

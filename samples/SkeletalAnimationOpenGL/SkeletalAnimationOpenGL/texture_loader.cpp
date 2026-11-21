@@ -35,15 +35,15 @@ namespace TextureLoader
         return texture;
     }
 
-    Result<GLuint> from_memory(const uint8_t *data, size_t dataSize)
+    Result<GLuint> from_memory(const uint8_t *data, size_t size)
     {
-        if (data == nullptr || dataSize == 0 || dataSize > static_cast<size_t>(INT_MAX))
+        if (data == nullptr || size == 0 || size > static_cast<size_t>(INT_MAX))
             return "invalid arguments";
 
         stbi_set_flip_vertically_on_load(1);
 
         int w = 0, h = 0, n = 0;
-        const auto pixels = stbi_load_from_memory(data, static_cast<int>(dataSize), &w, &h, &n, STBI_rgb_alpha);
+        const auto pixels = stbi_load_from_memory(data, static_cast<int>(size), &w, &h, &n, STBI_rgb_alpha);
         if (pixels == nullptr)
             return "failed to load the image";
 
@@ -58,12 +58,12 @@ namespace TextureLoader
         return texture;
     }
 
-    Result<GLuint> from_file(const char *fileName)
+    Result<GLuint> from_file(const std::string& file_name)
     {
         stbi_set_flip_vertically_on_load(1);
         
         int w = 0, h = 0, n = 0;
-        const auto pixels = stbi_load(fileName, &w, &h, &n, STBI_rgb_alpha);
+        const auto pixels = stbi_load(file_name.c_str(), &w, &h, &n, STBI_rgb_alpha);
         if (pixels == nullptr)
             return "failed to load the image";
 

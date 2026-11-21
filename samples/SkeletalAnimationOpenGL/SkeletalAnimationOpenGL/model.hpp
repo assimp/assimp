@@ -54,8 +54,8 @@ public:
 
     void draw();
 
-    Result<> set_animation(size_t index);
-    Result<> set_animation(const std::string& name);
+    void set_animation(size_t index);
+    void set_animation(const std::string& name);
 
     const Mat4* get_joint_transforms() const { return m_joint_transforms; }
 

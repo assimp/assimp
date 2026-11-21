@@ -186,7 +186,7 @@ Result<> App::init_graphics(const std::string& model_path)
       m_model
     );
 
-    CHECK_RESULT(m_model->set_animation(1));
+    m_model->set_animation(1);
 
     return Ok();
 }

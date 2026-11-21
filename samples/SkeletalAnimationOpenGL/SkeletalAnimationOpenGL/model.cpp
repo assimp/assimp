@@ -68,22 +68,30 @@ void Model::draw()
         m->draw();
 }
 
-Result<> Model::set_animation(size_t index)
+void Model::set_animation(size_t index)
 {
-    if (index >= m_animations.size())
-        return "invalid animation index " + std::to_string(index);
+    if (index < m_animations.size())
+        m_current_animation = index;
+    else
+    {
+        std::printf("[WARN]: no animation at index %zu\n", index);
+        m_current_animation = 0;
+    }
 
-    m_current_animation = index;
     m_current_time = 0.0;
-
-    return Ok();
 }
 
-Result<> Model::set_animation(const std::string& name)
+void Model::set_animation(const std::string& name)
 {
     for (size_t i = 0; i < m_animations.size(); i++)
+    {
         if (m_animations[i].name == name)
-            return set_animation(i);
+        {
+            set_animation(i);
+            return;
+        }
+    }
 
-    return "no such animation \"" + name + "\"";
+    set_animation(0);
+    std::printf("[WARN]: no such animation \"%s\". setting animation to index 0\n", name.c_str());
 }

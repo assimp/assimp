@@ -162,6 +162,30 @@ TEST_F(utPLYImportExport, importBinaryPLYWithNewlineInBinary) {
     EXPECT_EQ(2u, scene->mMeshes[0]->mFaces[0].mIndices[2]);
 }
 
+TEST_F(utPLYImportExport, importTruncatedBinaryPLY) {
+    const std::string header = "ply\n"
+                               "format binary_little_endian 1.0\n"
+                               "element vertex 3\n"
+                               "property float x\n"
+                               "property float y\n"
+                               "property float z\n"
+                               "end_header\n";
+    {
+        // all three vertices present
+        const std::string data = header + std::string(3 * 12, '\0');
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "ply");
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(3u, scene->mMeshes[0]->mNumVertices);
+    }
+
+    // the last vertex is missing
+    const std::string truncated = header + std::string(2 * 12, '\0');
+    Assimp::Importer importer;
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(truncated.data(), truncated.size(), 0, "ply"));
+}
+
 TEST_F(utPLYImportExport, vertexColorTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", aiProcess_ValidateDataStructure);

@@ -332,14 +332,14 @@ template <class T>
 AI_FORCE_INLINE bool IOStreamBuffer<T>::getNextBlock(std::vector<T> &buffer) {
     // Return the last block-value if getNextLine was used before
     if (0 != m_cachePos) {
-        buffer = std::vector<T>(m_cache.begin() + m_cachePos, m_cache.end());
+        buffer = std::vector<T>(m_cache.begin() + m_cachePos, m_cache.begin() + m_cacheSize);
         m_cachePos = 0;
     } else {
         if (!readNextBlock()) {
             return false;
         }
 
-        buffer = std::vector<T>(m_cache.begin(), m_cache.end());
+        buffer = std::vector<T>(m_cache.begin(), m_cache.begin() + m_cacheSize);
     }
 
     return true;

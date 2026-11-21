@@ -14,6 +14,16 @@
 class Model
 {
 public:
+    struct Joint
+    {
+        int32_t parent_index{-1};
+        
+        Mat4 offset_matrix{};
+        Mat4 bind_transform{};
+        Mat4 current_transform{};
+    };
+
+public:
     ~Model();
 
     Model(const Model &) = delete;
@@ -27,6 +37,8 @@ private:
 private:
     std::vector<Box<Mesh>> m_meshes;
     std::vector<GLuint> m_textures;
+    std::vector<Joint> m_joints;
+    Mat4 m_global_inverse_transform{};
 
     friend class ModelLoader;
 };

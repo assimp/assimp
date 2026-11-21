@@ -35,9 +35,11 @@ private:
 private:
     std::string m_dir_path;
     std::vector<TextureData> m_textures_loaded;
+    std::map<std::string, int32_t> m_joint_map;
 
-    Result<> process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes);
-    Result<Box<Mesh>> process_mesh(const aiScene *scene, aiMesh *mesh);
+    Result<> setup_skeleton(aiNode *node, int32_t parent_index, std::vector<Model::Joint>& joints);
+    Result<> process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes, std::vector<Model::Joint>& joints);
+    Result<Box<Mesh>> process_mesh(const aiScene *scene, aiMesh *mesh, std::vector<Model::Joint>& joints);
 
     Result<GLuint> load_embedded_texture(const aiTexture *embedded_texture);
     Result<std::vector<GLuint>> load_material_textures(aiMaterial *mat, aiTextureType type, const std::string &type_name, const aiScene *scene);

@@ -9,6 +9,8 @@ layout(std140) uniform UBO
 
 layout(location = 0) in vec3 in_pos;
 layout(location = 1) in vec2 in_texcoord;
+layout(location = 2) in uvec4 in_bone_ids;
+layout(location = 3) in vec4 in_bone_weights;
 
 out vec2 v_texcoord;
 

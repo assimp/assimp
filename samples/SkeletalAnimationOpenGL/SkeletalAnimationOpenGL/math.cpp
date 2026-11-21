@@ -33,8 +33,3 @@ Mat4 look_at_rh(const Vec3& eye, const Vec3& at, const Vec3& up)
       z.x, z.y, z.z, -(z * eye),
       0.0f, 0.0f, 0.0f, 1.0f);
 }
-
-Mat4 transposed(Mat4 m)
-{
-    return m.Transpose();
-}

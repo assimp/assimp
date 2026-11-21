@@ -12,8 +12,12 @@
 
 struct Vertex
 {
-    GLfloat x{}, y{}, z{};
-    GLfloat u{}, v{};
+    static constexpr uint32_t NUM_MAX_BONES = 4;
+
+    GLfloat pos[3];
+    GLfloat texcoord[2];
+    GLuint bone_ids[NUM_MAX_BONES];
+    GLfloat bone_weights[NUM_MAX_BONES];
 };
 
 class Mesh

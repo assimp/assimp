@@ -22,6 +22,7 @@
 
 #include <GL/freeglut.h>
 
+#include <map>
 #include <cmath>
 #include <cstdio>
 #include <cassert>

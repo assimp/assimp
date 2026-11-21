@@ -34,14 +34,18 @@ Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
     Box<Model> model(new Model());
 
     Assimp::Importer importer;
-    const aiScene *pScene = importer.ReadFile(filename, aiProcess_Triangulate);
+    const aiScene *pScene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_LimitBoneWeights);
 
     if (!pScene)
         return importer.GetErrorString();
 
     ModelLoader loader{};
+
+    CHECK_RESULT(loader.setup_skeleton(pScene->mRootNode, -1, model->m_joints));
+    model->m_global_inverse_transform = inversed(pScene->mRootNode->mTransformation);
+
     loader.m_dir_path = filename.substr(0, filename.find_last_of("/\\"));
-    const auto result = loader.process_node(pScene, pScene->mRootNode, model->m_meshes);
+    const auto result = loader.process_node(pScene, pScene->mRootNode, model->m_meshes, model->m_joints);
 
     for (const auto &loaded : loader.m_textures_loaded)
         model->m_textures.push_back(loaded.texture);
@@ -56,7 +60,31 @@ ModelLoader::~ModelLoader()
 {
 }
 
-Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes)
+Result<> ModelLoader::setup_skeleton(aiNode *node, int32_t parent_index, std::vector<Model::Joint>& joints)
+{
+    const auto index = static_cast<int32_t>(joints.size());
+    
+    const std::string joint_name(node->mName.C_Str());
+    
+    if (m_joint_map.count(joint_name))
+        return "found a duplicate joint name";
+
+    m_joint_map[joint_name] = index;
+    
+    Model::Joint joint{};
+    joint.parent_index = parent_index;
+    joint.current_transform = joint.bind_transform = node->mTransformation;
+    joints.push_back(joint);
+
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
+        CHECK_RESULT(setup_skeleton(node->mChildren[i], index, joints));
+    }
+
+    return Ok();
+}
+
+Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes, std::vector<Model::Joint>& joints)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
@@ -64,7 +92,7 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
         
         Box<Mesh> mesh;
         CHECK_ASSIGN_RESULT(
-            process_mesh(scene, ai_mesh),
+            process_mesh(scene, ai_mesh, joints),
             mesh
         );
 
@@ -73,13 +101,13 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
 
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        CHECK_RESULT(this->process_node(scene, node->mChildren[i], meshes));
+        CHECK_RESULT(process_node(scene, node->mChildren[i], meshes, joints));
     }
 
     return Ok();
 }
 
-Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh)
+Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh, std::vector<Model::Joint>& joints)
 {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
@@ -89,17 +117,46 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh)
     {
         Vertex vertex{};
 
-        vertex.x = mesh->mVertices[i].x;
-        vertex.y = mesh->mVertices[i].y;
-        vertex.z = mesh->mVertices[i].z;
+        vertex.pos[0] = mesh->mVertices[i].x;
+        vertex.pos[1] = mesh->mVertices[i].y;
+        vertex.pos[2] = mesh->mVertices[i].z;
 
         if (mesh->mTextureCoords[0])
         {
-            vertex.u = static_cast<float>(mesh->mTextureCoords[0][i].x);
-            vertex.v = static_cast<float>(mesh->mTextureCoords[0][i].y);
+            vertex.texcoord[0] = static_cast<float>(mesh->mTextureCoords[0][i].x);
+            vertex.texcoord[1] = static_cast<float>(mesh->mTextureCoords[0][i].y);
         }
 
+        std::fill(vertex.bone_weights, vertex.bone_weights + Vertex::NUM_MAX_BONES, 0.0f);
+
         vertices.push_back(vertex);
+    }
+
+    for (unsigned int i = 0; i < mesh->mNumBones; i++)
+    {
+        const auto& bone = mesh->mBones[i];
+        
+        const std::string bone_name(bone->mName.C_Str());
+        const auto bone_id = m_joint_map.find(bone_name);
+        if (bone_id == m_joint_map.end())
+            return "failed to find a joint named \"" + bone_name + "\"";
+
+        joints[bone_id->second].offset_matrix = bone->mOffsetMatrix;
+
+        for (unsigned int j = 0; j < bone->mNumWeights; j++)
+        {
+            const auto& weight = bone->mWeights[j];
+            auto& vertex = vertices[weight.mVertexId];
+            for (uint32_t k = 0; k < Vertex::NUM_MAX_BONES; k++)
+            {
+                if (vertex.bone_weights[k] == 0.0f)
+                {
+                    vertex.bone_ids[k] = bone_id->second;
+                    vertex.bone_weights[k] = weight.mWeight;
+                    break;
+                }
+            }
+        }
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)

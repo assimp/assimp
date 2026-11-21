@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include "ReadSizeRecordingIOSystem.h"
 
 #include <assimp/commonMetaData.h>
 #include <assimp/scene.h>
@@ -83,6 +84,50 @@ TEST_F(utglTFImportExport, incorrect_vertex_arrays) {
     EXPECT_EQ(scene->mMeshes[6]->mNumFaces, 18u);
     EXPECT_EQ(scene->mMeshes[7]->mNumVertices, 35u);
     EXPECT_EQ(scene->mMeshes[7]->mNumFaces, 17u);
+}
+
+// A binary glTF 1.0 file: header (magic, version 1, total length, scene length, scene format
+// JSON) and a scene with one triangle. The scene length in the header can be overridden.
+static std::string makeBinaryTriangle(uint32_t declaredSceneLength = 0) {
+    const std::string scene = R"({"asset":{"version":"1.0"},)"
+            R"("buffers":{"buf":{"byteLength":36,"uri":"data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAA"}},)"
+            R"("bufferViews":{"v":{"buffer":"buf","byteOffset":0,"byteLength":36}},)"
+            R"("accessors":{"pos":{"bufferView":"v","byteOffset":0,"componentType":5126,"count":3,"type":"VEC3"}},)"
+            R"("meshes":{"tri":{"primitives":[{"attributes":{"POSITION":"pos"},"mode":4}]}},)"
+            R"("nodes":{"node":{"meshes":["tri"]}},"scenes":{"scene":{"nodes":["node"]}},"scene":"scene"})";
+    // the body that follows the scene starts at a multiple of four bytes
+    std::string padded = scene + std::string((4 - scene.size() % 4) % 4, ' ');
+    auto put = [](std::string &out, uint32_t v) {
+        for (int i = 0; i < 4; ++i) {
+            out += static_cast<char>((v >> (8 * i)) & 0xff);
+        }
+    };
+    std::string file = "glTF";
+    put(file, 1);
+    put(file, static_cast<uint32_t>(20 + padded.size()));
+    put(file, declaredSceneLength ? declaredSceneLength : static_cast<uint32_t>(padded.size()));
+    put(file, 0);
+    return file + padded;
+}
+
+TEST_F(utglTFImportExport, binarySceneLengthLargerThanFile) {
+    {
+        const std::string data = makeBinaryTriangle();
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "glb");
+        ASSERT_NE(nullptr, scene);
+        EXPECT_EQ(1u, scene->mNumMeshes);
+    }
+
+    // The header declares a 2 GB scene. The importer reports only that no reader accepted
+    // the file, so record what the loaders ask the stream for: the format detection reads a
+    // few hundred bytes, the scene buffer of the declared size must not be read.
+    const std::string data = makeBinaryTriangle(0x80000000u);
+    size_t largestRead = 0;
+    Assimp::Importer importer;
+    importer.SetIOHandler(new Assimp::ReadSizeRecordingIOSystem("test.glb", reinterpret_cast<const uint8_t *>(data.data()), data.size(), largestRead));
+    EXPECT_EQ(nullptr, importer.ReadFile("test.glb", 0));
+    EXPECT_LT(largestRead, 4096u);
 }
 
 TEST_F(utglTFImportExport, sceneMetadata) {

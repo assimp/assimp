@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 #include "Tools/TestTools.h"
+#include "ReadSizeRecordingIOSystem.h"
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #   include "AssetLib/glTF2/glTF2AssetWriter.h"
 #endif // ASSIMP_BUILD_NO_EXPORT
@@ -157,6 +158,27 @@ TEST_F(utglTF2ImportExport, importglTF2FromFileTest) {
 
 TEST_F(utglTF2ImportExport, importBinaryglTF2FromFileTest) {
     EXPECT_TRUE(binaryImporterTest());
+}
+
+TEST_F(utglTF2ImportExport, binaryJsonChunkLengthLargerThanFile) {
+    {
+        Assimp::Importer importer;
+        EXPECT_NE(nullptr, importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF-Binary/BoxTextured.glb", 0));
+    }
+
+    // GLB header (magic, version 2, total length) and a JSON chunk header that declares
+    // a 2 GB chunk, followed by a two-byte chunk
+    static const unsigned char data[] = {
+        'g', 'l', 'T', 'F', 2, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0x80, 'J', 'S', 'O', 'N', '{', '}'
+    };
+    // The importer reports only that no reader accepted the file, so record what the
+    // loaders ask the stream for: the format detection reads a few hundred bytes, the
+    // chunk buffer of the declared size must not be read.
+    size_t largestRead = 0;
+    Assimp::Importer importer;
+    importer.SetIOHandler(new Assimp::ReadSizeRecordingIOSystem("test.glb", data, sizeof(data), largestRead));
+    EXPECT_EQ(nullptr, importer.ReadFile("test.glb", 0));
+    EXPECT_LT(largestRead, 4096u);
 }
 
 TEST_F(utglTF2ImportExport, importglTF2_KHR_materials_pbrSpecularGlossiness) {

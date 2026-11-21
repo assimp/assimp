@@ -36,6 +36,7 @@ Result<Box<Mesh>> Mesh::create(const std::vector<Vertex> &vertices, const std::v
     if (glGetError() != GL_NO_ERROR)
         return "failed to create vertex/index buffers";
 
+    mesh->m_textures = textures;
     mesh->m_index_count = (GLsizei)indices.size();
 
     return mesh;

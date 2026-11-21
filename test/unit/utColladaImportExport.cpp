@@ -658,6 +658,73 @@ TEST_F(utColladaImportExport, animationValueAccessorPastDataArray) {
     EXPECT_EQ(nullptr, importer.ReadFileFromMemory(emptyData.c_str(), emptyData.size(), 0));
 }
 
+// A triangle skinned to two joints whose inverse bind matrices are given by a
+// float array with the given number of values (32 for both matrices).
+static std::string makeSkinWithBindPoseCount(unsigned int valueCount) {
+    std::string values;
+    for (unsigned int i = 0; i < valueCount; ++i) {
+        values += (i % 5 == 0) ? "1 " : "0 ";
+    }
+    return R"(<?xml version="1.0" encoding="utf-8"?>
+<COLLADA version="1.4.1">
+  <library_geometries>
+    <geometry id="g" name="g">
+      <mesh>
+        <source id="pos">
+          <float_array id="pos-a" count="9">0 0 0 1 0 0 0 1 0</float_array>
+          <technique_common><accessor source="#pos-a" count="3" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common>
+        </source>
+        <vertices id="v"><input semantic="POSITION" source="#pos"/></vertices>
+        <triangles count="1"><input semantic="VERTEX" source="#v" offset="0"/><p>0 1 2</p></triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_controllers>
+    <controller id="skin">
+      <skin source="#g">
+        <bind_shape_matrix>1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</bind_shape_matrix>
+        <source id="joints">
+          <Name_array id="joints-a" count="2">j0 j1</Name_array>
+          <technique_common><accessor source="#joints-a" count="2" stride="1"><param name="JOINT" type="name"/></accessor></technique_common>
+        </source>
+        <source id="poses">
+          <float_array id="poses-a" count=")" + std::to_string(valueCount) + R"(">)" + values + R"(</float_array>
+          <technique_common><accessor source="#poses-a" count="2" stride="16"><param name="TRANSFORM" type="float4x4"/></accessor></technique_common>
+        </source>
+        <source id="weights">
+          <float_array id="weights-a" count="1">1</float_array>
+          <technique_common><accessor source="#weights-a" count="1" stride="1"><param name="WEIGHT" type="float"/></accessor></technique_common>
+        </source>
+        <joints><input semantic="JOINT" source="#joints"/><input semantic="INV_BIND_MATRIX" source="#poses"/></joints>
+        <vertex_weights count="3">
+          <input semantic="JOINT" source="#joints" offset="0"/>
+          <input semantic="WEIGHT" source="#weights" offset="1"/>
+          <vcount>1 1 1</vcount>
+          <v>0 0 1 0 1 0</v>
+        </vertex_weights>
+      </skin>
+    </controller>
+  </library_controllers>
+  <library_visual_scenes>
+    <visual_scene id="s">
+      <node id="j0" name="j0" sid="j0" type="JOINT"/>
+      <node id="j1" name="j1" sid="j1" type="JOINT"/>
+      <node id="n" name="n"><instance_controller url="#skin"/></node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene><instance_visual_scene url="#s"/></scene>
+</COLLADA>)";
+}
+
+TEST_F(utColladaImportExport, skinBindPosesWithinDataArray) {
+    const std::string data = makeSkinWithBindPoseCount(32);
+    Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data.c_str(), data.size(), 0);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(2u, scene->mMeshes[0]->mNumBones);
+}
+
 static constexpr  char kData[] = " \
 <?xml version=\"1.0\" encoding=\"utf-8\"?> \
 <COLLADA version=\"1.4.1\"> \

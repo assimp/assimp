@@ -34,24 +34,26 @@ Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
     Box<Model> model(new Model());
 
     Assimp::Importer importer;
-    const aiScene *pScene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_LimitBoneWeights);
+    const aiScene *scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_LimitBoneWeights);
 
-    if (!pScene)
+    if (!scene)
         return importer.GetErrorString();
 
     ModelLoader loader{};
 
-    CHECK_RESULT(loader.setup_skeleton(pScene->mRootNode, -1, model->m_joints));
-    model->m_global_inverse_transform = inversed(pScene->mRootNode->mTransformation);
+    CHECK_RESULT(loader.setup_skeleton(scene->mRootNode, -1, model->m_joints));
+    model->m_global_inverse_transform = inversed(scene->mRootNode->mTransformation);
 
     loader.m_dir_path = filename.substr(0, filename.find_last_of("/\\"));
-    const auto result = loader.process_node(pScene, pScene->mRootNode, model->m_meshes, model->m_joints);
+    const auto result = loader.process_node(scene, scene->mRootNode, model->m_meshes, model->m_joints);
 
     for (const auto &loaded : loader.m_textures_loaded)
         model->m_textures.push_back(loaded.texture);
 
     if (result.is_error())
         return result.get_error();
+
+    CHECK_RESULT(loader.load_animations(scene, model->m_animations));
 
     for (uint32_t i = 0; i < Model::MAX_JOINT_COUNT; i++)
         model->m_joint_transforms[i] = Mat4{}; // Default constructor gives identity matrix
@@ -187,6 +189,52 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh, 
     }
 
     return Mesh::create(vertices, indices, mesh_textures);
+}
+
+Result<> ModelLoader::load_animations(const aiScene* scene, std::vector<Model::Animation>& animations)
+{
+    for (unsigned int i = 0; i < scene->mNumAnimations; i++)
+    {
+        Model::Animation anim{};
+
+        const auto& ai_anim = scene->mAnimations[i];
+
+        anim.name = ai_anim->mName.C_Str();
+        anim.duration = ai_anim->mDuration;
+        anim.ticks_per_second = ai_anim->mTicksPerSecond ? ai_anim->mTicksPerSecond : Model::DEFAULT_TICKS_PER_SECOND;
+
+        for (unsigned int j = 0; j < ai_anim->mNumChannels; j++)
+        {
+            Model::AnimationChannel channel{};
+
+            const auto& ai_channel = ai_anim->mChannels[j];
+
+            {
+                const std::string name(ai_channel->mNodeName.C_Str());
+                const auto it = m_joint_map.find(name);
+                if (it == m_joint_map.end())
+                    return "animation \"" + anim.name + "\" references unknown joint \"" + name + "\"";
+                channel.joint_index = it->second;
+            }
+
+            // NOTE: We ignore the interpolation types and always use linear interpolation in this sample
+            channel.position_keys.resize(ai_channel->mNumPositionKeys);
+            channel.rotation_keys.resize(ai_channel->mNumRotationKeys);
+            channel.scaling_keys.resize(ai_channel->mNumScalingKeys);
+            for (unsigned int k = 0; k < ai_channel->mNumPositionKeys; k++)
+                channel.position_keys[k] = {ai_channel->mPositionKeys[k].mTime, ai_channel->mPositionKeys[k].mValue};
+            for (unsigned int k = 0; k < ai_channel->mNumRotationKeys; k++)
+                channel.rotation_keys[k] = {ai_channel->mRotationKeys[k].mTime, ai_channel->mRotationKeys[k].mValue};
+            for (unsigned int k = 0; k < ai_channel->mNumScalingKeys; k++)
+                channel.scaling_keys[k] = {ai_channel->mScalingKeys[k].mTime, ai_channel->mScalingKeys[k].mValue};
+
+            anim.channels.push_back(std::move(channel));
+        }
+
+        animations.push_back(std::move(anim));
+    }
+
+    return Ok();
 }
 
 Result<std::vector<GLuint>> ModelLoader::load_material_textures(aiMaterial *mat, aiTextureType type, const std::string &type_name, const aiScene *scene)

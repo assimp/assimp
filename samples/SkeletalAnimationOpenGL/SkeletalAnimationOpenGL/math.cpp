@@ -8,8 +8,6 @@
 
 #include "math.hpp"
 
-#include <assimp/vector3.inl>
-#include <assimp/matrix4x4.inl>
 #include <assimp/MathFunctions.h>
 
 Mat4 perspective_fov_rh(float fov_y, float aspect, float z_near, float z_far)

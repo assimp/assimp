@@ -50,7 +50,12 @@ public:
     Model(const Model &) = delete;
     Model &operator=(const Model &) = delete;
 
+    void update(double dt);
+
     void draw();
+
+    Result<> set_animation(size_t index);
+    Result<> set_animation(const std::string& name);
 
     const Mat4* get_joint_transforms() const { return m_joint_transforms; }
 
@@ -64,6 +69,9 @@ private:
     std::vector<Animation> m_animations;
     Mat4 m_global_inverse_transform{};
     Mat4 m_joint_transforms[MAX_JOINT_COUNT];
+
+    double m_current_time{};
+    size_t m_current_animation{};
 
     friend class ModelLoader;
 };

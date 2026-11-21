@@ -186,15 +186,18 @@ Result<> App::init_graphics(const std::string& model_path)
       m_model
     );
 
+    CHECK_RESULT(m_model->set_animation(1));
+
     return Ok();
 }
 
 void App::on_render()
 {
     const int32_t time_cur = glutGet(GLUT_ELAPSED_TIME);
-    if (m_time_start < 0)
-      m_time_start = time_cur;
-    const float t = (time_cur - m_time_start) / 1000.0f;
+    if (m_time_prev_frame < 0)
+      m_time_prev_frame = time_cur;
+    const double dt = (time_cur - m_time_prev_frame) / 1000.0f;
+    m_time_prev_frame = time_cur;
 
     glClearColor(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -202,7 +205,7 @@ void App::on_render()
     if (!m_model)
         return;
 
-    Mat4::RotationY(-t, m_world);
+    m_model->update(dt);
 
     {
         m_ubo_data.world = transposed(m_world);

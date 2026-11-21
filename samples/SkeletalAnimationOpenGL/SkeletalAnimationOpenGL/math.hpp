@@ -8,8 +8,9 @@
 
 #pragma once
 
-#include <assimp/matrix4x4.h>
-#include <assimp/quaternion.h>
+#include <assimp/vector3.inl>
+#include <assimp/matrix4x4.inl>
+#include <assimp/quaternion.inl>
 
 static constexpr float PI = 3.14159265358979323846;
 
@@ -19,6 +20,18 @@ using Quat = aiQuaterniont<float>;
 
 Mat4 look_at_rh(const Vec3& eye, const Vec3& at, const Vec3& up);
 Mat4 perspective_fov_rh(float fov_y, float aspect, float z_near, float z_far);
+
+inline Vec3 interpolate(const Vec3& a, const Vec3& b, float f)
+{
+    return a + (b - a) * f;
+}
+
+inline Quat interpolate(const Quat& a, const Quat& b, float f)
+{
+    Quat q;
+    Quat::Interpolate(q, a, b, f);
+    return q.Normalize();
+}
 
 inline Mat4 inversed(Mat4 m)
 {

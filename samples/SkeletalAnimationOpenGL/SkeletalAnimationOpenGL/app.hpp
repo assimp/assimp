@@ -63,7 +63,7 @@ private:
 
     int32_t m_width{1};
     int32_t m_height{1};
-    int32_t m_time_start{-1};
+    int32_t m_time_prev_frame{-1};
 
     Box<Model> m_model;
 

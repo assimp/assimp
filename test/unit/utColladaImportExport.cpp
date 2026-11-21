@@ -236,6 +236,46 @@ public:
     }
 };
 
+// A triangle whose <triangles> element has the given inputs and index list.
+static std::string makeTriangleWithInputs(const std::string &inputs, const std::string &indices) {
+    return R"(<?xml version="1.0" encoding="utf-8"?>
+<COLLADA version="1.4.1">
+  <library_geometries>
+    <geometry id="g" name="g">
+      <mesh>
+        <source id="p">
+          <float_array id="p-a" count="9">0 0 0 1 0 0 0 1 0</float_array>
+          <technique_common><accessor source="#p-a" count="3" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common>
+        </source>
+        <vertices id="v"><input semantic="POSITION" source="#p"/></vertices>
+        <triangles count="1">)" + inputs + "<p>" + indices + R"(</p></triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="s"><node id="n" name="n"><instance_geometry url="#g"/></node></visual_scene>
+  </library_visual_scenes>
+  <scene><instance_visual_scene url="#s"/></scene>
+</COLLADA>)";
+}
+
+TEST_F(utColladaImportExport, primitiveInputsAndIndexList) {
+    {
+        const std::string data = makeTriangleWithInputs(R"(<input semantic="VERTEX" source="#v" offset="0"/><input semantic="NORMAL" source="#p" offset="1"/>)", "0 0 1 1 2 2");
+        Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(data.c_str(), data.size(), aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(1u, scene->mMeshes[0]->mNumFaces);
+    }
+    {
+        // No VERTEX input: there is no per-vertex offset to read the position index from
+        const std::string data = makeTriangleWithInputs(R"(<input semantic="NORMAL" source="#p" offset="0"/>)", "0 1 2");
+        Importer importer;
+        EXPECT_EQ(nullptr, importer.ReadFileFromMemory(data.c_str(), data.size(), 0));
+    }
+}
+
 TEST_F(utColladaImportExport, importDaeFromFileTest) {
     EXPECT_TRUE(importerTest());
 }

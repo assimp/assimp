@@ -1933,8 +1933,11 @@ void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t n
     // calculate the base offset of the vertex whose attributes we ant to copy
     const auto baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;
 
-    // don't overrun the boundaries of the index list
-    ai_assert((baseOffset + numOffsets - 1) < indices.size());
+    // don't overrun the boundaries of the index list; perVertexOffset is SIZE_MAX when the
+    // primitive has no VERTEX input
+    if (perVertexOffset >= numOffsets || baseOffset + numOffsets > indices.size()) {
+        throw DeadlyImportError("index offset out of range");
+    }
 
     // extract per-vertex channels using the global per-vertex offset
     for (auto it = pMesh.mPerVertexData.begin(); it != pMesh.mPerVertexData.end(); ++it) {

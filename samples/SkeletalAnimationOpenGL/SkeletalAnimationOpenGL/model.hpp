@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "math.hpp"
 #include "mesh.hpp"
 
 class Model

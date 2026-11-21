@@ -47,6 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/commonMetaData.h>
 #include <assimp/scene.h>
 
+#include <array>
+#include <string>
+#include <vector>
+
 using namespace Assimp;
 
 class utglTFImportExport : public AbstractImportExportBase {
@@ -110,46 +114,46 @@ TEST_F(utglTFImportExport, sceneMetadata) {
     }
 }
 
-// A glTF 1.0 asset with one primitive of the given mode over four vertices
-// (a unit quad), with or without an index accessor 0, 1, 2, 3.
-static std::string makeQuadPrimitive(int mode, bool indexed) {
-    // 4 x VEC3 float positions followed by 4 x uint16 indices
+// A glTF 1.0 asset with one primitive of the given mode over six vertices, with
+// or without an index accessor 0, 1, 2, 3, 4, 5.
+static std::string makeChainPrimitive(int mode, bool indexed) {
+    // 6 x VEC3 float positions followed by 6 x uint16 indices
     static const char *buffer = "data:application/octet-stream;base64,"
-                                "AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAAAAAAABAAIAAwA=";
+                                "AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAAAAAACAPwAAgD8AAAAAAAAAQAAAAAAAAAAAAAAAQAAAgD8AAAAAAAABAAIAAwAEAAUA";
     std::string json = R"({
   "asset": { "version": "1.0" },
-  "buffers": { "buf": { "byteLength": 56, "uri": ")";
+  "buffers": { "buf": { "byteLength": 84, "uri": ")";
     json += buffer;
     json += R"(" } },
   "bufferViews": {
-    "pos_view": { "buffer": "buf", "byteOffset": 0, "byteLength": 48, "target": 34962 },
-    "idx_view": { "buffer": "buf", "byteOffset": 48, "byteLength": 8, "target": 34963 }
+    "pos_view": { "buffer": "buf", "byteOffset": 0, "byteLength": 72, "target": 34962 },
+    "idx_view": { "buffer": "buf", "byteOffset": 72, "byteLength": 12, "target": 34963 }
   },
   "accessors": {
-    "pos": { "bufferView": "pos_view", "byteOffset": 0, "componentType": 5126, "count": 4, "type": "VEC3" },
-    "idx": { "bufferView": "idx_view", "byteOffset": 0, "componentType": 5123, "count": 4, "type": "SCALAR" }
+    "pos": { "bufferView": "pos_view", "byteOffset": 0, "componentType": 5126, "count": 6, "type": "VEC3" },
+    "idx": { "bufferView": "idx_view", "byteOffset": 0, "componentType": 5123, "count": 6, "type": "SCALAR" }
   },
-  "meshes": { "quad": { "primitives": [ { "attributes": { "POSITION": "pos" }, )";
+  "meshes": { "chain": { "primitives": [ { "attributes": { "POSITION": "pos" }, )";
     if (indexed) {
         json += R"("indices": "idx", )";
     }
     json += R"("mode": )" + std::to_string(mode) + R"( } ] } },
-  "nodes": { "node": { "meshes": [ "quad" ] } },
+  "nodes": { "node": { "meshes": [ "chain" ] } },
   "scenes": { "scene": { "nodes": [ "node" ] } },
   "scene": "scene"
 })";
     return json;
 }
 
-static void checkQuadFaces(int mode, bool indexed, const unsigned int (&expected)[2][3]) {
-    const std::string json = makeQuadPrimitive(mode, indexed);
+static void checkChainFaces(int mode, bool indexed, const std::vector<std::array<unsigned int, 3>> &expected) {
+    const std::string json = makeChainPrimitive(mode, indexed);
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFileFromMemory(json.c_str(), json.size(), 0, "gltf");
     ASSERT_NE(nullptr, scene);
     ASSERT_EQ(1u, scene->mNumMeshes);
     const aiMesh *mesh = scene->mMeshes[0];
-    ASSERT_EQ(2u, mesh->mNumFaces);
-    for (unsigned int f = 0; f < 2; ++f) {
+    ASSERT_EQ(expected.size(), mesh->mNumFaces);
+    for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
         ASSERT_EQ(3u, mesh->mFaces[f].mNumIndices);
         for (unsigned int i = 0; i < 3; ++i) {
             EXPECT_EQ(expected[f][i], mesh->mFaces[f].mIndices[i]) << "face " << f << ", index " << i;
@@ -157,15 +161,15 @@ static void checkQuadFaces(int mode, bool indexed, const unsigned int (&expected
     }
 }
 
-TEST_F(utglTFImportExport, triangleStripUsesPreviousFace) {
-    const unsigned int expected[2][3] = { { 0, 1, 2 }, { 1, 2, 3 } };
-    checkQuadFaces(5, true, expected);
-    checkQuadFaces(5, false, expected);
+TEST_F(utglTFImportExport, triangleStripFacesKeepWinding) {
+    // Every second triangle has its first two vertices swapped, as in GL
+    const std::vector<std::array<unsigned int, 3>> expected = { { 0, 1, 2 }, { 2, 1, 3 }, { 2, 3, 4 }, { 4, 3, 5 } };
+    checkChainFaces(5, true, expected);
+    checkChainFaces(5, false, expected);
 }
 
-TEST_F(utglTFImportExport, triangleFanUsesPreviousFace) {
-    const unsigned int expected[2][3] = { { 0, 1, 2 }, { 0, 2, 3 } };
-    checkQuadFaces(6, true, expected);
-    checkQuadFaces(6, false, expected);
+TEST_F(utglTFImportExport, triangleFanFaces) {
+    const std::vector<std::array<unsigned int, 3>> expected = { { 0, 1, 2 }, { 0, 2, 3 }, { 0, 3, 4 }, { 0, 4, 5 } };
+    checkChainFaces(6, true, expected);
+    checkChainFaces(6, false, expected);
 }
-

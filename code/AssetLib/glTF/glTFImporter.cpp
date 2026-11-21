@@ -283,7 +283,12 @@ void glTFImporter::ImportMeshes(Asset &r) {
             }
 
             if (attr.normal.size() > 0 && attr.normal[0]) {
-                attr.normal[0]->ExtractData(aim->mNormals);
+                // later steps read one normal per vertex
+                if (attr.normal[0]->count != aim->mNumVertices) {
+                    DefaultLogger::get()->warn("Normal count in mesh \"", mesh.id, "\" does not match the vertex count, normals ignored.");
+                } else {
+                    attr.normal[0]->ExtractData(aim->mNormals);
+                }
             }
 
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {

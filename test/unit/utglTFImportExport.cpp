@@ -109,3 +109,63 @@ TEST_F(utglTFImportExport, sceneMetadata) {
         ASSERT_EQ(strncmp(generator.C_Str(), "collada2gltf", 12), 0);
     }
 }
+
+// A glTF 1.0 asset with one primitive of the given mode over four vertices
+// (a unit quad), with or without an index accessor 0, 1, 2, 3.
+static std::string makeQuadPrimitive(int mode, bool indexed) {
+    // 4 x VEC3 float positions followed by 4 x uint16 indices
+    static const char *buffer = "data:application/octet-stream;base64,"
+                                "AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAAAAAAABAAIAAwA=";
+    std::string json = R"({
+  "asset": { "version": "1.0" },
+  "buffers": { "buf": { "byteLength": 56, "uri": ")";
+    json += buffer;
+    json += R"(" } },
+  "bufferViews": {
+    "pos_view": { "buffer": "buf", "byteOffset": 0, "byteLength": 48, "target": 34962 },
+    "idx_view": { "buffer": "buf", "byteOffset": 48, "byteLength": 8, "target": 34963 }
+  },
+  "accessors": {
+    "pos": { "bufferView": "pos_view", "byteOffset": 0, "componentType": 5126, "count": 4, "type": "VEC3" },
+    "idx": { "bufferView": "idx_view", "byteOffset": 0, "componentType": 5123, "count": 4, "type": "SCALAR" }
+  },
+  "meshes": { "quad": { "primitives": [ { "attributes": { "POSITION": "pos" }, )";
+    if (indexed) {
+        json += R"("indices": "idx", )";
+    }
+    json += R"("mode": )" + std::to_string(mode) + R"( } ] } },
+  "nodes": { "node": { "meshes": [ "quad" ] } },
+  "scenes": { "scene": { "nodes": [ "node" ] } },
+  "scene": "scene"
+})";
+    return json;
+}
+
+static void checkQuadFaces(int mode, bool indexed, const unsigned int (&expected)[2][3]) {
+    const std::string json = makeQuadPrimitive(mode, indexed);
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(json.c_str(), json.size(), 0, "gltf");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    const aiMesh *mesh = scene->mMeshes[0];
+    ASSERT_EQ(2u, mesh->mNumFaces);
+    for (unsigned int f = 0; f < 2; ++f) {
+        ASSERT_EQ(3u, mesh->mFaces[f].mNumIndices);
+        for (unsigned int i = 0; i < 3; ++i) {
+            EXPECT_EQ(expected[f][i], mesh->mFaces[f].mIndices[i]) << "face " << f << ", index " << i;
+        }
+    }
+}
+
+TEST_F(utglTFImportExport, triangleStripUsesPreviousFace) {
+    const unsigned int expected[2][3] = { { 0, 1, 2 }, { 1, 2, 3 } };
+    checkQuadFaces(5, true, expected);
+    checkQuadFaces(5, false, expected);
+}
+
+TEST_F(utglTFImportExport, triangleFanUsesPreviousFace) {
+    const unsigned int expected[2][3] = { { 0, 1, 2 }, { 0, 2, 3 } };
+    checkQuadFaces(6, true, expected);
+    checkQuadFaces(6, false, expected);
+}
+

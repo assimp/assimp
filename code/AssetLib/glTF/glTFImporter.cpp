@@ -365,7 +365,7 @@ void glTFImporter::ImportMeshes(Asset &r) {
                     faces = new aiFace[nFaces];
                     SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
                     for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], data.GetUInt(i));
+                        SetFace(faces[i - 2], faces[i - 3].mIndices[1], faces[i - 3].mIndices[2], data.GetUInt(i));
                     }
                     break;
                 }
@@ -374,7 +374,7 @@ void glTFImporter::ImportMeshes(Asset &r) {
                     faces = new aiFace[nFaces];
                     SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
                     for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i));
+                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 3].mIndices[2], data.GetUInt(i));
                     }
                     break;
                 }
@@ -437,7 +437,7 @@ void glTFImporter::ImportMeshes(Asset &r) {
                     faces = new aiFace[nFaces];
                     SetFace(faces[0], 0, 1, 2);
                     for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], i);
+                        SetFace(faces[i - 2], faces[i - 3].mIndices[1], faces[i - 3].mIndices[2], i);
                     }
                     break;
                 }
@@ -446,7 +446,7 @@ void glTFImporter::ImportMeshes(Asset &r) {
                     faces = new aiFace[nFaces];
                     SetFace(faces[0], 0, 1, 2);
                     for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], i);
+                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 3].mIndices[2], i);
                     }
                     break;
                 }

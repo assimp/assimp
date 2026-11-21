@@ -680,7 +680,9 @@ void glTFImporter::ImportEmbeddedTextures(Asset &r) {
         tex->pcData = static_cast<aiTexel *>(data);
 
         if (!img.mimeType.empty()) {
-            if (const char *ext = strchr(img.mimeType.c_str(), '/') + 1) {
+            const char *slash = strchr(img.mimeType.c_str(), '/');
+            if (slash != nullptr) {
+                const char *ext = slash + 1;
                 if (strncmp(ext, "jpeg", 4) == 0) {
                     ext = "jpg";
                 }

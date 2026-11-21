@@ -10,7 +10,14 @@
 
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 #include "contrib/stb/stb_image.h"
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -34,7 +41,13 @@ Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
 
     ModelLoader loader{};
     loader.m_dir_path = filename.substr(0, filename.find_last_of("/\\"));
-    CHECK_RESULT(loader.process_node(pScene, pScene->mRootNode, model->m_meshes, model->m_textures));
+    const auto result = loader.process_node(pScene, pScene->mRootNode, model->m_meshes);
+
+    for (const auto &loaded : loader.m_textures_loaded)
+        model->m_textures.push_back(loaded.texture);
+
+    if (result.is_error())
+        return result.get_error();
 
     return model;
 }
@@ -43,7 +56,7 @@ ModelLoader::~ModelLoader()
 {
 }
 
-Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes, std::vector<GLuint>& textures) 
+Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
@@ -51,7 +64,7 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
         
         Box<Mesh> mesh;
         CHECK_ASSIGN_RESULT(
-            process_mesh(scene, ai_mesh, textures),
+            process_mesh(scene, ai_mesh),
             mesh
         );
 
@@ -60,13 +73,13 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
 
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        CHECK_RESULT(this->process_node(scene, node->mChildren[i], meshes, textures));
+        CHECK_RESULT(this->process_node(scene, node->mChildren[i], meshes));
     }
 
     return Ok();
 }
 
-Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh, std::vector<GLuint>& textures)
+Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh)
 {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
@@ -107,7 +120,6 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh, 
             diffuse_maps
         );
 
-        textures.insert(textures.end(), diffuse_maps.begin(), diffuse_maps.end());
         mesh_textures.insert(mesh_textures.end(), diffuse_maps.begin(), diffuse_maps.end());
     }
 
@@ -227,17 +239,12 @@ namespace TextureLoader
         int w = 0, h = 0, n = 0;
         const auto pixels = stbi_load_from_memory(data, static_cast<int>(size), &w, &h, &n, STBI_rgb_alpha);
         if (pixels == nullptr)
-            return "failed to load the image";
+            return "failed to decode the embedded image: " + std::string(stbi_failure_reason());
 
-        GLuint texture{};
-        CHECK_ASSIGN_RESULT(
-            from_pixels(pixels, w, h, GL_RGBA),
-            texture
-        );
-
+        auto result = from_pixels(pixels, w, h, GL_RGBA);
         stbi_image_free(pixels);
 
-        return texture;
+        return result;
     }
 
     Result<GLuint> from_file(const std::string& file_name)
@@ -247,16 +254,11 @@ namespace TextureLoader
         int w = 0, h = 0, n = 0;
         const auto pixels = stbi_load(file_name.c_str(), &w, &h, &n, STBI_rgb_alpha);
         if (pixels == nullptr)
-            return "failed to load the image";
+            return "failed to load the image \"" + file_name + "\": " + std::string(stbi_failure_reason());
 
-        GLuint texture;
-        CHECK_ASSIGN_RESULT(
-            from_pixels(pixels, w, h, GL_RGBA),
-            texture
-        );
-
+        auto result = from_pixels(pixels, w, h, GL_RGBA);
         stbi_image_free(pixels);
 
-        return texture;
+        return result;
     }
 }

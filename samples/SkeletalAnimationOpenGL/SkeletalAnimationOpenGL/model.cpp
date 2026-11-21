@@ -10,7 +10,8 @@
 
 Model::~Model()
 {
-    glDeleteTextures(m_textures.size(), m_textures.data());
+    if (!m_textures.empty())
+        glDeleteTextures(static_cast<GLsizei>(m_textures.size()), m_textures.data());
 }
 
 void Model::draw()

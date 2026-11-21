@@ -34,7 +34,7 @@ static Result<> compile_shader_from_file(const std::string& path, GLenum type, S
     std::ifstream file(path, std::ios::in | std::ios::binary);
     
     if (!file)
-      return "failed to read the shader from file \"%s\"" + path;
+      return "failed to read the shader from file \"" + path + "\"";
     
     {
         std::stringstream ss;
@@ -56,9 +56,8 @@ static Result<> compile_shader_from_file(const std::string& path, GLenum type, S
       glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
       std::vector<char> log(static_cast<size_t>(log_length > 1 ? log_length : 1), '\0');
       glGetShaderInfoLog(shader, static_cast<GLsizei>(log.size()), nullptr, log.data());
-      std::fprintf(stderr, "[ERROR]: failed to compile shader '%s':\n%s\n", path.c_str(), log.data());
       glDeleteShader(shader);
-      return "failed to compile the shader \"" + std::string(log.data()) + "\"";
+      return "failed to compile the shader \"" + path + "\": " + std::string(log.data());
     }
 
     handle.handle = shader;

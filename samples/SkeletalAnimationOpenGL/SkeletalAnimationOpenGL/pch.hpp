@@ -36,20 +36,26 @@
 #include <memory>
 #include <variant>
 
+// -------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------
+// Adopted from https://i-a-s.me vulkan series
+
 #define CHECK_RESULT(_result)                                                                                          \
+  do                                                                                                                   \
   {                                                                                                                    \
-    const auto result = _result;                                                                                       \
-    if (result.is_error())                                                                                             \
-      return result.get_error();                                                                                       \
-  }
+    const auto check_result_ = _result;                                                                                \
+    if (check_result_.is_error())                                                                                      \
+      return check_result_.get_error();                                                                                \
+  } while (0)
 
 #define CHECK_ASSIGN_RESULT(_result, _var)                                                                             \
+  do                                                                                                                   \
   {                                                                                                                    \
-    auto result = _result;                                                                                             \
-    if (result.is_error())                                                                                             \
-      return result.get_error();                                                                                       \
-    _var = std::move(result).take_value();                                                                             \
-  }
+    auto check_result_ = _result;                                                                                      \
+    if (check_result_.is_error())                                                                                      \
+      return check_result_.get_error();                                                                                \
+    _var = std::move(check_result_).take_value();                                                                      \
+  } while (0)
 
 struct Ok
 {
@@ -127,3 +133,6 @@ private:
 // Alias std::unique_ptr to Box. Easier to type.
 // (Inspired by Rust of course, just like Result above).
 template<typename T> using Box = std::unique_ptr<T>;
+
+// -------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------

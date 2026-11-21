@@ -18,8 +18,6 @@ ELSE ()
   set(M_LIB "m")
 ENDIF ()
 
-ADD_COMPILE_DEFINITIONS(SHADER_PATH="${CMAKE_CURRENT_SOURCE_DIR}/SkeletalAnimationOpenGL/")
-
 INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}
   ${Assimp_SOURCE_DIR}/include

@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 #include <assimp/Importer.hpp>
 
@@ -163,3 +164,21 @@ TEST_F(utLWSImportExport, importFileWithoutElementsFails) {
     const std::string error = importer.GetErrorString();
     ASSERT_NE(error.find("no elements"), std::string::npos);
 }
+
+TEST_F(utLWSImportExport, importCommentLineInPluginBlock) {
+    // A '#' line inside a plugin block used to make the importer loop forever
+    const std::string data = "LWSC\n"
+                             "3\n"
+                             "\n"
+                             "FirstFrame 1\n"
+                             "LastFrame 60\n"
+                             "AddNullObject Null\n"
+                             "Plugin x\n"
+                             "# comment\n"
+                             "EndPlugin\n";
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "lws");
+    ASSERT_NE(nullptr, scene);
+    EXPECT_NE(nullptr, scene->mRootNode);
+}
+

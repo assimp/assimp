@@ -142,13 +142,18 @@ AI_FORCE_INLINE bool SkipSpaces(const char_t **inout, const char_t *end) {
 }
 
 // ---------------------------------------------------------------------------------
-/// @brief Will skip a line.
+/// @brief Will skip a line. Stops early at a '#' that starts a trailing comment.
 /// @param in     The incoming buffer.
 /// @param out    The  buffer with skipped data.
 /// @param end    The end of the buffer.
 /// @return true if valid.
 template <class char_t>
 AI_FORCE_INLINE bool SkipLine(const char_t *in, const char_t **out, const char_t *end) {
+    // Called on the '#' of a comment: step over it, otherwise the loop below stops at once
+    // and callers that use SkipLine to advance never make progress.
+    if (in != end && *in == (char_t)'#') {
+        ++in;
+    }
     while ((*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0') && *in != (char_t)'#' && in != end) {
         ++in;
     }

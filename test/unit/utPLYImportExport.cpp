@@ -356,3 +356,65 @@ TEST_F(utPLYImportExport, uintVertexColorsAreNormalizedToUnitRange) {
     EXPECT_NEAR(0.5f, c.g, 1e-5f);
     EXPECT_NEAR(0.0f, c.b, 1e-5f);
 }
+
+TEST_F(utPLYImportExport, importAfterFailedImportStartsWithNewMesh) {
+    // Four colored vertices; the second vertex line is not a number, so the
+    // import throws after the first vertex has been stored.
+    static const char broken[] = "ply\n"
+                                 "format ascii 1.0\n"
+                                 "element vertex 4\n"
+                                 "property float x\n"
+                                 "property float y\n"
+                                 "property float z\n"
+                                 "property uchar red\n"
+                                 "property uchar green\n"
+                                 "property uchar blue\n"
+                                 "end_header\n"
+                                 "9 9 9 255 0 0\n"
+                                 "x 0 0 0 255 0\n"
+                                 "1 1 0 0 0 255\n"
+                                 "0 1 0 9 9 9\n";
+    // A point cloud with more vertices than the broken file declared.
+    static const char points[] = "ply\n"
+                                 "format ascii 1.0\n"
+                                 "element vertex 5\n"
+                                 "property float x\n"
+                                 "property float y\n"
+                                 "property float z\n"
+                                 "end_header\n"
+                                 "0 0 0\n"
+                                 "1 0 0\n"
+                                 "2 0 0\n"
+                                 "3 0 0\n"
+                                 "4 0 0\n";
+    // A triangle with fewer vertices than the broken file declared and no colors.
+    static const char triangle[] = "ply\n"
+                                   "format ascii 1.0\n"
+                                   "element vertex 3\n"
+                                   "property float x\n"
+                                   "property float y\n"
+                                   "property float z\n"
+                                   "element face 1\n"
+                                   "property list uchar int vertex_indices\n"
+                                   "end_header\n"
+                                   "0 0 0\n"
+                                   "1 0 0\n"
+                                   "0 1 0\n"
+                                   "3 0 1 2\n";
+
+    Assimp::Importer importer;
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(broken, sizeof(broken) - 1, 0, "ply"));
+
+    const aiScene *scene = importer.ReadFileFromMemory(points, sizeof(points) - 1, 0, "ply");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(5u, scene->mMeshes[0]->mNumVertices);
+
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(broken, sizeof(broken) - 1, 0, "ply"));
+
+    scene = importer.ReadFileFromMemory(triangle, sizeof(triangle) - 1, 0, "ply");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(3u, scene->mMeshes[0]->mNumVertices);
+    EXPECT_FALSE(scene->mMeshes[0]->HasVertexColors(0));
+}

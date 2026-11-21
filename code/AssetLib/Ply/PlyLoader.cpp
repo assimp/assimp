@@ -188,6 +188,11 @@ namespace Assimp {
     // ------------------------------------------------------------------------------------------------
     // Imports the given file into the given scene structure.
     void PLYImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
+        // A previous import may have thrown while the mesh was being built. The importer instance
+        // is reused for the next file, so drop what is left over instead of filling it again.
+        delete mGeneratedMesh;
+        mGeneratedMesh = nullptr;
+
         const std::string mode = "rb";
         std::unique_ptr<IOStream> fileStream(pIOHandler->Open(pFile, mode));
         if (!fileStream) {

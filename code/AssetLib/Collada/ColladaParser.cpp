@@ -1789,7 +1789,12 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
         while (*content != 0) {
             // read a value.
             // Hack: (thom) Some exporters put negative indices sometimes. We just try to carry on anyways.
+            const char *before = content;
             int value = std::max(0, strtol10(content, &content));
+            if (content == before) {
+                // not a number: strtol10 did not move, and the loop would append zeros forever
+                throw DeadlyImportError("Invalid character in <p> element.");
+            }
             indices.push_back(size_t(value));
             // skip whitespace after it
             SkipSpacesAndLineEnd(&content, end);

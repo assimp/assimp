@@ -14,7 +14,7 @@
 
 #include <filesystem>
 
-App* g_app{};
+Box<App> g_app;
 
 int main(int argc, char **argv)
 {
@@ -54,31 +54,40 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    while (glGetError() != GL_NO_ERROR) {}
+
     std::printf("OpenGL version: %s\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
     std::printf("Renderer:       %s\n", reinterpret_cast<const char *>(glGetString(GL_RENDERER)));
 
-    g_app = new App();
-    if (!g_app->on_create(model_path, vertex_shader_path, fragment_shader_path)) {
-        std::fprintf(stderr, "[ERROR]: failed to initialize the App.\n");
+    auto result = App::create(
+        glutGet(GLUT_WINDOW_WIDTH),
+        glutGet(GLUT_WINDOW_HEIGHT),
+        model_path,
+        vertex_shader_path,
+        fragment_shader_path
+    );
+    if (result.is_error())
+    {
+        std::fprintf(stderr, "[ERROR]: failed to initialize the app: \"%s\".\n", result.get_error().c_str());
         return 1;
     }
+    g_app = std::move(result).take_value();
 
     glutDisplayFunc([]()
     {
-        if (g_app)
-            g_app->on_render();
+        g_app->on_render();
         glutSwapBuffers();
     });
 
     glutReshapeFunc([](int width, int height)
     {
-        if (g_app)
-            g_app->on_resize(width, height);
+        g_app->on_resize(width, height);
     });
 
     glutKeyboardFunc([](unsigned char key, int, int)
     {
-        if (key == 27) { // Escape
+        if (key == 27) // Escape 
+        {
             glutLeaveMainLoop();
         }
     });
@@ -90,14 +99,12 @@ int main(int argc, char **argv)
     
     glutCloseFunc([]()
     {
-        delete g_app;
-        g_app = nullptr;
+        g_app.reset();
     });
 
     glutMainLoop();
 
-    delete g_app;
-    g_app = nullptr;
+    g_app.reset();
 
     return 0;
 }

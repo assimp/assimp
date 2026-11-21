@@ -8,24 +8,55 @@
 
 #pragma once
 
-#include <glad/glad.h>
-
-#include <string>
-#include <stdint.h>
+#include "model.hpp"
 
 class App
 {
-public:  
-  App() = default;
-  App(const App &) = delete;
-  App &operator=(const App &) = delete;
+    static constexpr GLuint UBO_BINDING = 0;
+    static constexpr GLint DIFFUSE_TEXTURE_UNIT = 0;
 
-  ~App();
+    struct UBO
+    {
+      Mat4 world;
+      Mat4 view;
+      Mat4 projection;
+    };
 
-  bool on_create(const std::string& model_path,
-    const std::string& vertex_shader_path,
-    const std::string& fragment_shader_path);
+public:
+    static Result<Box<App>> create(
+        int32_t width, int32_t height,
+        const std::string& model_path,
+        const std::string& vertex_shader_path,
+        const std::string& fragment_shader_path);
 
-  void on_render();
-  void on_resize(int32_t width, int32_t height);
+    App(const App &) = delete;
+    App &operator=(const App &) = delete;
+
+    ~App();
+
+    void on_render();
+
+    void on_resize(int32_t width, int32_t height);
+
+private:
+    App(int32_t width, int32_t height): m_width(width), m_height(height) {}
+
+private:
+    Result<> init_pipeline(const std::string& vertex_shader_path, const std::string& fragment_shader_path);
+    Result<> init_graphics(const std::string& model_path);
+
+private:
+    GLuint m_program{};
+    GLuint m_ubo_buffer{};
+    GLuint m_tex_sampler_state{};
+
+    Mat4 m_world{};
+    Mat4 m_view{};
+    Mat4 m_projection{};
+
+    int32_t m_width{1};
+    int32_t m_height{1};
+    int32_t m_time_start{-1};
+
+    Box<Model> m_model;
 };

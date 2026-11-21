@@ -49,6 +49,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <assimp/Importer.hpp>
 
+#include <algorithm>
+#include <fstream>
+#include <iterator>
+#include <string>
+#include <vector>
+
 using namespace Assimp;
 
 class utFBXImporterExporter : public AbstractImportExportBase {
@@ -111,6 +117,42 @@ TEST_F(utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords) {
     aiMesh *mesh = scene->mMeshes[0];
     EXPECT_EQ(mesh->mNumFaces, 12u);
     EXPECT_EQ(mesh->mNumVertices, 36u);
+}
+
+TEST_F(utFBXImporterExporter, importRotationKeysFarApart) {
+    // Every animation curve of this model has two keys, and the rotation curves turn by more
+    // than 180 degrees between them, so the importer inserts keys in between.
+    const char *path = ASSIMP_TEST_MODELS_NONBSD_DIR "/FBX/2013_BINARY/anims_with_full_rotations_between_keys.fbx";
+    std::ifstream file(path, std::ios::binary);
+    std::vector<char> data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    ASSERT_FALSE(data.empty());
+
+    // Set the second value of every two-key curve to 1e9 degrees (about 2.8 million turns).
+    // The array header is type 'f', element count, encoding, stored length, then the floats.
+    const std::string name = "KeyValueFloatf";
+    const unsigned char farAway[4] = { 0x28, 0x6b, 0x6e, 0x4e }; // 1e9f, little endian
+    unsigned int changed = 0;
+    for (auto it = std::search(data.begin(), data.end(), name.begin(), name.end()); it != data.end();
+            it = std::search(it + 1, data.end(), name.begin(), name.end())) {
+        const size_t header = static_cast<size_t>(it - data.begin()) + name.size();
+        ASSERT_LT(header + 12 + 8, data.size());
+        const unsigned char twoPlain[8] = { 2, 0, 0, 0, 0, 0, 0, 0 };
+        if (!std::equal(twoPlain, twoPlain + 8, data.begin() + header)) {
+            continue;
+        }
+        std::copy(farAway, farAway + 4, data.begin() + header + 12 + 4);
+        ++changed;
+    }
+    ASSERT_GT(changed, 0u);
+
+    // used to insert keys until memory ran out
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data.data(), data.size(), 0, "fbx");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumAnimations);
+    for (unsigned int c = 0; c < scene->mAnimations[0]->mNumChannels; ++c) {
+        EXPECT_LE(scene->mAnimations[0]->mChannels[c]->mNumRotationKeys, 3u * (1024u + 2u));
+    }
 }
 
 TEST_F(utFBXImporterExporter, importCubesWithNoNames) {

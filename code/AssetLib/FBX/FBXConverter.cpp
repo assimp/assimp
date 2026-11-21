@@ -70,6 +70,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
+// Upper bound of the keys inserted between two rotation keys (about 1024 half turns)
+static constexpr unsigned int MaxInterpolatedRotationKeys = 1024;
+
 using namespace Util;
 
 #define MAGIC_NODE_TAG "_$AssimpFbx$"
@@ -3484,8 +3487,15 @@ FBXConverter::KeyFrameListList FBXConverter::GetRotationKeyframeList(const std::
                 int64_t tc = curve->GetKeys().at(1);
                 float vc = curve->GetValues().at(1);
                 for (size_t n = 1; n < count; n++) {
+                    // Each inserted key moves the value by about 179 degrees. Bound their number per
+                    // segment, and stop when the time step rounds down to zero and nothing advances.
+                    unsigned int inserted = 0;
                     while (std::abs(vc - vp) >= 180.0f) {
                         double step = std::floor(double(tc - tp) / std::abs(vc - vp) * 179.0f);
+                        if (step < 1.0 || ++inserted > MaxInterpolatedRotationKeys) {
+                            FBXImporter::LogWarn("rotation keys too far apart, interpolation between them truncated");
+                            break;
+                        }
                         int64_t tnew = tp + int64_t(step);
                         float vnew = vp + (vc - vp) * float(step / (tc - tp));
                         if (tnew >= adj_start && tnew <= adj_stop) {

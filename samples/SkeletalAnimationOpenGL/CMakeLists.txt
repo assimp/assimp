@@ -2,7 +2,8 @@ FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLUT)
 
 IF ( NOT GLUT_FOUND )
-  MESSAGE( FATAL_ERROR "Please install glut." )
+  MESSAGE( WARNING "Please install glut to build this sample" )
+  RETURN ()
 ENDIF ()
 
 IF ( MSVC )
@@ -53,6 +54,10 @@ TARGET_PRECOMPILE_HEADERS( assimp_skeletalanimationogl PRIVATE
 )
 SET_TARGET_PROPERTIES( assimp_skeletalanimationogl PROPERTIES
   OUTPUT_NAME assimp_skeletalanimationogl
+)
+
+TARGET_COMPILE_DEFINITIONS( assimp_skeletalanimationogl PRIVATE
+  SAMPLE_RES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/res"
 )
 
 INSTALL( TARGETS assimp_skeletalanimationogl

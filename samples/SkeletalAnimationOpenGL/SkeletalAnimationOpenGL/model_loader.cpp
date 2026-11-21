@@ -34,6 +34,7 @@ Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
     Box<Model> model(new Model());
 
     Assimp::Importer importer;
+    importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, Vertex::NUM_MAX_BONES);
     const aiScene *scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_LimitBoneWeights);
 
     if (!scene)
@@ -59,10 +60,6 @@ Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
         model->m_joint_transforms[i] = Mat4{}; // Default constructor gives identity matrix
 
     return model;
-}
-
-ModelLoader::~ModelLoader()
-{
 }
 
 Result<> ModelLoader::setup_skeleton(aiNode *node, int32_t parent_index, std::vector<Model::Joint>& joints)
@@ -100,7 +97,7 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
         
         Box<Mesh> mesh;
         CHECK_ASSIGN_RESULT(
-            process_mesh(scene, ai_mesh, joints),
+            process_mesh(scene, node, ai_mesh, joints),
             mesh
         );
 
@@ -115,7 +112,7 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
     return Ok();
 }
 
-Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh, std::vector<Model::Joint>& joints)
+Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiNode *node, aiMesh *mesh, std::vector<Model::Joint>& joints)
 {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
@@ -164,6 +161,16 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiMesh *mesh, 
                     break;
                 }
             }
+        }
+    }
+
+    if (mesh->mNumBones == 0)
+    {
+        const auto node_joint = static_cast<GLuint>(m_joint_map.at(node->mName.C_Str()));
+        for (auto& vertex : vertices)
+        {
+            vertex.bone_ids[0] = node_joint;
+            vertex.bone_weights[0] = 1.0f;
         }
     }
 
@@ -224,7 +231,7 @@ Result<> ModelLoader::load_animations(const aiScene* scene, std::vector<Model::A
             for (unsigned int k = 0; k < ai_channel->mNumPositionKeys; k++)
                 channel.position_keys[k] = {ai_channel->mPositionKeys[k].mTime, ai_channel->mPositionKeys[k].mValue};
             for (unsigned int k = 0; k < ai_channel->mNumRotationKeys; k++)
-                channel.rotation_keys[k] = {ai_channel->mRotationKeys[k].mTime, ai_channel->mRotationKeys[k].mValue};
+                channel.rotation_keys[k] = {ai_channel->mRotationKeys[k].mTime, static_cast<Quat>(ai_channel->mRotationKeys[k].mValue)};
             for (unsigned int k = 0; k < ai_channel->mNumScalingKeys; k++)
                 channel.scaling_keys[k] = {ai_channel->mScalingKeys[k].mTime, ai_channel->mScalingKeys[k].mValue};
 

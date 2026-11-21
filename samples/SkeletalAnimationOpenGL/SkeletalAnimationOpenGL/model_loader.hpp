@@ -24,7 +24,7 @@ class ModelLoader
 public:
     static Result<Box<Model>> from_file(const std::string &filename);
 
-    ~ModelLoader();
+    ~ModelLoader() = default;
 
     ModelLoader(const ModelLoader &) = delete;
     ModelLoader &operator=(const ModelLoader &) = delete;
@@ -39,7 +39,7 @@ private:
 
     Result<> setup_skeleton(aiNode *node, int32_t parent_index, std::vector<Model::Joint>& joints);
     Result<> process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes, std::vector<Model::Joint>& joints);
-    Result<Box<Mesh>> process_mesh(const aiScene *scene, aiMesh *mesh, std::vector<Model::Joint>& joints);
+    Result<Box<Mesh>> process_mesh(const aiScene *scene, aiNode *node, aiMesh *mesh, std::vector<Model::Joint>& joints);
     Result<> load_animations(const aiScene* scene, std::vector<Model::Animation>& animations);
 
     Result<GLuint> load_embedded_texture(const aiTexture *embedded_texture);

@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     static constexpr int32_t WINDOW_WIDTH = 800;
     static constexpr int32_t WINDOW_HEIGHT = 600;
 
-    std::string res_dir_path = "./res";
+    std::string res_dir_path = SAMPLE_RES_DIR;
     if (argc > 1) {
         res_dir_path = argv[1];
     }
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
         !std::filesystem::exists(fragment_shader_path)
     ) {
         std::fprintf(stderr, "[ERROR]: failed to find the 'res' dir.. try running '%s <path_to_res>'\n", argv[0]);
-        return -1;
+        return 1;
     }
 
     glutInit(&argc, argv);

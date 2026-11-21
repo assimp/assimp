@@ -27,19 +27,26 @@ struct ShaderHandle
     }
 };
 
-static Result<> compile_shader_from_file(const std::string& path, GLenum type, ShaderHandle& handle)
-{
-    std::string source;
-    
+static Result<> compile_shader_from_file(const std::string& path, GLenum type, ShaderHandle& handle, const std::string& source_prefix = "")
+{    
     std::ifstream file(path, std::ios::in | std::ios::binary);
     
     if (!file)
       return "failed to read the shader from file \"" + path + "\"";
-    
+ 
+    std::string source;
     {
         std::stringstream ss;
         ss << file.rdbuf();
         source = ss.str();
+
+        const auto p1 = source.find("#version");
+        const auto p2 = source.find("\n", p1);
+        if ((p1 == source.npos) || (p2 == source.npos))
+            return "shader does not have a #version line";
+
+        if (!source_prefix.empty())
+            source.insert(p2 + 1, source_prefix + "#line 2\n");
     }
 
     GLuint shader = glCreateShader(type);
@@ -87,6 +94,9 @@ App::~App()
     if (m_ubo_buffer)
         glDeleteBuffers(1, &m_ubo_buffer);
 
+    if (m_bone_ubo_buffer)
+        glDeleteBuffers(1, &m_bone_ubo_buffer);
+
     if (m_program)
         glDeleteProgram(m_program);
 }
@@ -96,7 +106,7 @@ Result<> App::init_pipeline(const std::string& vertex_shader_path,
 {
     {
         ShaderHandle vs, fs;
-        CHECK_RESULT(compile_shader_from_file(vertex_shader_path, GL_VERTEX_SHADER, vs));
+        CHECK_RESULT(compile_shader_from_file(vertex_shader_path, GL_VERTEX_SHADER, vs, "#define MAX_JOINT_COUNT " + std::to_string(Model::MAX_JOINT_COUNT) + "\n"));
         CHECK_RESULT(compile_shader_from_file(fragment_shader_path, GL_FRAGMENT_SHADER, fs));
 
         m_program = glCreateProgram();
@@ -116,10 +126,19 @@ Result<> App::init_pipeline(const std::string& vertex_shader_path,
       return "failed to link shader program: \"" + std::string(log.data()) + "\"";
     }
 
-    const GLuint block_index = glGetUniformBlockIndex(m_program, "UBO");
-    if (block_index == GL_INVALID_INDEX)
-      return "'UBO' uniform block not found in the vertex shader";
-    glUniformBlockBinding(m_program, block_index, UBO_BINDING);
+    {
+        const GLuint block_index = glGetUniformBlockIndex(m_program, "UBO");
+        if (block_index == GL_INVALID_INDEX)
+          return "'UBO' uniform block not found in the vertex shader";
+        glUniformBlockBinding(m_program, block_index, UBO_BINDING);
+    }
+
+    {
+        const GLuint block_index = glGetUniformBlockIndex(m_program, "BoneUBO");
+        if (block_index == GL_INVALID_INDEX)
+          return "'BoneUBO' uniform block not found in the vertex shader";
+        glUniformBlockBinding(m_program, block_index, BONE_UBO_BINDING);
+    }
 
     glUseProgram(m_program);
     glUniform1i(glGetUniformLocation(m_program, "diffuse_texture"), DIFFUSE_TEXTURE_UNIT);
@@ -135,6 +154,11 @@ Result<> App::init_graphics(const std::string& model_path)
     glGenBuffers(1, &m_ubo_buffer);
     glBindBuffer(GL_UNIFORM_BUFFER, m_ubo_buffer);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(UBO), nullptr, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    glGenBuffers(1, &m_bone_ubo_buffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_bone_ubo_buffer);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(BoneUBO), nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     glGenSamplers(1, &m_tex_sampler_state);
@@ -175,22 +199,32 @@ void App::on_render()
     glClearColor(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    if (!m_model)
+        return;
+
     Mat4::RotationY(-t, m_world);
 
-    UBO ubo;
-    ubo.world = transposed(m_world);
-    ubo.view = transposed(m_view);
-    ubo.projection = transposed(m_projection);
+    {
+        m_ubo_data.world = transposed(m_world);
+        m_ubo_data.view = transposed(m_view);
+        m_ubo_data.projection = transposed(m_projection);
+
+        for (uint32_t i = 0; i < Model::MAX_JOINT_COUNT; i++)
+            m_bone_ubo_data.bones[i] = transposed(m_model->get_joint_transforms()[i]);
+    }
+
     glBindBuffer(GL_UNIFORM_BUFFER, m_ubo_buffer);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ubo), &ubo);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(m_ubo_data), &m_ubo_data);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_bone_ubo_buffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(m_bone_ubo_data), &m_bone_ubo_data);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     glUseProgram(m_program);
     glBindBufferBase(GL_UNIFORM_BUFFER, UBO_BINDING, m_ubo_buffer);
+    glBindBufferBase(GL_UNIFORM_BUFFER, BONE_UBO_BINDING, m_bone_ubo_buffer);
     glBindSampler(DIFFUSE_TEXTURE_UNIT, m_tex_sampler_state);
 
-    if (m_model)
-      m_model->draw();
+    m_model->draw();
 }
 
 void App::on_resize(int32_t width, int32_t height)

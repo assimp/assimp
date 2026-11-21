@@ -14,13 +14,14 @@
 class Model
 {
 public:
+    static constexpr uint32_t MAX_JOINT_COUNT = 64;
+
     struct Joint
     {
         int32_t parent_index{-1};
-        
+
         Mat4 offset_matrix{};
         Mat4 bind_transform{};
-        Mat4 current_transform{};
     };
 
 public:
@@ -31,6 +32,8 @@ public:
 
     void draw();
 
+    const Mat4* get_joint_transforms() const { return m_joint_transforms; }
+
 private:
     Model() = default;
 
@@ -39,6 +42,7 @@ private:
     std::vector<GLuint> m_textures;
     std::vector<Joint> m_joints;
     Mat4 m_global_inverse_transform{};
+    Mat4 m_joint_transforms[MAX_JOINT_COUNT];
 
     friend class ModelLoader;
 };

@@ -53,6 +53,9 @@ Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
     if (result.is_error())
         return result.get_error();
 
+    for (uint32_t i = 0; i < Model::MAX_JOINT_COUNT; i++)
+        model->m_joint_transforms[i] = Mat4{}; // Default constructor gives identity matrix
+
     return model;
 }
 
@@ -73,8 +76,11 @@ Result<> ModelLoader::setup_skeleton(aiNode *node, int32_t parent_index, std::ve
     
     Model::Joint joint{};
     joint.parent_index = parent_index;
-    joint.current_transform = joint.bind_transform = node->mTransformation;
+    joint.bind_transform = node->mTransformation;
     joints.push_back(joint);
+
+    if (joints.size() > Model::MAX_JOINT_COUNT)
+        return "model contains too many joints";
 
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {

@@ -186,6 +186,27 @@ TEST_F(utPLYImportExport, importTruncatedBinaryPLY) {
     EXPECT_EQ(nullptr, importer.ReadFileFromMemory(truncated.data(), truncated.size(), 0, "ply"));
 }
 
+TEST_F(utPLYImportExport, importBinaryPLYEndingInsideValueAtBlockBoundary) {
+    // The importer reads binary data in blocks of 1 MiB. Make the file end two bytes after
+    // the start of a float that crosses the end of the first block, so that the next block
+    // does not complete it.
+    const size_t blockSize = 1024 * 1024;
+    std::string header = "ply\n"
+                         "format binary_little_endian 1.0\n"
+                         "element vertex 100000\n"
+                         "property float x\n"
+                         "property float y\n"
+                         "property float z\n";
+    while ((blockSize - (header.size() + std::string("end_header\n").size())) % 4 != 2) {
+        header += "comment x\n";
+    }
+    header += "end_header\n";
+    const std::string data = header + std::string(blockSize - header.size() + 1, '\0');
+
+    Assimp::Importer importer;
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(data.data(), data.size(), 0, "ply"));
+}
+
 TEST_F(utPLYImportExport, vertexColorTest) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", aiProcess_ValidateDataStructure);

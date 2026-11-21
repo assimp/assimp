@@ -903,6 +903,10 @@ bool PropertyInstance::ParseValueBinary(IOStreamBuffer<char> &streamBuffer,
         } else {
             throw DeadlyImportError("Invalid .ply file: File corrupted");
         }
+        // the file may end inside this value, so that even the next block does not complete it
+        if (bufferSize < lsize) {
+            throw DeadlyImportError("Invalid .ply file: File corrupted");
+        }
     }
 
     bool ret = true;

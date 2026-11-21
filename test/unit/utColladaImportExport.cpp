@@ -609,6 +609,55 @@ TEST_F(utColladaZaeImportExport, importMakeHumanTest) {
     EXPECT_STREQ("1.4.1", value.C_Str());
 }
 
+// Animation channel whose value accessor describes two 4x4 matrices, backed by
+// a float array that holds the given number of values.
+static std::string makeAnimationWithValueCount(unsigned int valueCount) {
+    std::string values;
+    for (unsigned int i = 0; i < valueCount; ++i) {
+        values += (i % 5 == 0) ? "1 " : "0 ";
+    }
+    return R"(<?xml version="1.0" encoding="utf-8"?>
+<COLLADA version="1.4.1">
+  <library_animations>
+    <animation id="a">
+      <source id="in">
+        <float_array id="in-a" count="2">0 1</float_array>
+        <technique_common><accessor source="#in-a" count="2" stride="1"><param name="TIME" type="float"/></accessor></technique_common>
+      </source>
+      <source id="out">
+        <float_array id="out-a" count=")" + std::to_string(valueCount) + R"(">)" + values + R"(</float_array>
+        <technique_common><accessor source="#out-a" count="2" stride="16"><param name="TRANSFORM" type="float4x4"/></accessor></technique_common>
+      </source>
+      <sampler id="smp"><input semantic="INPUT" source="#in"/><input semantic="OUTPUT" source="#out"/></sampler>
+      <channel source="#smp" target="n/transform"/>
+    </animation>
+  </library_animations>
+  <library_visual_scenes>
+    <visual_scene id="s"><node id="n" name="n"><matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix></node></visual_scene>
+  </library_visual_scenes>
+  <scene><instance_visual_scene url="#s"/></scene>
+</COLLADA>)";
+}
+
+TEST_F(utColladaImportExport, animationValueAccessorWithinDataArray) {
+    const std::string data = makeAnimationWithValueCount(32);
+    Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(data.c_str(), data.size(), 0);
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(1u, scene->mNumAnimations);
+}
+
+TEST_F(utColladaImportExport, animationValueAccessorPastDataArray) {
+    // Only the first of the two matrices is present.
+    const std::string shortData = makeAnimationWithValueCount(16);
+    Importer importer;
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(shortData.c_str(), shortData.size(), 0));
+
+    // No values at all.
+    const std::string emptyData = makeAnimationWithValueCount(0);
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(emptyData.c_str(), emptyData.size(), 0));
+}
+
 static constexpr  char kData[] = " \
 <?xml version=\"1.0\" encoding=\"utf-8\"?> \
 <COLLADA version=\"1.4.1\"> \

@@ -93,7 +93,9 @@ void AddNodeMetaData(aiNode *node, const std::string &key, const T &value) {
 // Reads a float value from an accessor and its data array.
 static ai_real ReadFloat(const Accessor &pAccessor, const Data &pData, size_t pIndex, size_t pOffset) {
     const size_t pos = pAccessor.mStride * pIndex + pAccessor.mOffset + pOffset;
-    ai_assert(pos < pData.mValues.size());
+    if (pos >= pData.mValues.size()) {
+        throw DeadlyImportError("Collada: accessor reads past the end of its data array.");
+    }
     return pData.mValues[pos];
 }
 

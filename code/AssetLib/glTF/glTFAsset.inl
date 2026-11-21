@@ -1147,8 +1147,11 @@ inline void Asset::ReadBinaryHeader(IOStream &stream) {
     static_assert(std::numeric_limits<uint32_t>::max() <= std::numeric_limits<size_t>::max(), "size_t must be at least 32bits");
     mSceneLength = static_cast<size_t>(header.sceneLength); // Can't be larger than 4GB (max. uint32_t)
     // The scene is read into a buffer of this size before anything else is checked,
-    // so do not accept a length that the rest of the file cannot hold
-    if (mSceneLength > stream.FileSize() - stream.Tell()) {
+    // so do not accept a length that the rest of the file cannot hold. A stream that
+    // reports less than what has already been read cannot be trusted either.
+    const size_t fileSize = stream.FileSize();
+    const size_t position = stream.Tell();
+    if (position > fileSize || mSceneLength > fileSize - position) {
         throw DeadlyImportError("GLTF: JSON size exceeds the file size");
     }
 

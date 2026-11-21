@@ -179,6 +179,17 @@ TEST_F(utglTF2ImportExport, binaryJsonChunkLengthLargerThanFile) {
     importer.SetIOHandler(new Assimp::ReadSizeRecordingIOSystem("test.glb", data, sizeof(data), largestRead));
     EXPECT_EQ(nullptr, importer.ReadFile("test.glb", 0));
     EXPECT_LT(largestRead, 4096u);
+
+    // An 8 KB declaration: the buffer can be allocated anywhere, so without the check the
+    // read of the declared size would always be recorded
+    static const unsigned char smaller[] = {
+        'g', 'l', 'T', 'F', 2, 0, 0, 0, 22, 0, 0, 0, 0, 0x20, 0, 0, 'J', 'S', 'O', 'N', '{', '}'
+    };
+    size_t smallerLargestRead = 0;
+    Assimp::Importer smallerImporter;
+    smallerImporter.SetIOHandler(new Assimp::ReadSizeRecordingIOSystem("test.glb", smaller, sizeof(smaller), smallerLargestRead));
+    EXPECT_EQ(nullptr, smallerImporter.ReadFile("test.glb", 0));
+    EXPECT_LT(smallerLargestRead, 4096u);
 }
 
 TEST_F(utglTF2ImportExport, importglTF2_KHR_materials_pbrSpecularGlossiness) {

@@ -128,6 +128,15 @@ TEST_F(utglTFImportExport, binarySceneLengthLargerThanFile) {
     importer.SetIOHandler(new Assimp::ReadSizeRecordingIOSystem("test.glb", reinterpret_cast<const uint8_t *>(data.data()), data.size(), largestRead));
     EXPECT_EQ(nullptr, importer.ReadFile("test.glb", 0));
     EXPECT_LT(largestRead, 4096u);
+
+    // An 8 KB declaration: the buffer can be allocated anywhere, so without the check the
+    // read of the declared size would always be recorded
+    const std::string smaller = makeBinaryTriangle(0x2000u);
+    size_t smallerLargestRead = 0;
+    Assimp::Importer smallerImporter;
+    smallerImporter.SetIOHandler(new Assimp::ReadSizeRecordingIOSystem("test.glb", reinterpret_cast<const uint8_t *>(smaller.data()), smaller.size(), smallerLargestRead));
+    EXPECT_EQ(nullptr, smallerImporter.ReadFile("test.glb", 0));
+    EXPECT_LT(smallerLargestRead, 4096u);
 }
 
 TEST_F(utglTFImportExport, sceneMetadata) {

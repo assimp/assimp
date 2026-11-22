@@ -1214,7 +1214,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
     for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
         const std::vector<aiVector2D> &uvs = mesh.GetTextureCoords(i);
         if (uvs.empty()) {
-            break;
+            continue;
         }
 
         aiVector3D *out_uv = out_mesh->mTextureCoords[i] = new aiVector3D[vertices.size()];
@@ -1231,7 +1231,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
     for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
         const std::vector<aiColor4D> &colors = mesh.GetVertexColors(i);
         if (colors.empty()) {
-            break;
+            continue;
         }
 
         out_mesh->mColors[i] = new aiColor4D[vertices.size()];
@@ -1445,7 +1445,7 @@ unsigned int FBXConverter::ConvertMeshMultiMaterial(const MeshGeometry &mesh, co
     for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i, ++num_vcs) {
         const std::vector<aiColor4D> &colors = mesh.GetVertexColors(i);
         if (colors.empty()) {
-            break;
+            continue;
         }
 
         out_mesh->mColors[i] = new aiColor4D[count_vertices];

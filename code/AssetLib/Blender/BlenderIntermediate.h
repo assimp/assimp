@@ -174,6 +174,13 @@ namespace Blender {
 
         // Camera objects (for Action -> aiNodeAnim), filled during ConvertNode.
         std::vector<const Object *> camera_objects;
+        /** Armature objects (bone hierarchy + pose Action -> aiNodeAnim). */
+        std::vector<const Object *> armature_objects;
+        /**
+         * Map Armature Object name -> bone rest name used as aiNode::mName
+         * (unique: "ArmatureObj|BoneName") for pose channel targeting.
+         */
+        std::unordered_map<std::string, std::unordered_map<std::string, std::string>> armatureBoneNodeNames;
 
         // original file data
         const FileDatabase& db;

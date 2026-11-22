@@ -172,11 +172,55 @@ void Structure ::Convert<FCurve>(
 
 //--------------------------------------------------------------------------------
 template <>
+void Structure ::Convert<Bone>(
+        Bone &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.parent, "*parent", db);
+    ReadField<ErrorPolicy_Igno>(dest.childbase, "childbase", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
+    ReadFieldArray2<ErrorPolicy_Igno>(dest.arm_mat, "arm_mat", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bArmature>(
+        bArmature &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Warn>(dest.id, "id", db);
+    ReadField<ErrorPolicy_Igno>(dest.bonebase, "bonebase", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<ActionChannelBag>(
+        ActionChannelBag &dest,
+        const FileDatabase &db) const {
+    // DNA: FCurve **fcurve_array (count from block size / pointer width).
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.fcurve_array, "**fcurve_array", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<ActionStripKeyframeData>(
+        ActionStripKeyframeData &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.channelbag_array, "**channelbag_array", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
 void Structure ::Convert<bAction>(
         bAction &dest,
         const FileDatabase &db) const {
     ReadField<ErrorPolicy_Warn>(dest.id, "id", db);
     ReadField<ErrorPolicy_Igno>(dest.curves, "curves", db);
+    // Layered Actions (Blender 4.4+/5): strip keyframe payloads with FCurve bags.
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.strip_keyframe_data_array, "**strip_keyframe_data_array", db);
     db.reader->IncPtr(size);
 }
 
@@ -1304,6 +1348,10 @@ void DNA::RegisterConverters() {
 
     converters["Object"] = DNA::FactoryPair(&Structure::Allocate<Object>, &Structure::Convert<Object>);
     converters["BezTriple"] = DNA::FactoryPair(&Structure::Allocate<BezTriple>, &Structure::Convert<BezTriple>);
+    converters["Bone"] = DNA::FactoryPair(&Structure::Allocate<Bone>, &Structure::Convert<Bone>);
+    converters["bArmature"] = DNA::FactoryPair(&Structure::Allocate<bArmature>, &Structure::Convert<bArmature>);
+    converters["ActionChannelBag"] = DNA::FactoryPair(&Structure::Allocate<ActionChannelBag>, &Structure::Convert<ActionChannelBag>);
+    converters["ActionStripKeyframeData"] = DNA::FactoryPair(&Structure::Allocate<ActionStripKeyframeData>, &Structure::Convert<ActionStripKeyframeData>);
     converters["FCurve"] = DNA::FactoryPair(&Structure::Allocate<FCurve>, &Structure::Convert<FCurve>);
     converters["bAction"] = DNA::FactoryPair(&Structure::Allocate<bAction>, &Structure::Convert<bAction>);
     converters["NlaStrip"] = DNA::FactoryPair(&Structure::Allocate<NlaStrip>, &Structure::Convert<NlaStrip>);

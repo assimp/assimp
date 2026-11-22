@@ -837,6 +837,8 @@ struct Object final : ElemBase {
         Type_LATTICE = 22
 
         // DNA_object_types.h / bpy.types.Object.type:
+        ,
+        Type_ARMATURE = 25
         // legacy Grease Pencil: OB_GPENCIL_LEGACY, bpy 'GPENCIL'
         ,
         Type_GPENCIL_LEGACY = 26
@@ -1180,10 +1182,48 @@ struct FCurve final : ElemBase {
             array_index(0) {}
 };
 
-/** DNA bAction - named Action with FCurve list. */
+/** DNA Bone - rest pose bone in an Armature. */
+struct Bone final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    std::shared_ptr<Bone> parent WARN;
+    ListBase childbase; // Bone
+    char name[64];
+    float arm_mat[4][4];
+
+    Bone() {
+        memset(name, 0, sizeof name);
+        for (unsigned i = 0; i < 4; ++i) {
+            for (unsigned j = 0; j < 4; ++j) {
+                arm_mat[i][j] = (i == j) ? 1.f : 0.f;
+            }
+        }
+    }
+};
+
+/** DNA bArmature - Object.data for OB_ARMATURE. */
+struct bArmature final : ElemBase {
+    ID id;
+    ListBase bonebase; // root Bone list
+};
+
+/**
+ * DNA ActionChannelBag - layered Action FCurve bag (Blender 4.4+ / 5.x).
+ * DNA type name is ActionChannelBag (capital B).
+ */
+struct ActionChannelBag final : ElemBase {
+    vector<std::shared_ptr<FCurve>> fcurve_array; // DNA **fcurve_array
+};
+
+/** DNA ActionStripKeyframeData - strip payload holding channelbags. */
+struct ActionStripKeyframeData final : ElemBase {
+    vector<std::shared_ptr<ActionChannelBag>> channelbag_array; // **channelbag_array
+};
+
+/** DNA bAction - legacy curves ListBase and/or layered strip keyframe data. */
 struct bAction final : ElemBase {
     ID id;
-    ListBase curves;
+    ListBase curves; // legacy FCurve list (pre-layered)
+    vector<std::shared_ptr<ActionStripKeyframeData>> strip_keyframe_data_array;
 };
 
 /** DNA NlaStrip - references a bAction on a track. */

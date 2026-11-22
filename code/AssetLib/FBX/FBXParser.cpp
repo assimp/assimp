@@ -574,7 +574,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
     }
     // deflate cannot expand data by more than 1032:1, so a larger element count is not backed
     // by the compressed data that follows; reject it before allocating the buffer
-    if (encmode == 1 && full_length64 / 1032 > static_cast<uint64_t>(comp_len)) {
+    if (encmode == 1 && full_length64 > static_cast<uint64_t>(comp_len) * 1032) {
         ParseError("binary data array length does not match its compressed data", &el);
     }
 

@@ -74,6 +74,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -665,12 +666,11 @@ void BlendPushCameraActionAnim(std::vector<aiAnimation *> &anims, const Assimp::
     anims.push_back(anim);
 }
 
-void BlendConvertCameraAnimations(aiScene *out, Assimp::Blender::ConversionData &conv_data) {
+void BlendConvertCameraAnimations(std::vector<aiAnimation *> &anims, Assimp::Blender::ConversionData &conv_data) {
     using namespace Assimp::Blender;
-    if (out == nullptr || conv_data.camera_objects.empty()) {
+    if (conv_data.camera_objects.empty()) {
         return;
     }
-    std::vector<aiAnimation *> anims;
     std::set<std::pair<const Object *, const bAction *>> seen;
     for (const Object *obj : conv_data.camera_objects) {
         if (obj == nullptr || !obj->adt) {
@@ -707,12 +707,450 @@ void BlendConvertCameraAnimations(aiScene *out, Assimp::Blender::ConversionData 
             tcur = track->next;
         }
     }
-    if (anims.empty()) {
+}
+
+// Matrix helpers are defined later in this TU (same anonymous namespace).
+void BlendIdentityM4(float m[4][4]);
+void BlendMulM3(float r[3][3], const float a[3][3], const float b[3][3]);
+void BlendMulM4(float r[4][4], const float a[4][4], const float b[4][4]);
+void BlendSizeToMat3(float m[3][3], const float size[3]);
+void BlendQuatToMat3(float m[3][3], const float q[4]);
+void BlendEulXYZToMat3(float m[3][3], const float eul[3]);
+void BlendCopyMat4ToAi(aiMatrix4x4 &out, const float m[4][4]);
+
+const Assimp::Blender::Bone *BlendCastBone(const Assimp::Blender::ElemBase *e) {
+    using namespace Assimp::Blender;
+    if (e == nullptr) {
+        return nullptr;
+    }
+    if (e->dna_type != nullptr && std::strcmp(e->dna_type, "Bone") != 0) {
+        return nullptr;
+    }
+    return static_cast<const Bone *>(e);
+}
+
+/** Parent-relative rest matrix from Bone.arm_mat (armature space). */
+void BlendBoneRestLocalM4(const Assimp::Blender::Bone *bone, const Assimp::Blender::Bone *parent,
+        float out[4][4]) {
+    if (bone == nullptr) {
+        BlendIdentityM4(out);
         return;
     }
-    out->mNumAnimations = static_cast<unsigned int>(anims.size());
-    out->mAnimations = new aiAnimation *[out->mNumAnimations];
-    std::copy(anims.begin(), anims.end(), out->mAnimations);
+    if (parent == nullptr) {
+        for (unsigned i = 0; i < 4; ++i) {
+            for (unsigned j = 0; j < 4; ++j) {
+                out[i][j] = bone->arm_mat[i][j];
+            }
+        }
+        return;
+    }
+    // local = inv(parent.arm_mat) * bone.arm_mat
+    aiMatrix4x4 parentAi, boneAi;
+    BlendCopyMat4ToAi(parentAi, parent->arm_mat);
+    BlendCopyMat4ToAi(boneAi, bone->arm_mat);
+    const aiMatrix4x4 localAi = parentAi.Inverse() * boneAi;
+    for (unsigned x = 0; x < 4; ++x) {
+        for (unsigned y = 0; y < 4; ++y) {
+            out[x][y] = localAi[y][x];
+        }
+    }
+}
+
+/** rna_path "pose.bones[\"Name\"].prop" -> bone name + property. */
+bool BlendParsePoseBoneRnaPath(const std::string &path, std::string &boneName, std::string &prop) {
+    static const char kPrefix[] = "pose.bones[\"";
+    constexpr size_t kPrefixLen = sizeof(kPrefix) - 1;
+    if (path.size() <= kPrefixLen || path.compare(0, kPrefixLen, kPrefix) != 0) {
+        return false;
+    }
+    const size_t endName = path.find("\"].", kPrefixLen);
+    if (endName == std::string::npos) {
+        return false;
+    }
+    boneName.assign(path, kPrefixLen, endName - kPrefixLen);
+    prop.assign(path, endName + 3, std::string::npos);
+    return !boneName.empty() && !prop.empty();
+}
+
+void BlendCollectActionFCurves(const Assimp::Blender::bAction &act, std::vector<const Assimp::Blender::FCurve *> &out) {
+    using namespace Assimp::Blender;
+    for (std::shared_ptr<ElemBase> cur = act.curves.first; cur;) {
+        const FCurve *fc = BlendCastFCurve(cur.get());
+        if (fc == nullptr) {
+            break;
+        }
+        out.push_back(fc);
+        cur = fc->next;
+    }
+    for (const std::shared_ptr<ActionStripKeyframeData> &strip : act.strip_keyframe_data_array) {
+        if (!strip) {
+            continue;
+        }
+        for (const std::shared_ptr<ActionChannelBag> &bag : strip->channelbag_array) {
+            if (!bag) {
+                continue;
+            }
+            for (const std::shared_ptr<FCurve> &fc : bag->fcurve_array) {
+                if (fc) {
+                    out.push_back(fc.get());
+                }
+            }
+        }
+    }
+}
+
+struct BlendPoseBoneCurves {
+    const Assimp::Blender::FCurve *loc[3];
+    const Assimp::Blender::FCurve *eul[3];
+    const Assimp::Blender::FCurve *quat[4];
+    const Assimp::Blender::FCurve *scl[3];
+    BlendPoseBoneCurves() {
+        for (int i = 0; i < 3; ++i) {
+            loc[i] = eul[i] = scl[i] = nullptr;
+        }
+        for (int i = 0; i < 4; ++i) {
+            quat[i] = nullptr;
+        }
+    }
+    bool HasAny() const {
+        for (int i = 0; i < 3; ++i) {
+            if (loc[i] || eul[i] || scl[i]) {
+                return true;
+            }
+        }
+        for (int i = 0; i < 4; ++i) {
+            if (quat[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+    bool PreferQuat() const {
+        for (int i = 0; i < 4; ++i) {
+            if (quat[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+void BlendPoseBasisToMat4(const BlendPoseBoneCurves &c, float t, float r_mat[4][4]) {
+    // Blender pose-channel DNA defaults: loc 0, eul 0, quat identity (w=1), scale 1.
+    float loc[3] = { 0.f, 0.f, 0.f };
+    float eul[3] = { 0.f, 0.f, 0.f };
+    float quat[4] = { 1.f, 0.f, 0.f, 0.f };
+    float scl[3] = { 1.f, 1.f, 1.f };
+    for (int a = 0; a < 3; ++a) {
+        if (c.loc[a]) {
+            loc[a] = BlendEvalFCurve(*c.loc[a], t);
+        }
+        if (c.eul[a]) {
+            eul[a] = BlendEvalFCurve(*c.eul[a], t);
+        }
+        if (c.scl[a]) {
+            scl[a] = BlendEvalFCurve(*c.scl[a], t);
+        }
+    }
+    for (int a = 0; a < 4; ++a) {
+        if (c.quat[a]) {
+            quat[a] = BlendEvalFCurve(*c.quat[a], t);
+        }
+    }
+
+    float smat[3][3], rmat[3][3], tmat[3][3];
+    BlendSizeToMat3(smat, scl);
+    if (c.PreferQuat()) {
+        BlendQuatToMat3(rmat, quat);
+    } else {
+        BlendEulXYZToMat3(rmat, eul);
+    }
+    BlendMulM3(tmat, rmat, smat);
+    BlendIdentityM4(r_mat);
+    for (unsigned int i = 0; i < 3; ++i) {
+        for (unsigned int j = 0; j < 3; ++j) {
+            r_mat[i][j] = tmat[i][j];
+        }
+    }
+    r_mat[3][0] = loc[0];
+    r_mat[3][1] = loc[1];
+    r_mat[3][2] = loc[2];
+}
+
+aiNodeAnim *BlendBuildPoseBoneNodeAnim(const std::string &nodeName, const float restLocal[4][4],
+        const BlendPoseBoneCurves &curves) {
+    using namespace Assimp::Blender;
+    if (!curves.HasAny()) {
+        return nullptr;
+    }
+    std::set<float> times;
+    auto collect = [&](const FCurve *fc) {
+        if (!fc) {
+            return;
+        }
+        for (const BezTriple &b : fc->bezt) {
+            times.insert(b.vec[1][0]);
+        }
+    };
+    for (int i = 0; i < 3; ++i) {
+        collect(curves.loc[i]);
+        collect(curves.eul[i]);
+        collect(curves.scl[i]);
+    }
+    for (int i = 0; i < 4; ++i) {
+        collect(curves.quat[i]);
+    }
+    if (times.empty()) {
+        return nullptr;
+    }
+
+    std::unique_ptr<aiNodeAnim> nd(new aiNodeAnim());
+    nd->mNodeName.Set(nodeName.c_str());
+    nd->mNumPositionKeys = nd->mNumRotationKeys = nd->mNumScalingKeys = static_cast<unsigned int>(times.size());
+    nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
+    nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
+    nd->mScalingKeys = new aiVectorKey[nd->mNumScalingKeys];
+
+    unsigned int i = 0;
+    for (float t : times) {
+        float basis[4][4], localBl[4][4];
+        BlendPoseBasisToMat4(curves, t, basis);
+        BlendMulM4(localBl, restLocal, basis);
+        aiMatrix4x4 localAi;
+        BlendCopyMat4ToAi(localAi, localBl);
+        aiVector3D scaling, position;
+        aiQuaternion rotation;
+        localAi.Decompose(scaling, rotation, position);
+        nd->mPositionKeys[i].mTime = t;
+        nd->mPositionKeys[i].mValue = position;
+        nd->mRotationKeys[i].mTime = t;
+        nd->mRotationKeys[i].mValue = rotation;
+        nd->mScalingKeys[i].mTime = t;
+        nd->mScalingKeys[i].mValue = scaling;
+        ++i;
+    }
+    return nd.release();
+}
+
+void BlendFindBoneRestLocal(const Assimp::Blender::Bone *bone, const Assimp::Blender::Bone *parent,
+        const std::string &wantName, float out[4][4], bool &found) {
+    using namespace Assimp::Blender;
+    if (bone == nullptr || found) {
+        return;
+    }
+    if (wantName == bone->name) {
+        BlendBoneRestLocalM4(bone, parent, out);
+        found = true;
+        return;
+    }
+    for (std::shared_ptr<ElemBase> cur = bone->childbase.first; cur;) {
+        const Bone *child = BlendCastBone(cur.get());
+        if (child == nullptr) {
+            break;
+        }
+        BlendFindBoneRestLocal(child, bone, wantName, out, found);
+        if (found) {
+            return;
+        }
+        cur = child->next;
+    }
+}
+
+bool BlendArmatureBoneRestLocal(const Assimp::Blender::bArmature &arm, const std::string &boneName, float out[4][4]) {
+    using namespace Assimp::Blender;
+    bool found = false;
+    for (std::shared_ptr<ElemBase> cur = arm.bonebase.first; cur;) {
+        const Bone *bone = BlendCastBone(cur.get());
+        if (bone == nullptr) {
+            break;
+        }
+        BlendFindBoneRestLocal(bone, nullptr, boneName, out, found);
+        if (found) {
+            return true;
+        }
+        cur = bone->next;
+    }
+    return false;
+}
+
+void BlendPushArmatureActionAnim(std::vector<aiAnimation *> &anims, const Assimp::Blender::Object &obj,
+        const Assimp::Blender::bAction &act, Assimp::Blender::ConversionData &conv_data) {
+    using namespace Assimp::Blender;
+    if (!obj.data || (obj.data->dna_type != nullptr && std::strcmp(obj.data->dna_type, "bArmature") != 0)) {
+        return;
+    }
+    const bArmature *arm = static_cast<const bArmature *>(obj.data.get());
+    const std::string armName = obj.id.name + 2;
+    const auto nameIt = conv_data.armatureBoneNodeNames.find(armName);
+    if (nameIt == conv_data.armatureBoneNodeNames.end() || nameIt->second.empty()) {
+        return;
+    }
+
+    std::vector<const FCurve *> fcurves;
+    BlendCollectActionFCurves(act, fcurves);
+    if (fcurves.empty()) {
+        return;
+    }
+
+    std::unordered_map<std::string, BlendPoseBoneCurves> byBone;
+    for (const FCurve *fc : fcurves) {
+        if (fc == nullptr) {
+            continue;
+        }
+        std::string boneName, prop;
+        if (!BlendParsePoseBoneRnaPath(fc->rna_path, boneName, prop)) {
+            continue;
+        }
+        if (nameIt->second.find(boneName) == nameIt->second.end()) {
+            continue;
+        }
+        BlendPoseBoneCurves &bag = byBone[boneName];
+        if (prop == "location" && fc->array_index >= 0 && fc->array_index < 3) {
+            bag.loc[fc->array_index] = fc;
+        } else if (prop == "rotation_euler" && fc->array_index >= 0 && fc->array_index < 3) {
+            bag.eul[fc->array_index] = fc;
+        } else if (prop == "rotation_quaternion" && fc->array_index >= 0 && fc->array_index < 4) {
+            bag.quat[fc->array_index] = fc;
+        } else if (prop == "scale" && fc->array_index >= 0 && fc->array_index < 3) {
+            bag.scl[fc->array_index] = fc;
+        }
+    }
+    if (byBone.empty()) {
+        return;
+    }
+
+    std::vector<aiNodeAnim *> channels;
+    double tmax = 0.0;
+    for (const auto &kv : byBone) {
+        float restLocal[4][4];
+        if (!BlendArmatureBoneRestLocal(*arm, kv.first, restLocal)) {
+            continue;
+        }
+        const auto nodeNameIt = nameIt->second.find(kv.first);
+        if (nodeNameIt == nameIt->second.end()) {
+            continue;
+        }
+        aiNodeAnim *ch = BlendBuildPoseBoneNodeAnim(nodeNameIt->second, restLocal, kv.second);
+        if (ch == nullptr) {
+            continue;
+        }
+        for (unsigned int k = 0; k < ch->mNumPositionKeys; ++k) {
+            tmax = std::max(tmax, ch->mPositionKeys[k].mTime);
+        }
+        channels.push_back(ch);
+    }
+    if (channels.empty()) {
+        return;
+    }
+
+    aiAnimation *anim = new aiAnimation();
+    anim->mName.Set(act.id.name[0] ? act.id.name + 2 : armName.c_str());
+    anim->mTicksPerSecond = 24.0;
+    anim->mDuration = tmax;
+    anim->mNumChannels = static_cast<unsigned int>(channels.size());
+    anim->mChannels = new aiNodeAnim *[anim->mNumChannels];
+    std::copy(channels.begin(), channels.end(), anim->mChannels);
+    anims.push_back(anim);
+}
+
+void BlendConvertArmatureAnimations(std::vector<aiAnimation *> &anims, Assimp::Blender::ConversionData &conv_data) {
+    using namespace Assimp::Blender;
+    if (conv_data.armature_objects.empty()) {
+        return;
+    }
+    std::set<std::pair<const Object *, const bAction *>> seen;
+    for (const Object *obj : conv_data.armature_objects) {
+        if (obj == nullptr || !obj->adt) {
+            continue;
+        }
+        auto tryAct = [&](const std::shared_ptr<bAction> &act) {
+            if (!act || !seen.insert({ obj, act.get() }).second) {
+                return;
+            }
+            BlendPushArmatureActionAnim(anims, *obj, *act, conv_data);
+        };
+        tryAct(obj->adt->action);
+        for (std::shared_ptr<ElemBase> tcur = obj->adt->nla_tracks.first; tcur;) {
+            const NlaTrack *track = nullptr;
+            if (tcur->dna_type == nullptr || std::strcmp(tcur->dna_type, "NlaTrack") == 0) {
+                track = static_cast<const NlaTrack *>(tcur.get());
+            }
+            if (track == nullptr) {
+                break;
+            }
+            for (std::shared_ptr<ElemBase> scur = track->strips.first; scur;) {
+                const NlaStrip *strip = nullptr;
+                if (scur->dna_type == nullptr || std::strcmp(scur->dna_type, "NlaStrip") == 0) {
+                    strip = static_cast<const NlaStrip *>(scur.get());
+                }
+                if (strip == nullptr) {
+                    break;
+                }
+                tryAct(strip->act);
+                scur = strip->next;
+            }
+            tcur = track->next;
+        }
+    }
+}
+
+/** Recursively emit bone aiNodes under an Armature object node. */
+void BlendEmitBoneNodeTree(aiNode *parentNode, const Assimp::Blender::Bone *bone,
+        const Assimp::Blender::Bone *parentBone, const Assimp::Blender::Object &armObj,
+        Assimp::Blender::ConversionData &conv_data, std::vector<aiNode *> &outChildren) {
+    using namespace Assimp::Blender;
+    if (bone == nullptr || parentNode == nullptr) {
+        return;
+    }
+    const std::string armName = armObj.id.name + 2;
+    const std::string boneName = bone->name;
+    // Unique Assimp node name: ArmatureObject|BoneName (pose channels target this).
+    const std::string nodeName = armName + "|" + boneName;
+    conv_data.armatureBoneNodeNames[armName][boneName] = nodeName;
+
+    std::unique_ptr<aiNode> node(new aiNode(nodeName));
+    float restLocal[4][4];
+    BlendBoneRestLocalM4(bone, parentBone, restLocal);
+    BlendCopyMat4ToAi(node->mTransformation, restLocal);
+
+    std::vector<aiNode *> childNodes;
+    for (std::shared_ptr<ElemBase> cur = bone->childbase.first; cur;) {
+        const Bone *child = BlendCastBone(cur.get());
+        if (child == nullptr) {
+            break;
+        }
+        BlendEmitBoneNodeTree(node.get(), child, bone, armObj, conv_data, childNodes);
+        cur = child->next;
+    }
+    if (!childNodes.empty()) {
+        node->mNumChildren = static_cast<unsigned int>(childNodes.size());
+        node->mChildren = new aiNode *[node->mNumChildren];
+        for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+            node->mChildren[i] = childNodes[i];
+            node->mChildren[i]->mParent = node.get();
+        }
+    }
+    outChildren.push_back(node.release());
+}
+
+void BlendAttachArmatureBones(aiNode *armNode, const Assimp::Blender::Object &obj,
+        Assimp::Blender::ConversionData &conv_data, std::vector<aiNode *> &boneRoots) {
+    using namespace Assimp::Blender;
+    if (armNode == nullptr || !obj.data) {
+        return;
+    }
+    if (obj.data->dna_type != nullptr && std::strcmp(obj.data->dna_type, "bArmature") != 0) {
+        return;
+    }
+    const bArmature *arm = static_cast<const bArmature *>(obj.data.get());
+    for (std::shared_ptr<ElemBase> cur = arm->bonebase.first; cur;) {
+        const Bone *bone = BlendCastBone(cur.get());
+        if (bone == nullptr) {
+            break;
+        }
+        BlendEmitBoneNodeTree(armNode, bone, nullptr, obj, conv_data, boneRoots);
+        cur = bone->next;
+    }
 }
 
 /** Prefer legacy Image.packedfile; else first ImagePackedFile in packedfiles. */
@@ -2166,8 +2604,17 @@ void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const File
         conv.textures.dismiss();
     }
 
-    // Camera Actions (location / rotation_euler) -> aiNodeAnim, Assimp-usual (cf. MD5 camera / LWS).
-    BlendConvertCameraAnimations(out, conv);
+    // Camera Actions + Armature pose.bones Actions -> typed aiNodeAnim.
+    {
+        std::vector<aiAnimation *> anims;
+        BlendConvertCameraAnimations(anims, conv);
+        BlendConvertArmatureAnimations(anims, conv);
+        if (!anims.empty()) {
+            out->mNumAnimations = static_cast<unsigned int>(anims.size());
+            out->mAnimations = new aiAnimation *[out->mNumAnimations];
+            std::copy(anims.begin(), anims.end(), out->mAnimations);
+        }
+    }
 
     // acknowledge that the scene might come out incomplete
     // by Assimp's definition of `complete`: blender scenes
@@ -3288,6 +3735,11 @@ aiNode *BlenderImporter::ConvertNode(const Scene &in, const Object *obj, Convers
             }
         } break;
 
+        case Object ::Type_ARMATURE: {
+            CheckActualType(obj->data.get(), "bArmature");
+            conv_data.armature_objects.push_back(obj);
+        } break;
+
             // Grease Pencil 3 (bpy 'GREASEPENCIL' / OB_GREASE_PENCIL): no stroke mesh yet,
             // but register DNA materials so packed fill/stroke / node images embed+assign.
         case Object ::Type_GREASE_PENCIL: {
@@ -3356,9 +3808,20 @@ aiNode *BlenderImporter::ConvertNode(const Scene &in, const Object *obj, Convers
         BlendCopyMat4ToAi(node->mTransformation, out);
     }
 
-    if (children.size()) {
-        node->mNumChildren = static_cast<unsigned int>(children.size());
+    std::vector<aiNode *> boneRoots;
+    if (obj->type == Object::Type_ARMATURE) {
+        BlendAttachArmatureBones(node.get(), *obj, conv_data, boneRoots);
+    }
+
+    const size_t nChildObj = children.size();
+    const size_t nChildAll = nChildObj + boneRoots.size();
+    if (nChildAll) {
+        node->mNumChildren = static_cast<unsigned int>(nChildAll);
         aiNode **nd = node->mChildren = new aiNode *[node->mNumChildren]();
+        for (aiNode *bn : boneRoots) {
+            *nd = bn;
+            (*nd++)->mParent = node.get();
+        }
         for (const Object *nobj : children) {
             *nd = ConvertNode(in, nobj, conv_data, node->mTransformation * parentTransform);
             (*nd++)->mParent = node.get();

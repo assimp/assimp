@@ -82,12 +82,16 @@ TEST_F(BlendImportMaterials, testImportMaterial) {
     ASSERT_PROPERTY_EQ(aiColor3D(0.1f, 0.2f, 0.3f), "diffuse.color", diffuseColor);
     ASSERT_PROPERTY_EQ(0.4f, "diffuse.intensity", diffuseIntensity);
     ASSERT_PROPERTY_EQ(1, "diffuse.shader", diffuseShader);
-    ASSERT_PROPERTY_EQ(0, "diffuse.ramp", diffuseRamp);
+    // Presence: do not invent diffuse.ramp / specular.ramp (DNA has no reliable bool; was hard-coded 0).
+    {
+        int invent = 0;
+        ASSERT_EQ(aiReturn_FAILURE, alpha->Get("$mat.blend.diffuse.ramp", 0, 0, invent));
+        ASSERT_EQ(aiReturn_FAILURE, alpha->Get("$mat.blend.specular.ramp", 0, 0, invent));
+    }
 
     ASSERT_PROPERTY_EQ(aiColor3D(0.5f, 0.6f, 0.7f), "specular.color", specularColor);
     ASSERT_PROPERTY_EQ(0.8f, "specular.intensity", specularIntensity);
     ASSERT_PROPERTY_EQ(1, "specular.shader", specularShader);
-    ASSERT_PROPERTY_EQ(0, "specular.ramp", specularRamp);
     ASSERT_PROPERTY_EQ(9, "specular.hardness", specularHardness);
 
     ASSERT_PROPERTY_EQ(1, "transparency.use", transparencyUse);

@@ -110,6 +110,12 @@ template <> void Structure :: Convert<PackedFile> (
     ) const
 ;
 
+template <> void Structure :: Convert<ImagePackedFile> (
+    ImagePackedFile& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<Base> (
     Base& dest,
     const FileDatabase& db
@@ -124,6 +130,66 @@ template <> void Structure :: Convert<MTFace> (
 
 template <> void Structure :: Convert<Material> (
     Material& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<MaterialGPencilStyle> (
+    MaterialGPencilStyle& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<GreasePencil> (
+    GreasePencil& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNodeStack> (
+    bNodeStack& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNodeSocketValueFloat> (
+    bNodeSocketValueFloat& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNodeSocketValueRGBA> (
+    bNodeSocketValueRGBA& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<NodeShaderUVMap> (
+    NodeShaderUVMap& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNodeSocket> (
+    bNodeSocket& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNode> (
+    bNode& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNodeLink> (
+    bNodeLink& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNodeTree> (
+    bNodeTree& dest,
     const FileDatabase& db
     ) const
 ;
@@ -254,6 +320,42 @@ template <> void Structure :: Convert<Image> (
     ) const
 ;
 
+template <> void Structure :: Convert<BezTriple> (
+    BezTriple& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<FCurve> (
+    FCurve& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bAction> (
+    bAction& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<NlaStrip> (
+    NlaStrip& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<NlaTrack> (
+    NlaTrack& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<AnimData> (
+    AnimData& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure::Convert<CustomData>(
     CustomData& dest,
     const FileDatabase& db
@@ -262,6 +364,12 @@ template <> void Structure::Convert<CustomData>(
 
 template <> void Structure::Convert<CustomDataLayer>(
     CustomDataLayer& dest,
+    const FileDatabase& db
+    ) const
+    ;
+
+template <> void Structure::Convert<AttributeStorageDna>(
+    AttributeStorageDna& dest,
     const FileDatabase& db
     ) const
     ;

@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
 #include <deque>
+#include <unordered_map>
 #include <assimp/material.h>
 
 struct aiTexture;
@@ -167,6 +168,12 @@ namespace Blender {
 
         // next texture ID for each texture type, respectively
         unsigned int next_texture[aiTextureType_UNKNOWN+1];
+
+        // Dedupe embedded aiTexture by Blender Image* (packedfiles / packedfile).
+        std::unordered_map<const Image *, unsigned int> embeddedImageTexIndex;
+
+        // Camera objects (for Action -> aiNodeAnim), filled during ConvertNode.
+        std::vector<const Object *> camera_objects;
 
         // original file data
         const FileDatabase& db;

@@ -62,8 +62,42 @@ void Structure ::Convert<Object>(
     int temp = 0;
     ReadField<ErrorPolicy_Fail>(temp, "type", db);
     dest.type = static_cast<Assimp::Blender::Object::Type>(temp);
-    ReadFieldArray2<ErrorPolicy_Warn>(dest.obmat, "obmat", db);
-    ReadFieldArray2<ErrorPolicy_Warn>(dest.parentinv, "parentinv", db);
+
+    // World matrix: pre-4.1 `obmat`, briefly renamed `object_to_world` in DNA
+    // (file SDNA often still `obmat` via rename). Gone from DNA since 4.1 (runtime).
+    dest.has_world_matrix = false;
+    if (Get("obmat") != nullptr) {
+        ReadFieldArray2<ErrorPolicy_Warn>(dest.obmat, "obmat", db);
+        dest.has_world_matrix = true;
+    } else if (Get("object_to_world") != nullptr) {
+        ReadFieldArray2<ErrorPolicy_Warn>(dest.obmat, "object_to_world", db);
+        dest.has_world_matrix = true;
+    }
+
+    if (Get("parentinv") != nullptr) {
+        ReadFieldArray2<ErrorPolicy_Warn>(dest.parentinv, "parentinv", db);
+    }
+
+    // Local authored transform for >=4.1 compose fallback (BKE_object_to_mat4).
+    ReadFieldArray<ErrorPolicy_Igno>(dest.loc, "loc", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.dloc, "dloc", db);
+    if (Get("scale") != nullptr) {
+        ReadFieldArray<ErrorPolicy_Igno>(dest.scale, "scale", db);
+    } else if (Get("size") != nullptr) {
+        // Pre-2.60 DNA used `size` for scale.
+        ReadFieldArray<ErrorPolicy_Igno>(dest.scale, "size", db);
+    }
+    ReadFieldArray<ErrorPolicy_Igno>(dest.dscale, "dscale", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.rot, "rot", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.drot, "drot", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.quat, "quat", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.dquat, "dquat", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.rotAxis, "rotAxis", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.drotAxis, "drotAxis", db);
+    ReadField<ErrorPolicy_Igno>(dest.rotAngle, "rotAngle", db);
+    ReadField<ErrorPolicy_Igno>(dest.drotAngle, "drotAngle", db);
+    ReadField<ErrorPolicy_Igno>(dest.rotmode, "rotmode", db);
+
     ReadFieldArray<ErrorPolicy_Warn>(dest.parsubstr, "parsubstr", db);
     {
         std::shared_ptr<Object> parent;
@@ -76,8 +110,107 @@ void Structure ::Convert<Object>(
     ReadFieldPtr<ErrorPolicy_Warn>(dest.proxy_group, "*proxy_group", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.dup_group, "*dup_group", db);
     ReadFieldPtr<ErrorPolicy_Fail>(dest.data, "*data", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.adt, "*adt", db);
     ReadField<ErrorPolicy_Igno>(dest.modifiers, "modifiers", db);
 
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<BezTriple>(
+        BezTriple &dest,
+        const FileDatabase &db) const {
+    ReadFieldArray2<ErrorPolicy_Igno>(dest.vec, "vec", db);
+    ReadField<ErrorPolicy_Igno>(dest.ipo, "ipo", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<FCurve>(
+        FCurve &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadField<ErrorPolicy_Igno>(dest.totvert, "totvert", db);
+    ReadField<ErrorPolicy_Igno>(dest.array_index, "array_index", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.bezt, "*bezt", db);
+
+    // char *rna_path -> C string in a DATA block
+    dest.rna_path.clear();
+    try {
+        const Field &f = (*this)["*rna_path"];
+        const StreamReaderAny::pos old = db.reader->GetCurrentPos();
+        db.reader->IncPtr(f.offset);
+        Pointer ptrval;
+        Convert(ptrval, db);
+        db.reader->SetCurrentPos(old);
+        if (ptrval.val) {
+            const FileBlockHead *block = LocateFileBlockForAddress(ptrval, db);
+            if (block) {
+                const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
+                db.reader->SetCurrentPos(block->start + static_cast<size_t>(ptrval.val - block->address.val));
+                for (;;) {
+                    const char c = static_cast<char>(db.reader->GetI1());
+                    if (c == '\0') {
+                        break;
+                    }
+                    dest.rna_path.push_back(c);
+                    if (dest.rna_path.size() > 512) {
+                        break;
+                    }
+                }
+                db.reader->SetCurrentPos(pold);
+            }
+        }
+    } catch (const Error &) {
+        dest.rna_path.clear();
+    }
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bAction>(
+        bAction &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Warn>(dest.id, "id", db);
+    ReadField<ErrorPolicy_Igno>(dest.curves, "curves", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<NlaStrip>(
+        NlaStrip &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.act, "*act", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
+    ReadField<ErrorPolicy_Igno>(dest.start, "start", db);
+    ReadField<ErrorPolicy_Igno>(dest.end, "end", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<NlaTrack>(
+        NlaTrack &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadField<ErrorPolicy_Igno>(dest.strips, "strips", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<AnimData>(
+        AnimData &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.action, "*action", db);
+    ReadField<ErrorPolicy_Igno>(dest.nla_tracks, "nla_tracks", db);
     db.reader->IncPtr(size);
 }
 
@@ -292,6 +425,21 @@ void Structure ::Convert<PackedFile>(
 
 //--------------------------------------------------------------------------------
 template <>
+void Structure ::Convert<ImagePackedFile>(
+        ImagePackedFile &dest,
+        const FileDatabase &db) const {
+
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.packedfile, "*packedfile", db);
+    ReadField<ErrorPolicy_Igno>(dest.view, "view", db);
+    ReadField<ErrorPolicy_Igno>(dest.tile_number, "tile_number", db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.filepath, "filepath", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
 void Structure ::Convert<Base>(
         Base &dest,
         const FileDatabase &db) const {
@@ -459,6 +607,227 @@ void Structure ::Convert<Material>(
     ReadField<ErrorPolicy_Igno>(dest.seed1, "seed1", db);
     ReadField<ErrorPolicy_Igno>(dest.seed2, "seed2", db);
 
+    ReadField<ErrorPolicy_Igno>(dest.use_nodes, "use_nodes", db);
+    ReadField<ErrorPolicy_Igno>(dest.metallic, "metallic", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.nodetree, "*nodetree", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.gp_style, "*gp_style", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<MaterialGPencilStyle>(
+        MaterialGPencilStyle &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.sima, "*sima", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.ima, "*ima", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<GreasePencil>(
+        GreasePencil &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
+    // DNA: Material **material_array - same ResolvePointer(vector) path as Mesh::mat.
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.material_array, "**material_array", db);
+    ReadField<ErrorPolicy_Igno>(dest.material_array_size, "material_array_size", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bNodeStack>(
+        bNodeStack &dest,
+        const FileDatabase &db) const {
+    ReadFieldArray<ErrorPolicy_Igno>(dest.vec, "vec", db);
+    ReadField<ErrorPolicy_Igno>(dest.min, "min", db);
+    ReadField<ErrorPolicy_Igno>(dest.max, "max", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bNodeSocketValueFloat>(
+        bNodeSocketValueFloat &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Igno>(dest.subtype, "subtype", db);
+    ReadField<ErrorPolicy_Igno>(dest.value, "value", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bNodeSocketValueRGBA>(
+        bNodeSocketValueRGBA &dest,
+        const FileDatabase &db) const {
+    ReadFieldArray<ErrorPolicy_Igno>(dest.value, "value", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<NodeShaderUVMap>(
+        NodeShaderUVMap &dest,
+        const FileDatabase &db) const {
+    ReadFieldArray<ErrorPolicy_Igno>(dest.uv_map, "uv_map", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bNodeSocket>(
+        bNodeSocket &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.identifier, "identifier", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.idname, "idname", db);
+    ReadField<ErrorPolicy_Igno>(dest.type, "type", db);
+
+    // default_value is void* in DNA. Many .blend writers store the pointee DATA
+    // block with SDNAnr 0 (appears as "Link"), so typed ResolvePointer fails.
+    // Decode by socket datatype (SOCK_FLOAT / SOCK_RGBA) - never invent values.
+    dest.default_value.reset();
+    {
+        Pointer ptrval;
+        ptrval.val = 0;
+        const StreamReaderAny::pos old = db.reader->GetCurrentPos();
+        try {
+            const Field &f = (*this)["*default_value"];
+            db.reader->IncPtr(f.offset);
+            Convert(ptrval, db);
+        } catch (const Error &) {
+            ptrval.val = 0;
+        }
+        db.reader->SetCurrentPos(old);
+
+        // eNodeSocketDatatype: SOCK_FLOAT=0, SOCK_RGBA=2 (makesdna DNA_node_types.h).
+        const char *valueStruct = nullptr;
+        if (dest.type == 0) {
+            valueStruct = "bNodeSocketValueFloat";
+        } else if (dest.type == 2) {
+            valueStruct = "bNodeSocketValueRGBA";
+        }
+        if (ptrval.val && valueStruct != nullptr) {
+            const FileBlockHead *block = LocateFileBlockForAddress(ptrval, db);
+            const Structure *sVal = db.dna.Get(valueStruct);
+            if (block != nullptr && sVal != nullptr) {
+                DNA::FactoryPair builders = db.dna.GetBlobToStructureConverter(*sVal, db);
+                if (builders.first && builders.second) {
+                    const uint64_t cache_owner = (block->id == "DATA") ? block->owner_id.val : 0;
+                    db.cache(dest.default_value).get(*sVal, dest.default_value, ptrval, cache_owner);
+                    if (!dest.default_value) {
+                        const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
+                        db.reader->SetCurrentPos(
+                                block->start + static_cast<size_t>((ptrval.val - block->address.val)));
+                        dest.default_value = ((*sVal).*builders.first)();
+                        db.cache(dest.default_value).set(*sVal, dest.default_value, ptrval, cache_owner);
+                        ((*sVal).*builders.second)(dest.default_value, db);
+                        dest.default_value->dna_type = sVal->name.c_str();
+                        db.reader->SetCurrentPos(pold);
+                    }
+                }
+            }
+        } else if (ptrval.val) {
+            // Unknown socket datatype: try generic void* resolve (may still fail on SDNAnr 0).
+            ReadFieldPtr<ErrorPolicy_Igno>(dest.default_value, "*default_value", db);
+        }
+    }
+
+    ReadField<ErrorPolicy_Igno>(dest.ns, "ns", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bNode>(
+        bNode &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadField<ErrorPolicy_Igno>(dest.inputs, "inputs", db);
+    ReadField<ErrorPolicy_Igno>(dest.outputs, "outputs", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.idname, "idname", db);
+    // Older DNA: "type"; newer renamed to "type_legacy" in blender.git SDNA.
+    ReadField<ErrorPolicy_Igno>(dest.type, "type", db);
+    short typeLegacy = 0;
+    ReadField<ErrorPolicy_Igno>(typeLegacy, "type_legacy", db);
+    if (typeLegacy != 0) {
+        dest.type = typeLegacy;
+    }
+    ReadField<ErrorPolicy_Igno>(dest.custom1, "custom1", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.id, "*id", db);
+    // DNA *storage is void*. DATA blocks often have SDNAnr 0 ("Link"), so typed
+    // ResolvePointer fails - same as bNodeSocket.default_value. For UV Map nodes,
+    // force-decode as NodeShaderUVMap so uv_map names reach AI_MATKEY_UVWSRC.
+    dest.storage.reset();
+    {
+        Pointer ptrval;
+        ptrval.val = 0;
+        const StreamReaderAny::pos old = db.reader->GetCurrentPos();
+        try {
+            const Field &f = (*this)["*storage"];
+            db.reader->IncPtr(f.offset);
+            Convert(ptrval, db);
+        } catch (const Error &) {
+            ptrval.val = 0;
+        }
+        db.reader->SetCurrentPos(old);
+
+        const bool isUvMapNode =
+                (dest.idname[0] != '\0' && std::strcmp(dest.idname, "ShaderNodeUVMap") == 0) ||
+                dest.type == 311; // SH_NODE_UVMAP
+        if (ptrval.val && isUvMapNode) {
+            const FileBlockHead *block = LocateFileBlockForAddress(ptrval, db);
+            const Structure *sVal = db.dna.Get("NodeShaderUVMap");
+            if (block != nullptr && sVal != nullptr) {
+                DNA::FactoryPair builders = db.dna.GetBlobToStructureConverter(*sVal, db);
+                if (builders.first && builders.second) {
+                    const uint64_t cache_owner = (block->id == "DATA") ? block->owner_id.val : 0;
+                    db.cache(dest.storage).get(*sVal, dest.storage, ptrval, cache_owner);
+                    if (!dest.storage) {
+                        const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
+                        db.reader->SetCurrentPos(
+                                block->start + static_cast<size_t>((ptrval.val - block->address.val)));
+                        dest.storage = ((*sVal).*builders.first)();
+                        db.cache(dest.storage).set(*sVal, dest.storage, ptrval, cache_owner);
+                        ((*sVal).*builders.second)(dest.storage, db);
+                        dest.storage->dna_type = sVal->name.c_str();
+                        db.reader->SetCurrentPos(pold);
+                    }
+                }
+            }
+        } else if (ptrval.val) {
+            ReadFieldPtr<ErrorPolicy_Igno>(dest.storage, "*storage", db);
+        }
+    }
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bNodeLink>(
+        bNodeLink &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.fromnode, "*fromnode", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.tonode, "*tonode", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.fromsock, "*fromsock", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.tosock, "*tosock", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bNodeTree>(
+        bNodeTree &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Warn>(dest.id, "id", db);
+    ReadField<ErrorPolicy_Igno>(dest.nodes, "nodes", db);
+    ReadField<ErrorPolicy_Igno>(dest.links, "links", db);
     db.reader->IncPtr(size);
 }
 
@@ -488,20 +857,52 @@ void Structure ::Convert<Mesh>(
         Mesh &dest,
         const FileDatabase &db) const {
 
+    // Capture owning ME `old` for AttributeStorage hydrate (ConvertMesh runs later,
+    // after ResolvePointer restored active_id_scope).
+    dest.blend_id_address = db.active_id_scope;
+
     ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
-    ReadField<ErrorPolicy_Fail>(dest.totface, "totface", db);
-    ReadField<ErrorPolicy_Fail>(dest.totedge, "totedge", db);
-    ReadField<ErrorPolicy_Fail>(dest.totvert, "totvert", db);
-    ReadField<ErrorPolicy_Igno>(dest.totloop, "totloop", db);
-    ReadField<ErrorPolicy_Igno>(dest.totpoly, "totpoly", db);
+    // dna_rename_defs.h: totface->totface_legacy, totedge->edges_num, totvert->verts_num,
+    // totloop->corners_num, totpoly->faces_num. File DNA uses whichever name was written.
+    if (Get("totface")) {
+        ReadField<ErrorPolicy_Fail>(dest.totface, "totface", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.totface, "totface_legacy", db);
+    }
+    if (Get("totedge")) {
+        ReadField<ErrorPolicy_Fail>(dest.totedge, "totedge", db);
+    } else {
+        ReadField<ErrorPolicy_Fail>(dest.totedge, "edges_num", db);
+    }
+    if (Get("totvert")) {
+        ReadField<ErrorPolicy_Fail>(dest.totvert, "totvert", db);
+    } else {
+        ReadField<ErrorPolicy_Fail>(dest.totvert, "verts_num", db);
+    }
+    if (Get("totloop")) {
+        ReadField<ErrorPolicy_Igno>(dest.totloop, "totloop", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.totloop, "corners_num", db);
+    }
+    if (Get("totpoly")) {
+        ReadField<ErrorPolicy_Igno>(dest.totpoly, "totpoly", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.totpoly, "faces_num", db);
+    }
     ReadField<ErrorPolicy_Igno>(dest.subdiv, "subdiv", db);
     ReadField<ErrorPolicy_Igno>(dest.subdivr, "subdivr", db);
     ReadField<ErrorPolicy_Igno>(dest.subsurftype, "subsurftype", db);
-    ReadField<ErrorPolicy_Igno>(dest.smoothresh, "smoothresh", db);
-    ReadFieldPtr<ErrorPolicy_Fail>(dest.mface, "*mface", db);
+    if (Get("smoothresh")) {
+        ReadField<ErrorPolicy_Igno>(dest.smoothresh, "smoothresh", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.smoothresh, "smoothresh_legacy", db);
+    }
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mface, "*mface", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mtface, "*mtface", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.tface, "*tface", db);
-    ReadFieldPtr<ErrorPolicy_Fail>(dest.mvert, "*mvert", db);
+    // Blender 5+ often leaves *mvert/*mloop/*mpoly null; geometry lives in AttributeStorage
+    // (DNA_mesh_types.h attribute_storage + DNA_attribute_types.h).
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mvert, "*mvert", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.medge, "*medge", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mloop, "*mloop", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mloopuv, "*mloopuv", db);
@@ -512,11 +913,45 @@ void Structure ::Convert<Mesh>(
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mcol, "*mcol", db);
     ReadFieldPtr<ErrorPolicy_Fail>(dest.mat, "**mat", db);
 
-    ReadField<ErrorPolicy_Igno>(dest.vdata, "vdata", db);
-    ReadField<ErrorPolicy_Igno>(dest.edata, "edata", db);
-    ReadField<ErrorPolicy_Igno>(dest.fdata, "fdata", db);
-    ReadField<ErrorPolicy_Igno>(dest.pdata, "pdata", db);
-    ReadField<ErrorPolicy_Warn>(dest.ldata, "ldata", db);
+    // CustomData renames: vdata->vert_data, edata->edge_data, pdata->face_data, ldata->corner_data.
+    if (Get("vdata")) {
+        ReadField<ErrorPolicy_Igno>(dest.vdata, "vdata", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.vdata, "vert_data", db);
+    }
+    if (Get("edata")) {
+        ReadField<ErrorPolicy_Igno>(dest.edata, "edata", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.edata, "edge_data", db);
+    }
+    if (Get("fdata")) {
+        ReadField<ErrorPolicy_Igno>(dest.fdata, "fdata", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.fdata, "fdata_legacy", db);
+    }
+    if (Get("pdata")) {
+        ReadField<ErrorPolicy_Igno>(dest.pdata, "pdata", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.pdata, "face_data", db);
+    }
+    if (Get("ldata")) {
+        ReadField<ErrorPolicy_Warn>(dest.ldata, "ldata", db);
+    } else {
+        ReadField<ErrorPolicy_Warn>(dest.ldata, "corner_data", db);
+    }
+
+    // DNA rename: poly_offset_indices -> face_offset_indices (dna_rename_defs.h).
+    ReadField<ErrorPolicy_Igno>(dest.poly_offset_ptr, "*poly_offset_indices", db);
+    if (!dest.poly_offset_ptr.val) {
+        ReadField<ErrorPolicy_Igno>(dest.poly_offset_ptr, "*face_offset_indices", db);
+    }
+    {
+        // blender::AttributeStorage (DNA_attribute_types.h)
+        AttributeStorageDna as;
+        ReadField<ErrorPolicy_Igno>(as, "attribute_storage", db);
+        dest.attribute_dna_ptr = as.dna_attributes;
+        dest.attribute_dna_num = as.dna_attributes_num;
+    }
 
     db.reader->IncPtr(size);
 }
@@ -756,6 +1191,8 @@ void Structure ::Convert<Camera>(
     dest.flag = static_cast<Assimp::Blender::Camera::Type>(temp);
     ReadField<ErrorPolicy_Warn>(dest.lens, "lens", db);
     ReadField<ErrorPolicy_Warn>(dest.sensor_x, "sensor_x", db);
+    ReadField<ErrorPolicy_Warn>(dest.sensor_y, "sensor_y", db);
+    ReadField<ErrorPolicy_Warn>(dest.ortho_scale, "ortho_scale", db);
     ReadField<ErrorPolicy_Igno>(dest.clipsta, "clipsta", db);
     ReadField<ErrorPolicy_Igno>(dest.clipend, "clipend", db);
 
@@ -786,7 +1223,12 @@ void Structure ::Convert<Image>(
         const FileDatabase &db) const {
 
     ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
-    ReadFieldArray<ErrorPolicy_Warn>(dest.name, "name", db);
+    // Blender 2.8+: Image.filepath; older DNA used Image.name.
+    if (Get("filepath")) {
+        ReadFieldArray<ErrorPolicy_Warn>(dest.name, "filepath", db);
+    } else {
+        ReadFieldArray<ErrorPolicy_Warn>(dest.name, "name", db);
+    }
     ReadField<ErrorPolicy_Igno>(dest.ok, "ok", db);
     ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
     ReadField<ErrorPolicy_Igno>(dest.source, "source", db);
@@ -801,6 +1243,7 @@ void Structure ::Convert<Image>(
     ReadField<ErrorPolicy_Igno>(dest.twsta, "twsta", db);
     ReadField<ErrorPolicy_Igno>(dest.twend, "twend", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.packedfile, "*packedfile", db);
+    ReadField<ErrorPolicy_Igno>(dest.packedfiles, "packedfiles", db);
     ReadField<ErrorPolicy_Igno>(dest.lastupdate, "lastupdate", db);
     ReadField<ErrorPolicy_Igno>(dest.lastused, "lastused", db);
     ReadField<ErrorPolicy_Igno>(dest.animspeed, "animspeed", db);
@@ -827,6 +1270,16 @@ void Structure::Convert<CustomData>(
 
 //--------------------------------------------------------------------------------
 template <>
+void Structure::Convert<AttributeStorageDna>(
+        AttributeStorageDna &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Igno>(dest.dna_attributes, "*dna_attributes", db);
+    ReadField<ErrorPolicy_Igno>(dest.dna_attributes_num, "dna_attributes_num", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
 void Structure::Convert<CustomDataLayer>(
         CustomDataLayer &dest,
         const FileDatabase &db) const {
@@ -839,7 +1292,9 @@ void Structure::Convert<CustomDataLayer>(
     ReadField<ErrorPolicy_Warn>(dest.active_mask, "active_mask", db);
     ReadField<ErrorPolicy_Warn>(dest.uid, "uid", db);
     ReadFieldArray<ErrorPolicy_Warn>(dest.name, "name", db);
-    ReadCustomDataPtr<ErrorPolicy_Fail>(dest.data, dest.type, "*data", db);
+    // Keep *data address; Igno: unknown/newer CD types must not abort Mesh convert.
+    ReadField<ErrorPolicy_Igno>(dest.data_ptr, "*data", db);
+    ReadCustomDataPtr<ErrorPolicy_Igno>(dest.data, dest.type, "*data", db);
 
     db.reader->IncPtr(size);
 }
@@ -848,6 +1303,12 @@ void Structure::Convert<CustomDataLayer>(
 void DNA::RegisterConverters() {
 
     converters["Object"] = DNA::FactoryPair(&Structure::Allocate<Object>, &Structure::Convert<Object>);
+    converters["BezTriple"] = DNA::FactoryPair(&Structure::Allocate<BezTriple>, &Structure::Convert<BezTriple>);
+    converters["FCurve"] = DNA::FactoryPair(&Structure::Allocate<FCurve>, &Structure::Convert<FCurve>);
+    converters["bAction"] = DNA::FactoryPair(&Structure::Allocate<bAction>, &Structure::Convert<bAction>);
+    converters["NlaStrip"] = DNA::FactoryPair(&Structure::Allocate<NlaStrip>, &Structure::Convert<NlaStrip>);
+    converters["NlaTrack"] = DNA::FactoryPair(&Structure::Allocate<NlaTrack>, &Structure::Convert<NlaTrack>);
+    converters["AnimData"] = DNA::FactoryPair(&Structure::Allocate<AnimData>, &Structure::Convert<AnimData>);
     converters["Group"] = DNA::FactoryPair(&Structure::Allocate<Group>, &Structure::Convert<Group>);
     converters["MTex"] = DNA::FactoryPair(&Structure::Allocate<MTex>, &Structure::Convert<MTex>);
     converters["TFace"] = DNA::FactoryPair(&Structure::Allocate<TFace>, &Structure::Convert<TFace>);
@@ -856,9 +1317,20 @@ void DNA::RegisterConverters() {
     converters["Lamp"] = DNA::FactoryPair(&Structure::Allocate<Lamp>, &Structure::Convert<Lamp>);
     converters["MDeformWeight"] = DNA::FactoryPair(&Structure::Allocate<MDeformWeight>, &Structure::Convert<MDeformWeight>);
     converters["PackedFile"] = DNA::FactoryPair(&Structure::Allocate<PackedFile>, &Structure::Convert<PackedFile>);
+    converters["ImagePackedFile"] = DNA::FactoryPair(&Structure::Allocate<ImagePackedFile>, &Structure::Convert<ImagePackedFile>);
     converters["Base"] = DNA::FactoryPair(&Structure::Allocate<Base>, &Structure::Convert<Base>);
     converters["MTFace"] = DNA::FactoryPair(&Structure::Allocate<MTFace>, &Structure::Convert<MTFace>);
     converters["Material"] = DNA::FactoryPair(&Structure::Allocate<Material>, &Structure::Convert<Material>);
+    converters["MaterialGPencilStyle"] = DNA::FactoryPair(&Structure::Allocate<MaterialGPencilStyle>, &Structure::Convert<MaterialGPencilStyle>);
+    converters["GreasePencil"] = DNA::FactoryPair(&Structure::Allocate<GreasePencil>, &Structure::Convert<GreasePencil>);
+    converters["bNodeStack"] = DNA::FactoryPair(&Structure::Allocate<bNodeStack>, &Structure::Convert<bNodeStack>);
+    converters["bNodeSocketValueFloat"] = DNA::FactoryPair(&Structure::Allocate<bNodeSocketValueFloat>, &Structure::Convert<bNodeSocketValueFloat>);
+    converters["bNodeSocketValueRGBA"] = DNA::FactoryPair(&Structure::Allocate<bNodeSocketValueRGBA>, &Structure::Convert<bNodeSocketValueRGBA>);
+    converters["NodeShaderUVMap"] = DNA::FactoryPair(&Structure::Allocate<NodeShaderUVMap>, &Structure::Convert<NodeShaderUVMap>);
+    converters["bNodeSocket"] = DNA::FactoryPair(&Structure::Allocate<bNodeSocket>, &Structure::Convert<bNodeSocket>);
+    converters["bNode"] = DNA::FactoryPair(&Structure::Allocate<bNode>, &Structure::Convert<bNode>);
+    converters["bNodeLink"] = DNA::FactoryPair(&Structure::Allocate<bNodeLink>, &Structure::Convert<bNodeLink>);
+    converters["bNodeTree"] = DNA::FactoryPair(&Structure::Allocate<bNodeTree>, &Structure::Convert<bNodeTree>);
     converters["MTexPoly"] = DNA::FactoryPair(&Structure::Allocate<MTexPoly>, &Structure::Convert<MTexPoly>);
     converters["Mesh"] = DNA::FactoryPair(&Structure::Allocate<Mesh>, &Structure::Convert<Mesh>);
     converters["MDeformVert"] = DNA::FactoryPair(&Structure::Allocate<MDeformVert>, &Structure::Convert<MDeformVert>);
@@ -882,6 +1354,7 @@ void DNA::RegisterConverters() {
     converters["Image"] = DNA::FactoryPair(&Structure::Allocate<Image>, &Structure::Convert<Image>);
     converters["CustomData"] = DNA::FactoryPair(&Structure::Allocate<CustomData>, &Structure::Convert<CustomData>);
     converters["CustomDataLayer"] = DNA::FactoryPair(&Structure::Allocate<CustomDataLayer>, &Structure::Convert<CustomDataLayer>);
+    converters["AttributeStorage"] = DNA::FactoryPair(&Structure::Allocate<AttributeStorageDna>, &Structure::Convert<AttributeStorageDna>);
     converters["Collection"] = DNA::FactoryPair(&Structure::Allocate<Collection>, &Structure::Convert<Collection>);
     converters["CollectionChild"] = DNA::FactoryPair(&Structure::Allocate<CollectionChild>, &Structure::Convert<CollectionChild>);
     converters["CollectionObject"] = DNA::FactoryPair(&Structure::Allocate<CollectionObject>, &Structure::Convert<CollectionObject>);

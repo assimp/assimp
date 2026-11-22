@@ -47,6 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BlenderDNA.h"
 
+#include <cstring>
+#include <string>
+
 namespace Assimp::Blender {
 
 // Minor parts of this file are extracts from blender data structures,
@@ -130,6 +133,21 @@ struct PackedFile final : ElemBase {
     int size WARN;
     int seek WARN;
     std::shared_ptr<FileOffset> data WARN;
+};
+
+/** DNA ImagePackedFile - Blender 2.77+ stores embeds in Image.packedfiles ListBase. */
+struct ImagePackedFile final : ElemBase {
+    std::shared_ptr<ImagePackedFile> next WARN;
+    std::shared_ptr<PackedFile> packedfile WARN;
+    int view WARN;
+    int tile_number WARN;
+    char filepath[MaxNameLen] WARN;
+
+    ImagePackedFile() {
+        view = 0;
+        tile_number = 0;
+        memset(filepath, 0, sizeof filepath);
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -386,21 +404,120 @@ struct Material final : ElemBase {
     short spec_shader WARN;
 
     std::shared_ptr<MTex> mtex[18];
+
+    // Cycles/EEVEE node materials (C6). use_nodes is deprecated in modern DNA but
+    // present in older .blend files; nodetree is the authoritative pointer.
+    char use_nodes;
+    float metallic;
+    std::shared_ptr<struct bNodeTree> nodetree;
+
+    /** Grease Pencil stroke/fill textures (DNA Material.gp_style). */
+    std::shared_ptr<struct MaterialGPencilStyle> gp_style;
+};
+
+/** Subset of DNA MaterialGPencilStyle - fill/stroke Image pointers only. */
+struct MaterialGPencilStyle final : ElemBase {
+    std::shared_ptr<Image> sima; // stroke texture
+    std::shared_ptr<Image> ima; // fill texture
+};
+
+/** DNA GreasePencil (GP3 / OB_GREASE_PENCIL) - materials + packed GP textures. */
+struct GreasePencil final : ElemBase {
+    ID id FAIL;
+    /** DNA Material **material_array (same double-pointer pattern as Mesh::mat). */
+    vector<std::shared_ptr<Material>> material_array WARN;
+    short material_array_size WARN;
+
+    GreasePencil() :
+            material_array_size(0) {}
+};
+
+// -------------------------------------------------------------------------------
+/** Subset of DNA bNodeStack (legacy socket values; still written in old files). */
+struct bNodeStack final : ElemBase {
+    float vec[4];
+    float min, max;
+};
+
+/** Subset of DNA bNodeSocketValueFloat / RGBA (default_value pointee). */
+struct bNodeSocketValueFloat final : ElemBase {
+    int subtype;
+    float value;
+};
+
+struct bNodeSocketValueRGBA final : ElemBase {
+    float value[4];
+};
+
+/** Subset of DNA NodeShaderUVMap (bNode.storage for ShaderNodeUVMap). */
+struct NodeShaderUVMap final : ElemBase {
+    char uv_map[64];
+
+    NodeShaderUVMap() {
+        memset(uv_map, 0, sizeof uv_map);
+    }
+};
+
+/** Subset of DNA bNodeSocket. */
+struct bNodeSocket final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    char name[64];
+    char identifier[64];
+    char idname[64];
+    short type;
+    std::shared_ptr<ElemBase> default_value; // runtime-typed (Float/RGBA/...)
+    bNodeStack ns;
+
+    bNodeSocket() :
+            type(0),
+            ns() {
+        memset(name, 0, sizeof name);
+        memset(identifier, 0, sizeof identifier);
+        memset(idname, 0, sizeof idname);
+        ns.vec[0] = ns.vec[1] = ns.vec[2] = ns.vec[3] = 0.f;
+        ns.min = ns.max = 0.f;
+    }
+};
+
+/** Subset of DNA bNode (shader nodes for C6 Principled/Glass/Glossy flatten). */
+struct bNode final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    ListBase inputs;
+    ListBase outputs;
+    char name[64];
+    char idname[64];
+    short type; // DNA "type" / "type_legacy"
+    short custom1; // MixRGB blend type (MA_RAMP_*), etc.
+    std::shared_ptr<ElemBase> id; // e.g. Image* for ShaderNodeTexImage
+    std::shared_ptr<ElemBase> storage; // e.g. NodeShaderUVMap for ShaderNodeUVMap
+
+    bNode() {
+        memset(name, 0, sizeof name);
+        memset(idname, 0, sizeof idname);
+        type = 0;
+        custom1 = 0;
+    }
+};
+
+/** Subset of DNA bNodeLink. */
+struct bNodeLink final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    std::shared_ptr<ElemBase> fromnode;
+    std::shared_ptr<ElemBase> tonode;
+    std::shared_ptr<ElemBase> fromsock;
+    std::shared_ptr<ElemBase> tosock;
+};
+
+/** Subset of DNA bNodeTree (Material.nodetree). */
+struct bNodeTree final : ElemBase {
+    ID id;
+    ListBase nodes;
+    ListBase links;
 };
 
 /*
-CustomDataLayer 104
-
-    int type 0 4
-    int offset 4 4
-    int flag 8 4
-    int active 12 4
-    int active_rnd 16 4
-    int active_clone 20 4
-    int active_mask 24 4
-    int uid 28 4
-    char name 32 64
-    void *data 96 8
+CustomDataLayer — DNA sizes evolve; Convert uses file DNA offsets.
+MAX_CUSTOMDATA_LAYER_NAME = 68 (DNA_customdata_types.h).
 */
 struct CustomDataLayer final : ElemBase {
     int type;
@@ -411,8 +528,9 @@ struct CustomDataLayer final : ElemBase {
     int active_clone;
     int active_mask;
     int uid;
-    char name[64];
-    std::shared_ptr<ElemBase> data; // must be converted to real type according type member
+    char name[68];
+    std::shared_ptr<ElemBase> data; // DNA struct array or RawCustomData for CD_PROP_*
+    Pointer data_ptr; // *data old address (for scoped re-read / debug)
 
     CustomDataLayer() :
             type(0),
@@ -425,31 +543,19 @@ struct CustomDataLayer final : ElemBase {
             uid(0),
             data(nullptr) {
         memset(name, 0, sizeof name);
+        data_ptr.val = 0;
     }
 };
 
 /*
-CustomData 208
-
-    CustomDataLayer *layers 0 8
-    int typemap 8 168
-    int pad_i1 176 4
-    int totlayer 180 4
-    int maxlayer 184 4
-    int totsize 188 4
-    BLI_mempool *pool 192 8
-    CustomDataExternal *external 200 8
+CustomData — typemap length follows CD_NUMTYPES in the file (53 in Blender 4.x).
 */
 struct CustomData final : ElemBase {
     vector<std::shared_ptr<struct CustomDataLayer>> layers;
-    int typemap[42]; // CD_NUMTYPES
+    int typemap[64]; // >= CD_NUMTYPES (53); ReadFieldArray copies min(file,64)
     int totlayer;
     int maxlayer;
     int totsize;
-    /*
-    std::shared_ptr<BLI_mempool> pool;
-    std::shared_ptr<CustomDataExternal> external;
-    */
 };
 
 // -------------------------------------------------------------------------------
@@ -487,6 +593,21 @@ struct Mesh final : ElemBase {
     struct CustomData fdata;
     struct CustomData pdata;
     struct CustomData ldata;
+
+    // Blender 5+ AttributeStorage (filled during Convert; used to hydrate classic arrays)
+    Pointer poly_offset_ptr;
+    vector<int> poly_offset_indices;
+    Pointer attribute_dna_ptr;
+    int attribute_dna_num = 0;
+    // ME block `old` (FileDatabase::active_id_scope during Convert) for per-ID DATA lookup.
+    Pointer blend_id_address;
+};
+
+/** DNA subset of blender::AttributeStorage (DNA_attribute_types.h, file read only). */
+struct AttributeStorageDna final : ElemBase {
+    Pointer dna_attributes; // Attribute *dna_attributes
+    int dna_attributes_num = 0;
+    // char _pad[4]; runtime* - ignored
 };
 
 // -------------------------------------------------------------------------------
@@ -510,7 +631,13 @@ struct Camera : ElemBase {
     Type type, flag WARN;
     float lens WARN;
     float sensor_x WARN;
+    float sensor_y WARN; // film height - aspect = sensor_x/sensor_y when both set
+    float ortho_scale WARN; // Blender full ortho scale; aiCamera wants half-width
     float clipsta, clipend;
+
+    Camera() :
+            type(Type_PERSP), flag(Type_PERSP), lens(0.f), sensor_x(0.f), sensor_y(0.f),
+            ortho_scale(0.f), clipsta(0.f), clipend(0.f) {}
 };
 
 // -------------------------------------------------------------------------------
@@ -708,11 +835,39 @@ struct Object final : ElemBase {
         ,
         Type_WAVE = 21,
         Type_LATTICE = 22
+
+        // DNA_object_types.h / bpy.types.Object.type:
+        // legacy Grease Pencil: OB_GPENCIL_LEGACY, bpy 'GPENCIL'
+        ,
+        Type_GPENCIL_LEGACY = 26
+        // Grease Pencil 3 (Blender 4.3+): OB_GREASE_PENCIL, bpy 'GREASEPENCIL'
+        ,
+        Type_GREASE_PENCIL = 30
     };
 
     Type type FAIL;
+    /** World matrix when present in file DNA (`obmat` / `object_to_world`).
+     *  Absent from DNA since Blender 4.1 (runtime-only); see has_world_matrix. */
     float obmat[4][4] WARN;
     float parentinv[4][4] WARN;
+
+    // Local authored transform (DNA; used when has_world_matrix is false).
+    float loc[3] WARN;
+    float dloc[3] WARN;
+    float scale[3] WARN;
+    float dscale[3] WARN;
+    float rot[3] WARN;
+    float drot[3] WARN;
+    float quat[4] WARN;
+    float dquat[4] WARN;
+    float rotAxis[3] WARN;
+    float drotAxis[3] WARN;
+    float rotAngle WARN;
+    float drotAngle WARN;
+    short rotmode WARN;
+    /** True if `obmat` or `object_to_world` existed in the file SDNA. */
+    bool has_world_matrix;
+
     char parsubstr[32] WARN;
 
     Object *parent WARN;
@@ -721,12 +876,32 @@ struct Object final : ElemBase {
     std::shared_ptr<Object> proxy, proxy_from, proxy_group WARN;
     std::shared_ptr<Group> dup_group WARN;
     std::shared_ptr<ElemBase> data FAIL;
+    std::shared_ptr<struct AnimData> adt WARN; // object animation (Actions / NLA)
 
     ListBase modifiers;
 
     Object() :
-            type(Type_EMPTY), parent(nullptr) {
-        // empty
+            type(Type_EMPTY),
+            rotAngle(0.f),
+            drotAngle(0.f),
+            rotmode(1), // ROT_MODE_EUL / XYZ
+            has_world_matrix(false),
+            parent(nullptr) {
+        // Identity parentinv / unit scale / unit quat (Blender defaults).
+        for (unsigned int i = 0; i < 4; ++i) {
+            for (unsigned int j = 0; j < 4; ++j) {
+                obmat[i][j] = (i == j) ? 1.f : 0.f;
+                parentinv[i][j] = (i == j) ? 1.f : 0.f;
+            }
+        }
+        for (unsigned int i = 0; i < 3; ++i) {
+            loc[i] = dloc[i] = rot[i] = drot[i] = 0.f;
+            scale[i] = dscale[i] = 1.f;
+            rotAxis[i] = drotAxis[i] = (i == 1) ? 1.f : 0.f;
+        }
+        quat[0] = dquat[0] = 1.f;
+        quat[1] = quat[2] = quat[3] = 0.f;
+        dquat[1] = dquat[2] = dquat[3] = 0.f;
     }
 };
 
@@ -760,7 +935,8 @@ struct Scene final : ElemBase {
 struct Image final : ElemBase {
     ID id FAIL;
 
-    char name[240] WARN;
+    /** Legacy DNA `name` or modern `filepath` (FILE_MAX). */
+    char name[MaxNameLen] WARN;
 
     //struct anim *anim;
 
@@ -774,7 +950,10 @@ struct Image final : ElemBase {
     //unsigned int bindcode;
     //unsigned int *repbind;
 
+    /** Deprecated DNA pointer; often null when packedfiles is used. */
     std::shared_ptr<PackedFile> packedfile;
+    /** Blender 2.77+ / 4.x: ListBase of ImagePackedFile. */
+    ListBase packedfiles WARN;
     //struct PreviewImage * preview;
 
     float lastupdate;
@@ -783,7 +962,16 @@ struct Image final : ElemBase {
 
     short gen_x, gen_y, gen_type;
 
-    Image() = default;
+    Image() {
+        memset(name, 0, sizeof name);
+        ok = flag = source = type = pad = pad1 = 0;
+        lastframe = 0;
+        tpageflag = totbind = xrep = yrep = twsta = twend = 0;
+        lastupdate = 0.f;
+        lastused = 0;
+        animspeed = 0;
+        gen_x = gen_y = gen_type = 0;
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -965,6 +1153,68 @@ struct MTex final : ElemBase {
     //float zenupfac, zendownfac, blendfac;
 
     MTex() = default;
+};
+
+// -------------------------------------------------------------------------------
+/** DNA BezTriple - FCurve key (vec[1] is the keyframe time/value). */
+struct BezTriple final : ElemBase {
+    float vec[3][3];
+    char ipo;
+
+    BezTriple() :
+            ipo(0) {
+        memset(vec, 0, sizeof vec);
+    }
+};
+
+/** DNA FCurve - one animated RNA path component. */
+struct FCurve final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    int totvert;
+    int array_index;
+    std::string rna_path; // from char *rna_path
+    vector<BezTriple> bezt;
+
+    FCurve() :
+            totvert(0),
+            array_index(0) {}
+};
+
+/** DNA bAction - named Action with FCurve list. */
+struct bAction final : ElemBase {
+    ID id;
+    ListBase curves;
+};
+
+/** DNA NlaStrip - references a bAction on a track. */
+struct NlaStrip final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    std::shared_ptr<bAction> act;
+    char name[64];
+    float start, end;
+
+    NlaStrip() :
+            start(0.f),
+            end(0.f) {
+        memset(name, 0, sizeof name);
+    }
+};
+
+/** DNA NlaTrack - list of strips. */
+struct NlaTrack final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    ListBase strips;
+    char name[64];
+
+    NlaTrack() {
+        memset(name, 0, sizeof name);
+    }
+};
+
+/** DNA AnimData - Object.adt / ID animation wrapper. */
+struct AnimData final : ElemBase {
+    std::shared_ptr<bAction> action;
+    ListBase nla_tracks;
 };
 
 } // namespace Assimp::Blender

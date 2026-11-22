@@ -1178,7 +1178,7 @@ const Assimp::Blender::PackedFile *BlendImageGetPacked(const Assimp::Blender::Im
     return nullptr;
 }
 
-/** Path for format hint / logging: Image.filepath|name, else ImagePackedFile.filepath. */
+/** Path for format hint / logging: Image.filepath|name, else ImagePackedFile.filepath, else ID name. */
 const char *BlendImageDisplayPath(const Assimp::Blender::Image *img) {
     using namespace Assimp::Blender;
     if (img == nullptr) {
@@ -1200,7 +1200,103 @@ const char *BlendImageDisplayPath(const Assimp::Blender::Image *img) {
         }
         cur = ipf->next;
     }
+    // Presence: DNA ID name (skip "IM" prefix) when filepath was empty (e.g. generated "gradient").
+    if (img->id.name[2] != '\0') {
+        return img->id.name + 2;
+    }
     return img->name;
+}
+
+/**
+ * Ensure packed Image bytes are in conv_data.textures (dedupe by Image*).
+ * Returns true and writes *outIndex when packed payload was resolved.
+ */
+bool BlendEnsureEmbeddedPackedTexture(const Assimp::Blender::Image *img,
+        Assimp::Blender::ConversionData &conv_data, unsigned int *outIndex) {
+    using namespace Assimp::Blender;
+    if (img == nullptr) {
+        return false;
+    }
+    const PackedFile *packed = BlendImageGetPacked(img);
+    if (packed == nullptr || !packed->data || packed->size <= 0) {
+        return false;
+    }
+    const auto found = conv_data.embeddedImageTexIndex.find(img);
+    if (found != conv_data.embeddedImageTexIndex.end()) {
+        if (outIndex) {
+            *outIndex = found->second;
+        }
+        return true;
+    }
+    const unsigned int texIndex = static_cast<unsigned int>(conv_data.textures->size());
+    conv_data.embeddedImageTexIndex.emplace(img, texIndex);
+    conv_data.textures->push_back(new aiTexture());
+    aiTexture *curTex = conv_data.textures->back();
+    const char *dispPath = BlendImageDisplayPath(img);
+    const size_t nlen = std::strlen(dispPath);
+    const char *s = dispPath + nlen, *e = s;
+    while (s >= dispPath && *s != '.') {
+        --s;
+    }
+    curTex->achFormatHint[0] = s + 1 > e ? '\0' : static_cast<char>(::tolower(static_cast<unsigned char>(s[1])));
+    curTex->achFormatHint[1] = s + 2 > e ? '\0' : static_cast<char>(::tolower(static_cast<unsigned char>(s[2])));
+    curTex->achFormatHint[2] = s + 3 > e ? '\0' : static_cast<char>(::tolower(static_cast<unsigned char>(s[3])));
+    curTex->achFormatHint[3] = '\0';
+    curTex->mWidth = static_cast<unsigned int>(packed->size);
+    uint8_t *ch = new uint8_t[curTex->mWidth];
+    conv_data.db.reader->SetCurrentPos(static_cast<size_t>(packed->data->val));
+    conv_data.db.reader->CopyAndAdvance(ch, curTex->mWidth);
+    curTex->pcData = reinterpret_cast<aiTexel *>(ch);
+    if (dispPath[0] != '\0') {
+        curTex->mFilename = aiString(dispPath);
+    }
+    ASSIMP_LOG_INFO("Reading embedded texture, original file was ", dispPath);
+    if (outIndex) {
+        *outIndex = texIndex;
+    }
+    return true;
+}
+
+/** Emit every DNA Image ID block that has authored packed bytes (Presence). */
+void BlendEmitAllPackedImages(Assimp::Blender::ConversionData &conv_data,
+        std::vector<std::shared_ptr<Assimp::Blender::Image>> &owned) {
+    using namespace Assimp::Blender;
+    const auto it = conv_data.db.dna.indices.find("Image");
+    if (it == conv_data.db.dna.indices.end()) {
+        return;
+    }
+    const Structure &ss = conv_data.db.dna.structures[it->second];
+    DNA::FactoryPair builders = conv_data.db.dna.GetBlobToStructureConverter(ss, conv_data.db);
+    if (!builders.first || !builders.second) {
+        return;
+    }
+    for (const FileBlockHead &bl : conv_data.db.entries) {
+        if (bl.id != "IM" || bl.dna_index != it->second) {
+            continue;
+        }
+        // Reuse ObjectCache when this Image was already converted via materials.
+        std::shared_ptr<Image> img;
+        conv_data.db.cache(img).get(ss, img, bl.address, 0);
+        if (!img) {
+            const auto pold = conv_data.db.reader->GetCurrentPos();
+            const Pointer prevScope = conv_data.db.active_id_scope;
+            conv_data.db.reader->SetCurrentPos(bl.start);
+            conv_data.db.active_id_scope = bl.address;
+            std::shared_ptr<ElemBase> base = (ss.*builders.first)();
+            img = std::static_pointer_cast<Image>(base);
+            // Cache before Convert to match ResolvePointer cyclic-safe order.
+            conv_data.db.cache(img).set(ss, img, bl.address, 0);
+            (ss.*builders.second)(base, conv_data.db);
+            base->dna_type = ss.name.c_str();
+            conv_data.db.active_id_scope = prevScope;
+            conv_data.db.reader->SetCurrentPos(pold);
+        }
+        if (!img) {
+            continue;
+        }
+        owned.push_back(img);
+        BlendEnsureEmbeddedPackedTexture(img.get(), conv_data, nullptr);
+    }
 }
 
 struct BlendNodeGraph;
@@ -2125,41 +2221,13 @@ void BlendAttachNodeImage(aiMaterial *mout, const BlendTexMap &map, aiTextureTyp
     }
     const Image *img = map.img;
     aiString name;
-    const PackedFile *packed = BlendImageGetPacked(img);
-    const char *dispPath = BlendImageDisplayPath(img);
-    if (packed != nullptr && packed->data && packed->size > 0) {
-        unsigned int texIndex = 0;
-        const auto found = conv_data.embeddedImageTexIndex.find(img);
-        if (found != conv_data.embeddedImageTexIndex.end()) {
-            texIndex = found->second;
-        } else {
-            texIndex = static_cast<unsigned int>(conv_data.textures->size());
-            conv_data.embeddedImageTexIndex.emplace(img, texIndex);
-            conv_data.textures->push_back(new aiTexture());
-            aiTexture *curTex = conv_data.textures->back();
-            const size_t nlen = std::strlen(dispPath);
-            const char *s = dispPath + nlen, *e = s;
-            while (s >= dispPath && *s != '.') {
-                --s;
-            }
-            curTex->achFormatHint[0] = s + 1 > e ? '\0' : static_cast<char>(::tolower(static_cast<unsigned char>(s[1])));
-            curTex->achFormatHint[1] = s + 2 > e ? '\0' : static_cast<char>(::tolower(static_cast<unsigned char>(s[2])));
-            curTex->achFormatHint[2] = s + 3 > e ? '\0' : static_cast<char>(::tolower(static_cast<unsigned char>(s[3])));
-            curTex->achFormatHint[3] = '\0';
-            curTex->mWidth = static_cast<unsigned int>(packed->size);
-            uint8_t *ch = new uint8_t[curTex->mWidth];
-            conv_data.db.reader->SetCurrentPos(static_cast<size_t>(packed->data->val));
-            conv_data.db.reader->CopyAndAdvance(ch, curTex->mWidth);
-            curTex->pcData = reinterpret_cast<aiTexel *>(ch);
-            if (dispPath[0] != '\0') {
-                curTex->mFilename = aiString(dispPath);
-            }
-        }
+    unsigned int texIndex = 0;
+    if (BlendEnsureEmbeddedPackedTexture(img, conv_data, &texIndex)) {
         name.data[0] = '*';
         name.length = 1 + Assimp::ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1),
                 static_cast<int32_t>(texIndex));
     } else {
-        name = aiString(dispPath);
+        name = aiString(BlendImageDisplayPath(img));
     }
     const unsigned slot = conv_data.next_texture[type]++;
     mout->AddProperty(&name, AI_MATKEY_TEXTURE(type, slot));
@@ -2574,6 +2642,10 @@ void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const File
 
     BuildMaterials(conv);
 
+    // Presence: emit every packed Image ID block, not only those reached via materials.
+    std::vector<std::shared_ptr<Image>> ownedPackedImages;
+    BlendEmitAllPackedImages(conv, ownedPackedImages);
+
     if (conv.meshes->size()) {
         out->mMeshes = new aiMesh *[out->mNumMeshes = static_cast<unsigned int>(conv.meshes->size())];
         std::copy(conv.meshes->begin(), conv.meshes->end(), out->mMeshes);
@@ -2629,52 +2701,12 @@ void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const File
 void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const MTex *tex, const Image *img, ConversionData &conv_data) {
     aiString name;
 
-    const PackedFile *packed = BlendImageGetPacked(img);
-    const char *dispPath = BlendImageDisplayPath(img);
-
-    // check if the file contents are bundled with the BLEND file
-    if (packed != nullptr && packed->data && packed->size > 0) {
-        unsigned int texIndex = 0;
-        const auto found = conv_data.embeddedImageTexIndex.find(img);
-        if (found != conv_data.embeddedImageTexIndex.end()) {
-            texIndex = found->second;
-        } else {
-            texIndex = static_cast<unsigned int>(conv_data.textures->size());
-            conv_data.embeddedImageTexIndex.emplace(img, texIndex);
-            conv_data.textures->push_back(new aiTexture());
-            aiTexture *curTex = conv_data.textures->back();
-
-            // usually dispPath is the original file name of the embedded textures,
-            // so we can extract the file extension from it.
-            const size_t nlen = strlen(dispPath);
-            const char *s = dispPath + nlen, *e = s;
-            while (s >= dispPath && *s != '.') {
-                --s;
-            }
-
-            curTex->achFormatHint[0] = s + 1 > e ? '\0' : (char)::tolower((unsigned char)s[1]);
-            curTex->achFormatHint[1] = s + 2 > e ? '\0' : (char)::tolower((unsigned char)s[2]);
-            curTex->achFormatHint[2] = s + 3 > e ? '\0' : (char)::tolower((unsigned char)s[3]);
-            curTex->achFormatHint[3] = '\0';
-
-            // tex->mHeight = 0;
-            curTex->mWidth = static_cast<unsigned int>(packed->size);
-            uint8_t *ch = new uint8_t[curTex->mWidth];
-
-            conv_data.db.reader->SetCurrentPos(static_cast<size_t>(packed->data->val));
-            conv_data.db.reader->CopyAndAdvance(ch, curTex->mWidth);
-
-            curTex->pcData = reinterpret_cast<aiTexel *>(ch);
-            if (dispPath[0] != '\0') {
-                curTex->mFilename = aiString(dispPath);
-            }
-
-            LogInfo("Reading embedded texture, original file was ", dispPath);
-        }
+    unsigned int texIndex = 0;
+    if (BlendEnsureEmbeddedPackedTexture(img, conv_data, &texIndex)) {
         name.data[0] = '*';
         name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(texIndex));
     } else {
-        name = aiString(dispPath);
+        name = aiString(BlendImageDisplayPath(img));
     }
 
     aiTextureType texture_type = aiTextureType_UNKNOWN;

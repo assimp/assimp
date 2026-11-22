@@ -206,7 +206,7 @@ TEST_F(utASEImportExport, importSkeletonMeshBoneWeightsInRange) {
         }
     }
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
+#if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_COLLADA_EXPORTER)
     // Exporting such a scene used to trigger an out-of-bounds read in the
     // COLLADA exporter.
     Assimp::Exporter exporter;

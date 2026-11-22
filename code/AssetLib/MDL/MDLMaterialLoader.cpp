@@ -253,6 +253,26 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
         unsigned int iType,
         unsigned int *piSkip,
         aiTexture *pcNew) {
+    // Reject unknown texture formats before allocating any storage. Otherwise
+    // none of the branches below matches: the pixel array stays uninitialized,
+    // *piSkip stays zero and callers such as ReplaceTextureWithColor() read
+    // uninitialized memory. Types 1, 6 and 7 are handled by the callers and
+    // never reach this function.
+    switch (iType) {
+    case 0: // palletized 8 bit
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+        break;
+    default:
+        throw DeadlyImportError("Invalid MDL file. Unsupported texture format ", iType);
+    }
+
     const bool do_read = bad_texel != pcNew->pcData;
 
     // allocate storage for the texture image

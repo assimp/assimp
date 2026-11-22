@@ -2,8 +2,10 @@ unit aiQuaternion;
 
 interface
 
-type TaiQuaternion = packed record
-   w, x, y, z: single;
+uses aiDefs;
+
+type TaiQuaternion = record
+   w, x, y, z: ai_real;
 end;
 type PaiQuaternion = ^TaiQuaternion;
 

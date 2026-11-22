@@ -2,8 +2,10 @@ unit aiVector2D;
 
 interface
 
-type TaiVector2D = packed record
-   x, y: single;
+uses aiDefs;
+
+type TaiVector2D = record
+   x, y: ai_real;
 end;
 type PaiVector2D = ^TaiVector2D;
 

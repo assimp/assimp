@@ -77,6 +77,10 @@ public:
   {
   }
 
+  constexpr Result(const T &value) : m_variant(std::in_place_index<0>, value)
+  {
+  }
+
   constexpr Result(T &&value) : m_variant(std::in_place_index<0>, std::move(value))
   {
   }

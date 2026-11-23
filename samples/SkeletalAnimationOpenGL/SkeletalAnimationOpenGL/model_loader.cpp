@@ -110,7 +110,7 @@ Result<int32_t> ModelLoader::find_joint(const std::string &name) const
     const auto it = m_joint_map.find(name);
     if (it == m_joint_map.end())
         return "failed to find a joint named \"" + name + "\"";
-    return int32_t{it->second};
+    return it->second;
 }
 
 Result<GLuint> ModelLoader::add_bone(std::vector<Model::Bone> &bones, int32_t joint_index, const Mat4 &offset)

@@ -27,7 +27,7 @@ public:
     struct Bone
     {
         int32_t joint_index{-1};
-        Mat4 offset_matrix; 
+        Mat4 offset_matrix{}; 
     };
 
     template<class T> struct AnimationKey { double time; T value; };

@@ -57,7 +57,6 @@ void Model::update(double dt)
     {
         const auto& joint = m_joints[i];
         global[i] = joint.parent_index < 0 ? local[i] : global[joint.parent_index] * local[i];
-
     }
 
     for (size_t i = 0; i < m_bones.size(); i++)

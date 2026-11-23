@@ -597,7 +597,7 @@ TEST_F(utFBXImporterExporter, rejectExcessivelyNestedScopes) {
     // Scopes nest recursively in the parser. A deeply nested file must be rejected
     // with a parse error instead of overflowing the stack (OSS-Fuzz issue 442253768).
     std::string nested = "; FBX 7.4.0 project file\n";
-    const size_t depth = 200;
+    const size_t depth = 101;
     for (size_t i = 0; i < depth; ++i) {
         nested += "L: {\n";
     }
@@ -610,16 +610,16 @@ TEST_F(utFBXImporterExporter, rejectExcessivelyNestedScopes) {
     EXPECT_EQ(nullptr, scene);
     EXPECT_NE(std::string::npos, importer.GetErrorString().find("FBX scopes are nested too deeply"));
 
-    // A valid file with ordinary nested scopes is still imported successfully.
+    // Exactly 100 nested scopes remain within the parser limit.
     std::string shallow = fbxTriangleWithLastIndex("-3");
     const std::string headerVersion = "FBXHeaderVersion: 1003\n";
     const std::size_t insertAt = shallow.find(headerVersion);
     ASSERT_NE(std::string::npos, insertAt);
     std::string customScope = "\tCustom: {\n";
-    for (unsigned int i = 0; i < 8; ++i) {
+    for (unsigned int i = 0; i < 98; ++i) {
         customScope += "\tLayer: {\n";
     }
-    for (unsigned int i = 0; i < 8; ++i) {
+    for (unsigned int i = 0; i < 98; ++i) {
         customScope += "\t}\n";
     }
     customScope += "\t}\n";
@@ -649,5 +649,14 @@ TEST_F(utFBXImporterExporter, tokenizeBinaryScopesBelowNestingLimit) {
     Assimp::FBX::TokenList tokens;
 
     EXPECT_NO_THROW(Assimp::FBX::TokenizeBinary(tokens, shallow.data(), shallow.size(), tokenAllocator));
+    EXPECT_FALSE(tokens.empty());
+}
+
+TEST_F(utFBXImporterExporter, tokenizeBinaryScopesAtNestingLimit) {
+    const std::vector<char> atLimit = binaryFbxWithNestedScopes(100);
+    Assimp::StackAllocator tokenAllocator;
+    Assimp::FBX::TokenList tokens;
+
+    EXPECT_NO_THROW(Assimp::FBX::TokenizeBinary(tokens, atLimit.data(), atLimit.size(), tokenAllocator));
     EXPECT_FALSE(tokens.empty());
 }

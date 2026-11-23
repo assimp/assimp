@@ -49,6 +49,7 @@ SET_PROPERTY(TARGET assimp_skeletalanimationogl PROPERTY DEBUG_POSTFIX ${CMAKE_D
 TARGET_LINK_LIBRARIES( assimp_skeletalanimationogl PRIVATE 
   assimp 
   ${M_LIB}
+  ${CMAKE_DL_LIBS}
   ${OPENGL_LIBRARIES}
   FreeGLUT::freeglut
 )

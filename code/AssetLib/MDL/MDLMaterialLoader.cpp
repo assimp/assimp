@@ -256,8 +256,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
     // Reject unknown texture formats before allocating any storage. Otherwise
     // none of the branches below matches: the pixel array stays uninitialized,
     // *piSkip stays zero and callers such as ReplaceTextureWithColor() read
-    // uninitialized memory. Types 1, 6 and 7 are handled by the callers and
-    // never reach this function.
+    // uninitialized memory.
     switch (iType) {
     case 0: // palletized 8 bit
     case 2:
@@ -269,6 +268,20 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
     case 12:
     case 13:
         break;
+    // Types 1 (reference to another skin), 6 (embedded DDS file) and 7
+    // (reference to an external file) carry no raw pixel data and are handled
+    // by the callers of this function. SkipSkinLump_3DGS_MDL7() still forwards
+    // them here to query the size of the color data, which is zero, so it
+    // passes pcData == bad_texel. A real read would instead produce a texture
+    // whose pixel array stays null while mWidth/mHeight are set, and
+    // ReplaceTextureWithColor() dereferences that pointer.
+    case 1:
+    case 6:
+    case 7:
+        if (bad_texel != pcNew->pcData) {
+            throw DeadlyImportError("Invalid MDL file. Texture format ", iType, " has no color data.");
+        }
+        return;
     default:
         throw DeadlyImportError("Invalid MDL file. Unsupported texture format ", iType);
     }

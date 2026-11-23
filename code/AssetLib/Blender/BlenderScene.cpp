@@ -112,7 +112,142 @@ void Structure ::Convert<Object>(
     ReadFieldPtr<ErrorPolicy_Fail>(dest.data, "*data", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.adt, "*adt", db);
     ReadField<ErrorPolicy_Igno>(dest.modifiers, "modifiers", db);
+    ReadField<ErrorPolicy_Igno>(dest.particlesystem, "particlesystem", db);
 
+    db.reader->IncPtr(size);
+}
+
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<ParticleKey>(
+        ParticleKey &dest,
+        const FileDatabase &db) const {
+    ReadFieldArray<ErrorPolicy_Igno>(dest.co, "co", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.vel, "vel", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.rot, "rot", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.ave, "ave", db);
+    ReadField<ErrorPolicy_Igno>(dest.time, "time", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<ParticleData>(
+        ParticleData &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Igno>(dest.state, "state", db);
+    ReadField<ErrorPolicy_Igno>(dest.size, "size", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<ParticleDupliWeight>(
+        ParticleDupliWeight &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    {
+        std::shared_ptr<Object> ob;
+        ReadFieldPtr<ErrorPolicy_Igno>(ob, "*ob", db);
+        dest.ob = ob.get();
+    }
+    ReadField<ErrorPolicy_Igno>(dest.count, "count", db);
+    ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
+    ReadField<ErrorPolicy_Igno>(dest.index, "index", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<ParticleSettings>(
+        ParticleSettings &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Warn>(dest.id, "id", db);
+    ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
+    ReadField<ErrorPolicy_Igno>(dest.type, "type", db);
+    ReadField<ErrorPolicy_Igno>(dest.from, "from", db);
+    ReadField<ErrorPolicy_Igno>(dest.distr, "distr", db);
+    ReadField<ErrorPolicy_Igno>(dest.ren_as, "ren_as", db);
+    dest.hasPhystype = (Get("phystype") != nullptr);
+    if (dest.hasPhystype) {
+        ReadField<ErrorPolicy_Igno>(dest.phystype, "phystype", db);
+    }
+    dest.hasDrawAs = (Get("draw_as") != nullptr);
+    if (dest.hasDrawAs) {
+        ReadField<ErrorPolicy_Igno>(dest.draw_as, "draw_as", db);
+    }
+    dest.hasDraw = (Get("draw") != nullptr);
+    if (dest.hasDraw) {
+        ReadField<ErrorPolicy_Igno>(dest.draw, "draw", db);
+    }
+    ReadField<ErrorPolicy_Igno>(dest.totpart, "totpart", db);
+    dest.hasUserjit = (Get("userjit") != nullptr);
+    if (dest.hasUserjit) {
+        ReadField<ErrorPolicy_Igno>(dest.userjit, "userjit", db);
+    }
+    dest.hasGridRes = (Get("grid_res") != nullptr);
+    if (dest.hasGridRes) {
+        ReadField<ErrorPolicy_Igno>(dest.grid_res, "grid_res", db);
+    }
+    ReadField<ErrorPolicy_Igno>(dest.mass, "mass", db);
+    ReadField<ErrorPolicy_Igno>(dest.size, "size", db);
+    ReadField<ErrorPolicy_Igno>(dest.randsize, "randsize", db);
+    ReadField<ErrorPolicy_Igno>(dest.lifetime, "lifetime", db);
+    ReadField<ErrorPolicy_Igno>(dest.sta, "sta", db);
+    ReadField<ErrorPolicy_Igno>(dest.end, "end", db);
+    ReadField<ErrorPolicy_Igno>(dest.jitfac, "jitfac", db);
+    dest.hasGridRand = (Get("grid_rand") != nullptr);
+    if (dest.hasGridRand) {
+        ReadField<ErrorPolicy_Igno>(dest.grid_rand, "grid_rand", db);
+    }
+    dest.hasRandlife = (Get("randlife") != nullptr);
+    if (dest.hasRandlife) {
+        ReadField<ErrorPolicy_Igno>(dest.randlife, "randlife", db);
+    }
+    dest.hasRandlength = (Get("randlength") != nullptr);
+    if (dest.hasRandlength) {
+        ReadField<ErrorPolicy_Igno>(dest.randlength, "randlength", db);
+    }
+    dest.hasHairStep = (Get("hair_step") != nullptr);
+    if (dest.hasHairStep) {
+        ReadField<ErrorPolicy_Igno>(dest.hair_step, "hair_step", db);
+    }
+    // Presence: only mark hair_length emit when SDNA has normfac (RNA hair_length = *4).
+    dest.hasNormfac = (Get("normfac") != nullptr);
+    if (dest.hasNormfac) {
+        ReadField<ErrorPolicy_Igno>(dest.normfac, "normfac", db);
+    }
+    if (Get("*instance_collection") != nullptr) {
+        ReadFieldPtr<ErrorPolicy_Igno>(dest.dup_group, "*instance_collection", db);
+    } else {
+        ReadFieldPtr<ErrorPolicy_Igno>(dest.dup_group, "*dup_group", db);
+    }
+    if (Get("instance_weights") != nullptr) {
+        ReadField<ErrorPolicy_Igno>(dest.dupliweights, "instance_weights", db);
+    } else {
+        ReadField<ErrorPolicy_Igno>(dest.dupliweights, "dupliweights", db);
+    }
+    if (Get("*instance_object") != nullptr) {
+        ReadFieldPtr<ErrorPolicy_Igno>(dest.dup_ob, "*instance_object", db);
+    } else {
+        ReadFieldPtr<ErrorPolicy_Igno>(dest.dup_ob, "*dup_ob", db);
+    }
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mtex, "*mtex", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<ParticleSystem>(
+        ParticleSystem &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.part, "*part", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.particles, "*particles", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
+    ReadField<ErrorPolicy_Igno>(dest.seed, "seed", db);
+    ReadField<ErrorPolicy_Igno>(dest.totpart, "totpart", db);
     db.reader->IncPtr(size);
 }
 
@@ -1399,6 +1534,11 @@ void DNA::RegisterConverters() {
     converters["Tex"] = DNA::FactoryPair(&Structure::Allocate<Tex>, &Structure::Convert<Tex>);
     converters["Camera"] = DNA::FactoryPair(&Structure::Allocate<Camera>, &Structure::Convert<Camera>);
     converters["MirrorModifierData"] = DNA::FactoryPair(&Structure::Allocate<MirrorModifierData>, &Structure::Convert<MirrorModifierData>);
+    converters["ParticleKey"] = DNA::FactoryPair(&Structure::Allocate<ParticleKey>, &Structure::Convert<ParticleKey>);
+    converters["ParticleData"] = DNA::FactoryPair(&Structure::Allocate<ParticleData>, &Structure::Convert<ParticleData>);
+    converters["ParticleDupliWeight"] = DNA::FactoryPair(&Structure::Allocate<ParticleDupliWeight>, &Structure::Convert<ParticleDupliWeight>);
+    converters["ParticleSettings"] = DNA::FactoryPair(&Structure::Allocate<ParticleSettings>, &Structure::Convert<ParticleSettings>);
+    converters["ParticleSystem"] = DNA::FactoryPair(&Structure::Allocate<ParticleSystem>, &Structure::Convert<ParticleSystem>);
     converters["Image"] = DNA::FactoryPair(&Structure::Allocate<Image>, &Structure::Convert<Image>);
     converters["CustomData"] = DNA::FactoryPair(&Structure::Allocate<CustomData>, &Structure::Convert<CustomData>);
     converters["CustomDataLayer"] = DNA::FactoryPair(&Structure::Allocate<CustomDataLayer>, &Structure::Convert<CustomDataLayer>);

@@ -23,6 +23,18 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+template <class AiKey, class T, class ConvertFn>
+static void copy_keys(const AiKey *keys, unsigned int count, std::vector<Model::AnimationKey<T>> &out, ConvertFn convert_fn)
+{
+    const bool cubic = count > 0 && count % 3 == 0 && keys[0].mInterpolation == aiAnimInterpolation_Cubic_Spline;
+    const unsigned int first = cubic ? 1 : 0;
+    const unsigned int stride = cubic ? 3 : 1;
+
+    out.clear();
+    for (unsigned int k = first; k < count; k += stride)
+        out.push_back({keys[k].mTime, convert_fn(keys[k].mValue)});
+}
+
 namespace TextureLoader
 {
   Result<GLuint> from_file(const std::string& fileName);
@@ -243,24 +255,15 @@ Result<> ModelLoader::load_animations(const aiScene* scene, std::vector<Model::A
 
             const auto& ai_channel = ai_anim->mChannels[j];
 
-            {
-                const std::string name(ai_channel->mNodeName.C_Str());
-                const auto it = m_joint_map.find(name);
-                if (it == m_joint_map.end())
-                    return "animation \"" + anim.name + "\" references unknown joint \"" + name + "\"";
-                channel.joint_index = it->second;
-            }
+            CHECK_ASSIGN_RESULT(find_joint(ai_channel->mNodeName.C_Str()), channel.joint_index);
 
-            // NOTE: We ignore the interpolation types and always use linear interpolation in this sample
-            channel.position_keys.resize(ai_channel->mNumPositionKeys);
-            channel.rotation_keys.resize(ai_channel->mNumRotationKeys);
-            channel.scaling_keys.resize(ai_channel->mNumScalingKeys);
-            for (unsigned int k = 0; k < ai_channel->mNumPositionKeys; k++)
-                channel.position_keys[k] = {ai_channel->mPositionKeys[k].mTime, ai_channel->mPositionKeys[k].mValue};
-            for (unsigned int k = 0; k < ai_channel->mNumRotationKeys; k++)
-                channel.rotation_keys[k] = {ai_channel->mRotationKeys[k].mTime, static_cast<Quat>(ai_channel->mRotationKeys[k].mValue)};
-            for (unsigned int k = 0; k < ai_channel->mNumScalingKeys; k++)
-                channel.scaling_keys[k] = {ai_channel->mScalingKeys[k].mTime, ai_channel->mScalingKeys[k].mValue};
+            // NOTE: We always interpolate linearly
+            copy_keys(ai_channel->mPositionKeys, ai_channel->mNumPositionKeys, channel.position_keys,
+                [](const aiVector3D &v) { return Vec3(v); });
+            copy_keys(ai_channel->mRotationKeys, ai_channel->mNumRotationKeys, channel.rotation_keys,
+                [](const aiQuaternion &q) { return Quat(static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)); });
+            copy_keys(ai_channel->mScalingKeys, ai_channel->mNumScalingKeys, channel.scaling_keys,
+                [](const aiVector3D &v) { return Vec3(v); });
 
             anim.channels.push_back(std::move(channel));
         }

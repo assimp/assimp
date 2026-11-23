@@ -62,7 +62,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 #include <assimp/anim.h>
 #include <assimp/camera.h>
-#include <assimp/metadata.h>
 
 #include <algorithm>
 #include <cctype>
@@ -3761,88 +3760,6 @@ void BlendCopyMat4ToAi(aiMatrix4x4 &out, const float m[4][4]) {
 
 } // namespace
 
-
-/** Emit ParticleSystem/ParticleSettings onto aiNode metadata (typed path; no sidecar). */
-void BlendEmitParticleNodeMetadata(aiNode *node, const Assimp::Blender::Object &obj) {
-    using namespace Assimp::Blender;
-    if (node == nullptr || obj.particlesystem.first == nullptr) {
-        return;
-    }
-    if (node->mMetaData == nullptr) {
-        node->mMetaData = new aiMetadata();
-    }
-    int idx = 0;
-    for (const ParticleSystem *ps = static_cast<const ParticleSystem *>(obj.particlesystem.first.get());
-            ps != nullptr;
-            ps = static_cast<const ParticleSystem *>(ps->next.get()), ++idx) {
-        const std::string pref = "BLEND.ParticleSystem." + std::to_string(idx) + ".";
-        const char *psName = (ps->name[0] != '\0') ? ps->name : (obj.id.name + 2);
-        node->mMetaData->Add((pref + "name").c_str(), aiString(psName));
-        node->mMetaData->Add((pref + "seed").c_str(), static_cast<int32_t>(ps->seed));
-        if (ps->totpart != 0) {
-            node->mMetaData->Add((pref + "system_totpart").c_str(), static_cast<int32_t>(ps->totpart));
-        }
-        if (!ps->part) {
-            continue;
-        }
-        const ParticleSettings &p = *ps->part;
-        if (p.id.name[0] != '\0') {
-            node->mMetaData->Add((pref + "settingsName").c_str(), aiString(p.id.name + 2));
-        }
-        node->mMetaData->Add((pref + "type").c_str(), static_cast<int32_t>(p.type));
-        node->mMetaData->Add((pref + "from").c_str(), static_cast<int32_t>(p.from));
-        node->mMetaData->Add((pref + "distr").c_str(), static_cast<int32_t>(p.distr));
-        node->mMetaData->Add((pref + "ren_as").c_str(), static_cast<int32_t>(p.ren_as));
-        node->mMetaData->Add((pref + "flag").c_str(), static_cast<int32_t>(p.flag));
-        node->mMetaData->Add((pref + "totpart").c_str(), static_cast<int32_t>(p.totpart));
-        node->mMetaData->Add((pref + "mass").c_str(), p.mass);
-        node->mMetaData->Add((pref + "size").c_str(), p.size);
-        node->mMetaData->Add((pref + "randsize").c_str(), p.randsize);
-        node->mMetaData->Add((pref + "lifetime").c_str(), p.lifetime);
-        node->mMetaData->Add((pref + "frame_start").c_str(), p.sta);
-        node->mMetaData->Add((pref + "frame_end").c_str(), p.end);
-        node->mMetaData->Add((pref + "jitfac").c_str(), p.jitfac);
-        if (p.hasPhystype) {
-            node->mMetaData->Add((pref + "phystype").c_str(), static_cast<int32_t>(p.phystype));
-        }
-        if (p.hasDrawAs) {
-            node->mMetaData->Add((pref + "draw_as").c_str(), static_cast<int32_t>(p.draw_as));
-        }
-        if (p.hasDraw) {
-            node->mMetaData->Add((pref + "draw").c_str(), static_cast<int32_t>(p.draw));
-        }
-        if (p.hasUserjit) {
-            node->mMetaData->Add((pref + "userjit").c_str(), static_cast<int32_t>(p.userjit));
-        }
-        if (p.hasGridRes) {
-            node->mMetaData->Add((pref + "grid_res").c_str(), static_cast<int32_t>(p.grid_res));
-        }
-        if (p.hasGridRand) {
-            node->mMetaData->Add((pref + "grid_rand").c_str(), p.grid_rand);
-        }
-        if (p.hasRandlife) {
-            node->mMetaData->Add((pref + "randlife").c_str(), p.randlife);
-        }
-        if (p.hasRandlength) {
-            node->mMetaData->Add((pref + "randlength").c_str(), p.randlength);
-        }
-        if (p.hasHairStep) {
-            node->mMetaData->Add((pref + "hair_step").c_str(), static_cast<int32_t>(p.hair_step));
-        }
-        if (p.hasNormfac) {
-            node->mMetaData->Add((pref + "normfac").c_str(), p.normfac);
-            node->mMetaData->Add((pref + "hair_length").c_str(), p.normfac * 4.f);
-        }
-        if (p.dup_group && p.dup_group->id.name[0] != '\0') {
-            node->mMetaData->Add((pref + "collection").c_str(), aiString(p.dup_group->id.name + 2));
-        }
-        if (p.dup_ob && p.dup_ob->id.name[0] != '\0') {
-            node->mMetaData->Add((pref + "instanceObject").c_str(), aiString(p.dup_ob->id.name + 2));
-        }
-    }
-    node->mMetaData->Add("BLEND.ParticleSystem.count", static_cast<int32_t>(idx));
-}
-
 // ------------------------------------------------------------------------------------------------
 aiNode *BlenderImporter::ConvertNode(const Scene &in, const Object *obj, ConversionData &conv_data, const aiMatrix4x4 &parentTransform) {
     std::deque<const Object *> children;
@@ -3967,8 +3884,6 @@ aiNode *BlenderImporter::ConvertNode(const Scene &in, const Object *obj, Convers
         BlendMulM4(out, obj->parentinv, local);
         BlendCopyMat4ToAi(node->mTransformation, out);
     }
-
-    BlendEmitParticleNodeMetadata(node.get(), *obj);
 
     std::vector<aiNode *> boneRoots;
     if (obj->type == Object::Type_ARMATURE) {

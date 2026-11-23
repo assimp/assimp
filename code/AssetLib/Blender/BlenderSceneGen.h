@@ -308,37 +308,6 @@ template <> void Structure :: Convert<Camera> (
     ) const
 ;
 
-
-template <> void Structure :: Convert<ParticleKey> (
-    ParticleKey& dest,
-    const FileDatabase& db
-    ) const
-;
-
-template <> void Structure :: Convert<ParticleData> (
-    ParticleData& dest,
-    const FileDatabase& db
-    ) const
-;
-
-template <> void Structure :: Convert<ParticleDupliWeight> (
-    ParticleDupliWeight& dest,
-    const FileDatabase& db
-    ) const
-;
-
-template <> void Structure :: Convert<ParticleSettings> (
-    ParticleSettings& dest,
-    const FileDatabase& db
-    ) const
-;
-
-template <> void Structure :: Convert<ParticleSystem> (
-    ParticleSystem& dest,
-    const FileDatabase& db
-    ) const
-;
-
 template <> void Structure :: Convert<MirrorModifierData> (
     MirrorModifierData& dest,
     const FileDatabase& db

@@ -30,10 +30,10 @@ int main(int argc, char **argv)
     const std::string vertex_shader_path = res_dir_path + "/shaders/skinned.vert";
     const std::string fragment_shader_path = res_dir_path + "/shaders/skinned.frag";
     std::error_code ec;
-    if (!std::filesystem::is_directory(res_dir_path, ec) || ec ||
-        !std::filesystem::exists(model_path, ec) || ec ||
-        !std::filesystem::exists(vertex_shader_path, ec) || ec ||
-        !std::filesystem::exists(fragment_shader_path, ec) || ec
+    if (!std::filesystem::is_directory(res_dir_path, ec) ||
+        !std::filesystem::exists(model_path, ec) ||
+        !std::filesystem::exists(vertex_shader_path, ec) ||
+        !std::filesystem::exists(fragment_shader_path, ec)
     ) {
         std::fprintf(stderr, "[ERROR]: failed to find the 'res' dir.. try running '%s <path_to_res>'\n", argv[0]);
         return 1;

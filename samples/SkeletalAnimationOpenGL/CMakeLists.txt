@@ -1,8 +1,8 @@
 FIND_PACKAGE(OpenGL REQUIRED)
-FIND_PACKAGE(GLUT)
+find_package(FreeGLUT CONFIG QUIET)
 
-IF ( NOT GLUT_FOUND )
-  MESSAGE( WARNING "Please install glut to build this sample" )
+IF ( NOT FreeGLUT_FOUND )
+  MESSAGE( WARNING "Please install FreeGLUT to build this sample" )
   RETURN ()
 ENDIF ()
 
@@ -46,10 +46,17 @@ TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_skeletalanimationogl)
 
 SET_PROPERTY(TARGET assimp_skeletalanimationogl PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
-TARGET_LINK_LIBRARIES( assimp_skeletalanimationogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${M_LIB} )
+TARGET_LINK_LIBRARIES( assimp_skeletalanimationogl PRIVATE 
+  assimp 
+  ${M_LIB}
+  ${OPENGL_LIBRARIES}
+  FreeGLUT::freeglut
+)
+
 TARGET_PRECOMPILE_HEADERS( assimp_skeletalanimationogl PRIVATE
   $<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_LIST_DIR}/SkeletalAnimationOpenGL/pch.hpp>
 )
+
 SET_TARGET_PROPERTIES( assimp_skeletalanimationogl PROPERTIES
   OUTPUT_NAME assimp_skeletalanimationogl
 )

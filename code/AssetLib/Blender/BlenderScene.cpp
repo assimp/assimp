@@ -1137,12 +1137,62 @@ void Structure ::Convert<ModifierData>(
 
 //--------------------------------------------------------------------------------
 template <>
+void Structure ::Convert<AssetMetaData>(
+        AssetMetaData &dest,
+        const FileDatabase &db) const {
+    // Presence: Asset Browser char* fields (DATA blocks), same pattern as FCurve.rna_path.
+    auto readCString = [&](const char *fieldName, std::string &out) {
+        out.clear();
+        try {
+            const Field &f = (*this)[fieldName];
+            const StreamReaderAny::pos old = db.reader->GetCurrentPos();
+            db.reader->IncPtr(f.offset);
+            Pointer ptrval;
+            Convert(ptrval, db);
+            db.reader->SetCurrentPos(old);
+            if (!ptrval.val) {
+                return;
+            }
+            const FileBlockHead *block = LocateFileBlockForAddress(ptrval, db);
+            if (!block) {
+                return;
+            }
+            const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
+            db.reader->SetCurrentPos(block->start + static_cast<size_t>(ptrval.val - block->address.val));
+            for (;;) {
+                const char ch = static_cast<char>(db.reader->GetI1());
+                if (ch == '\0') {
+                    break;
+                }
+                out.push_back(ch);
+                if (out.size() >= 8192) {
+                    break;
+                }
+            }
+            db.reader->SetCurrentPos(pold);
+        } catch (const Error &) {
+            out.clear();
+        }
+    };
+    readCString("*author", dest.author);
+    readCString("*description", dest.description);
+    readCString("*copyright", dest.copyright);
+    readCString("*license", dest.license);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
 void Structure ::Convert<ID>(
         ID &dest,
         const FileDatabase &db) const {
 
     ReadFieldArray<ErrorPolicy_Warn>(dest.name, "name", db);
     ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
+    // Asset Browser mark (Presence: SDNA *asset_data).
+    if (Get("*asset_data") != nullptr) {
+        ReadFieldPtr<ErrorPolicy_Igno>(dest.asset_data, "*asset_data", db);
+    }
 
     db.reader->IncPtr(size);
 }
@@ -1391,6 +1441,7 @@ void DNA::RegisterConverters() {
     converters["ListBase"] = DNA::FactoryPair(&Structure::Allocate<ListBase>, &Structure::Convert<ListBase>);
     converters["MLoop"] = DNA::FactoryPair(&Structure::Allocate<MLoop>, &Structure::Convert<MLoop>);
     converters["ModifierData"] = DNA::FactoryPair(&Structure::Allocate<ModifierData>, &Structure::Convert<ModifierData>);
+    converters["AssetMetaData"] = DNA::FactoryPair(&Structure::Allocate<AssetMetaData>, &Structure::Convert<AssetMetaData>);
     converters["ID"] = DNA::FactoryPair(&Structure::Allocate<ID>, &Structure::Convert<ID>);
     converters["MCol"] = DNA::FactoryPair(&Structure::Allocate<MCol>, &Structure::Convert<MCol>);
     converters["MPoly"] = DNA::FactoryPair(&Structure::Allocate<MPoly>, &Structure::Convert<MPoly>);

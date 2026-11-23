@@ -117,9 +117,19 @@ struct Collection;
 static const size_t MaxNameLen = 1024;
 
 // -------------------------------------------------------------------------------
+/** DNA AssetMetaData (ID.asset_data) - Asset Browser fields only. */
+struct AssetMetaData final : ElemBase {
+    std::string author; // char *author
+    std::string description; // char *description
+    std::string copyright; // char *copyright
+    std::string license; // char *license
+};
+
 struct ID final : ElemBase {
     char name[MaxNameLen] WARN;
     short flag;
+    /** Presence: only when SDNA has *asset_data (Asset Browser mark). */
+    std::shared_ptr<AssetMetaData> asset_data WARN;
 };
 
 // -------------------------------------------------------------------------------

@@ -266,6 +266,12 @@ template <> void Structure :: Convert<ModifierData> (
     ) const
 ;
 
+template <> void Structure :: Convert<AssetMetaData> (
+    AssetMetaData& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<ID> (
     ID& dest,
     const FileDatabase& db

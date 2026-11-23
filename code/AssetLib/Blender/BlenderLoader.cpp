@@ -2648,6 +2648,32 @@ void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root,
 }
 
 // ------------------------------------------------------------------------------------------------
+
+/** Emit Asset Browser strings onto aiMetadata (Presence; aiString caps at AI_MAXLEN). */
+void BlendEmitAssetBrowserMetadata(aiMetadata *&meta, const Assimp::Blender::AssetMetaData *asset,
+        bool alsoSourceCopyright) {
+    if (asset == nullptr) {
+        return;
+    }
+    auto addStr = [&](const char *key, const std::string &val) {
+        if (val.empty()) {
+            return;
+        }
+        if (meta == nullptr) {
+            meta = new aiMetadata();
+        }
+        // aiString(std::string) truncates to AI_MAXLEN-1.
+        meta->Add(key, aiString(val));
+    };
+    addStr("Asset.Author", asset->author);
+    addStr("Asset.Description", asset->description);
+    addStr("Asset.Copyright", asset->copyright);
+    addStr("Asset.License", asset->license);
+    if (alsoSourceCopyright && !asset->copyright.empty()) {
+        addStr(AI_METADATA_SOURCE_COPYRIGHT, asset->copyright);
+    }
+}
+
 void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const FileDatabase &file,
         const char *blenderVersion) {
     ConversionData conv(file);
@@ -2744,8 +2770,7 @@ void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const File
         out->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
     }
 
-    // Typed scene metadata from the BLENDER file header only (generic container
-    // identity). No AssetMetaData.copyright / Text-ID author strings.
+    // Typed scene metadata: BLENDER header identity + optional Scene Asset Browser fields.
     if (out->mMetaData == nullptr) {
         out->mMetaData = new aiMetadata();
     }
@@ -2755,6 +2780,9 @@ void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const File
         std::string generator = std::string("Blender ") + blenderVersion;
         out->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(generator));
     }
+    // Presence: only DNA AssetMetaData strings (not Text datablocks).
+    BlendEmitAssetBrowserMetadata(out->mMetaData, in.id.asset_data.get(), true);
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -3922,6 +3950,9 @@ aiNode *BlenderImporter::ConvertNode(const Scene &in, const Object *obj, Convers
 
     // apply modifiers
     modifier_cache->ApplyModifiers(*node, conv_data, in, *obj);
+
+    // Asset Browser fields on Object ID (Presence).
+    BlendEmitAssetBrowserMetadata(node->mMetaData, obj->id.asset_data.get(), false);
 
     return node.release();
 }

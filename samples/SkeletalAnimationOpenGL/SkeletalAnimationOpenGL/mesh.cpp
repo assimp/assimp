@@ -6,6 +6,7 @@
 // Written by Aravinda Samarathunga (I-A-S)
 // ----------------------------------------------------------------------------
 
+#include "gl_loader.hpp"
 #include "mesh.hpp"
 
 Result<Box<Mesh>> Mesh::create(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices, const std::vector<GLuint> &textures)

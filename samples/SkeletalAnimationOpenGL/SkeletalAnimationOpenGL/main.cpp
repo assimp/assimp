@@ -10,6 +10,9 @@
 
 #include <GL/freeglut.h>
 
+#define SAMPLE_GL_LOADER_IMPLEMENTATION
+#include "gl_loader.hpp"
+
 #include <cstdio>
 
 #include <filesystem>
@@ -49,9 +52,13 @@ int main(int argc, char **argv)
 
     glutCreateWindow("Assimp - Skeletal Animation OpenGL sample");
 
-    if (!gladLoadGL()) {
-        std::fprintf(stderr, "[ERROR]: failed to load OpenGL functions with glad.\n");
-        return 1;
+    {
+        const auto result = load_gl_functions();
+        if (result.is_error())
+        {
+            std::fprintf(stderr, "[ERROR]: \"%s\".\n", result.get_error().c_str());
+            return 1;
+        }
     }
 
     while (glGetError() != GL_NO_ERROR) {}
@@ -59,19 +66,21 @@ int main(int argc, char **argv)
     std::printf("OpenGL version: %s\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
     std::printf("Renderer:       %s\n", reinterpret_cast<const char *>(glGetString(GL_RENDERER)));
 
-    auto result = App::create(
-        glutGet(GLUT_WINDOW_WIDTH),
-        glutGet(GLUT_WINDOW_HEIGHT),
-        model_path,
-        vertex_shader_path,
-        fragment_shader_path
-    );
-    if (result.is_error())
     {
-        std::fprintf(stderr, "[ERROR]: failed to initialize the app: \"%s\".\n", result.get_error().c_str());
-        return 1;
+        auto result = App::create(
+            glutGet(GLUT_WINDOW_WIDTH),
+            glutGet(GLUT_WINDOW_HEIGHT),
+            model_path,
+            vertex_shader_path,
+            fragment_shader_path
+        );
+        if (result.is_error())
+        {
+            std::fprintf(stderr, "[ERROR]: failed to initialize the app: \"%s\".\n", result.get_error().c_str());
+            return 1;
+        }
+        g_app = std::move(result).take_value();
     }
-    g_app = std::move(result).take_value();
 
     glutDisplayFunc([]()
     {

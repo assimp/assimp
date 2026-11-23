@@ -18,8 +18,6 @@
 #include <windows.h>
 #endif
 
-#include <glad/glad.h>
-
 #include <GL/freeglut.h>
 
 #include <map>

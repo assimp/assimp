@@ -6,6 +6,7 @@
 // Written by Aravinda Samarathunga (I-A-S)
 // ----------------------------------------------------------------------------
 
+#include "gl_loader.hpp"
 #include "app.hpp"
 #include "model_loader.hpp"
 

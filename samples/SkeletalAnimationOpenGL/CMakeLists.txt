@@ -25,7 +25,6 @@ INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/code
   ${SAMPLES_SHARED_CODE_DIR}
   ${Assimp_SOURCE_DIR}/contrib/utf8cpp/source
-  ${CMAKE_CURRENT_SOURCE_DIR}/glad/include
   ${GLUT_INCLUDE_DIR}
 )
 
@@ -41,7 +40,6 @@ ADD_EXECUTABLE( assimp_skeletalanimationogl
   SkeletalAnimationOpenGL/math.cpp
   SkeletalAnimationOpenGL/model.cpp
   SkeletalAnimationOpenGL/model_loader.cpp
-  glad/src/glad.c
 )
 
 TARGET_USE_COMMON_OUTPUT_DIRECTORY(assimp_skeletalanimationogl)

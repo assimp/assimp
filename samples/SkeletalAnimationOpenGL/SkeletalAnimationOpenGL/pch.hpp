@@ -20,6 +20,7 @@
 
 #include <GL/freeglut.h>
 
+#include <set>
 #include <map>
 #include <cmath>
 #include <cstdio>

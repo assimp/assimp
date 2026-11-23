@@ -21,8 +21,13 @@ public:
     {
         int32_t parent_index{-1};
 
-        Mat4 offset_matrix{};
         Mat4 bind_transform{};
+    };
+
+    struct Bone
+    {
+        int32_t joint_index{-1};
+        Mat4 offset_matrix; 
     };
 
     template<class T> struct AnimationKey { double time; T value; };
@@ -66,6 +71,7 @@ private:
     std::vector<Box<Mesh>> m_meshes;
     std::vector<GLuint> m_textures;
     std::vector<Joint> m_joints;
+    std::vector<Bone> m_bones;
     std::vector<Animation> m_animations;
     Mat4 m_global_inverse_transform{};
     Mat4 m_joint_transforms[MAX_JOINT_COUNT];

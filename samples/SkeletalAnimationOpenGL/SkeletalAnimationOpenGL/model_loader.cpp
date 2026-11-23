@@ -49,7 +49,7 @@ Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
     model->m_global_inverse_transform = inversed(scene->mRootNode->mTransformation);
 
     loader.m_dir_path = filename.substr(0, filename.find_last_of("/\\"));
-    const auto result = loader.process_node(scene, scene->mRootNode, model->m_meshes, model->m_joints);
+    const auto result = loader.process_node(scene, scene->mRootNode, model->m_meshes, model->m_bones);
 
     for (const auto &loaded : loader.m_textures_loaded)
         model->m_textures.push_back(loaded.texture);
@@ -71,10 +71,9 @@ Result<> ModelLoader::setup_skeleton(aiNode *node, int32_t parent_index, std::ve
     
     const std::string joint_name(node->mName.C_Str());
     
-    if (m_joint_map.count(joint_name))
-        return "found a duplicate joint name";
-
-    m_joint_map[joint_name] = index;
+    m_node_joints[node] = index;
+    if (!m_joint_map.emplace(joint_name, index).second)
+        m_duplicate_joint_names.insert(joint_name);
     
     Model::Joint joint{};
     joint.parent_index = parent_index;
@@ -92,7 +91,25 @@ Result<> ModelLoader::setup_skeleton(aiNode *node, int32_t parent_index, std::ve
     return Ok();
 }
 
-Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes, std::vector<Model::Joint>& joints)
+Result<int32_t> ModelLoader::find_joint(const std::string &name) const
+{
+    if (m_duplicate_joint_names.count(name))
+        return "joint name \"" + name + "\" is used by more than one node";
+    const auto it = m_joint_map.find(name);
+    if (it == m_joint_map.end())
+        return "failed to find a joint named \"" + name + "\"";
+    return int32_t{it->second};
+}
+
+Result<GLuint> ModelLoader::add_bone(std::vector<Model::Bone> &bones, int32_t joint_index, const Mat4 &offset)
+{
+    if (bones.size() >= Model::MAX_JOINT_COUNT)
+        return "model uses too many bones";
+    bones.push_back({joint_index, offset});
+    return static_cast<GLuint>(bones.size() - 1);
+}
+
+Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vector<Box<Mesh>>& meshes, std::vector<Model::Bone>& bones)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
@@ -100,7 +117,7 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
         
         Box<Mesh> mesh;
         CHECK_ASSIGN_RESULT(
-            process_mesh(scene, node, ai_mesh, joints),
+            process_mesh(scene, node, ai_mesh, bones),
             mesh
         );
 
@@ -109,13 +126,13 @@ Result<> ModelLoader::process_node(const aiScene *scene, aiNode *node, std::vect
 
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        CHECK_RESULT(process_node(scene, node->mChildren[i], meshes, joints));
+        CHECK_RESULT(process_node(scene, node->mChildren[i], meshes, bones));
     }
 
     return Ok();
 }
 
-Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiNode *node, aiMesh *mesh, std::vector<Model::Joint>& joints)
+Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiNode *node, aiMesh *mesh, std::vector<Model::Bone>& bones)
 {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
@@ -144,12 +161,11 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiNode *node, 
     {
         const auto& bone = mesh->mBones[i];
         
-        const std::string bone_name(bone->mName.C_Str());
-        const auto bone_id = m_joint_map.find(bone_name);
-        if (bone_id == m_joint_map.end())
-            return "failed to find a joint named \"" + bone_name + "\"";
+        int32_t joint_index = -1;
+        CHECK_ASSIGN_RESULT(find_joint(bone->mName.C_Str()), joint_index);
 
-        joints[bone_id->second].offset_matrix = bone->mOffsetMatrix;
+        GLuint bone_id = 0;
+        CHECK_ASSIGN_RESULT(add_bone(bones, joint_index, bone->mOffsetMatrix), bone_id);
 
         for (unsigned int j = 0; j < bone->mNumWeights; j++)
         {
@@ -159,7 +175,7 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiNode *node, 
             {
                 if (vertex.bone_weights[k] == 0.0f)
                 {
-                    vertex.bone_ids[k] = bone_id->second;
+                    vertex.bone_ids[k] = bone_id;
                     vertex.bone_weights[k] = weight.mWeight;
                     break;
                 }
@@ -167,14 +183,22 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiNode *node, 
         }
     }
 
-    if (mesh->mNumBones == 0)
+    for (auto& vertex : vertices)
     {
-        const auto node_joint = static_cast<GLuint>(m_joint_map.at(node->mName.C_Str()));
-        for (auto& vertex : vertices)
+        if (vertex.bone_weights[0] != 0.0f)
+            continue;
+
+        const int32_t node_joint = m_node_joints.at(node);
+        auto rigid = m_rigid_bones.find(node_joint);
+        if (rigid == m_rigid_bones.end())
         {
-            vertex.bone_ids[0] = node_joint;
-            vertex.bone_weights[0] = 1.0f;
+            GLuint bone_id = 0;
+            CHECK_ASSIGN_RESULT(add_bone(bones, node_joint, Mat4{}), bone_id);
+            rigid = m_rigid_bones.emplace(node_joint, bone_id).first;
         }
+
+        vertex.bone_ids[0] = rigid->second;
+        vertex.bone_weights[0] = 1.0f;
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)

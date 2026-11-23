@@ -58,8 +58,10 @@ void Model::update(double dt)
         const auto& joint = m_joints[i];
         global[i] = joint.parent_index < 0 ? local[i] : global[joint.parent_index] * local[i];
 
-        m_joint_transforms[i] = m_global_inverse_transform * global[i] * joint.offset_matrix;
     }
+
+    for (size_t i = 0; i < m_bones.size(); i++)
+        m_joint_transforms[i] = m_global_inverse_transform * global[m_bones[i].joint_index] * m_bones[i].offset_matrix;
 }
 
 void Model::draw()

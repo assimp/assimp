@@ -43,6 +43,8 @@ Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
 
     ModelLoader loader{};
 
+    if (scene->mRootNode->mTransformation.Determinant() == 0.0f)
+        return "scene root transform is not invertible";
     CHECK_RESULT(loader.setup_skeleton(scene->mRootNode, -1, model->m_joints));
     model->m_global_inverse_transform = inversed(scene->mRootNode->mTransformation);
 

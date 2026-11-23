@@ -69,7 +69,7 @@ protected:
     template <class T>
     struct Property {
         std::string name;
-        T value;
+        T value{};
     };
 
     typedef Property<uint32_t> HexProperty;

@@ -78,16 +78,6 @@ AI_WONT_RETURN void BVHLoader::ThrowException(T &&...args) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-BVHLoader::BVHLoader() :
-        mLine(),
-        mAnimTickDuration(),
-        mAnimNumFrames(),
-        noSkeletonMesh() {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool BVHLoader::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool /*checkSig*/) const {
     static const char *tokens[] = { "HIERARCHY" };
@@ -116,7 +106,7 @@ void BVHLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IOSyst
         throw DeadlyImportError("Failed to open file ", pFile, ".");
     }
 
-    size_t fileSize = file->FileSize();
+    const size_t fileSize = file->FileSize();
     if (fileSize == 0) {
         throw DeadlyImportError("File is too small.");
     }
@@ -142,24 +132,29 @@ void BVHLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IOSyst
 // Reads the file
 void BVHLoader::ReadStructure(aiScene *pScene) {
     // first comes hierarchy
-    std::string header = GetNextToken();
-    if (header != "HIERARCHY")
+    const std::string header = GetNextToken();
+    if (header != "HIERARCHY") {
         ThrowException("Expected header string \"HIERARCHY\".");
+    }
     ReadHierarchy(pScene);
 
     // then comes the motion data
-    std::string motion = GetNextToken();
-    if (motion != "MOTION")
+    const std::string motion = GetNextToken();
+    if (motion != "MOTION") {
         ThrowException("Expected beginning of motion data \"MOTION\".");
+    }
     ReadMotion(pScene);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Reads the hierarchy
 void BVHLoader::ReadHierarchy(aiScene *pScene) {
+    ai_assert(pScene != nullptr);
+
     std::string root = GetNextToken();
-    if (root != "ROOT")
+    if (root != "ROOT") {
         ThrowException("Expected root node \"ROOT\".");
+    }
 
     // Go read the hierarchy from here
     pScene->mRootNode = ReadNode();
@@ -169,17 +164,19 @@ void BVHLoader::ReadHierarchy(aiScene *pScene) {
 // Reads a node and recursively its children and returns the created node;
 aiNode *BVHLoader::ReadNode() {
     // first token is name
-    std::string nodeName = GetNextToken();
-    if (nodeName.empty() || nodeName == "{")
+    const std::string nodeName = GetNextToken();
+    if (nodeName.empty() || nodeName == "{") {
         ThrowException("Expected node name, but found \"", nodeName, "\".");
+    }
 
     // then an opening brace should follow
-    std::string openBrace = GetNextToken();
-    if (openBrace != "{")
+    const std::string openBrace = GetNextToken();
+    if (openBrace != "{") {
         ThrowException("Expected opening brace \"{\", but found \"", openBrace, "\".");
+    }
 
     // Create a node
-    aiNode *node = new aiNode(nodeName);
+    auto *node = new aiNode(nodeName);
     std::vector<aiNode *> childNodes;
 
     // and create an bone entry for it
@@ -192,11 +189,11 @@ aiNode *BVHLoader::ReadNode() {
         std::string token = GetNextToken();
 
         // node offset to parent node
-        if (token == "OFFSET")
+        if (token == "OFFSET") {
             ReadNodeOffset(node);
-        else if (token == "CHANNELS")
+        } else if (token == "CHANNELS") {
             ReadNodeChannels(internNode);
-        else if (token == "JOINT") {
+        } else if (token == "JOINT") {
             // child node follows
             aiNode *child = ReadNode();
             child->mParent = node;
@@ -205,8 +202,9 @@ aiNode *BVHLoader::ReadNode() {
             // The real symbol is "End Site". Second part comes in a separate token
             siteToken.clear();
             siteToken = GetNextToken();
-            if (siteToken != "Site")
+            if (siteToken != "Site") {
                 ThrowException("Expected \"End Site\" keyword, but found \"", token, " ", siteToken, "\".");
+            }
 
             aiNode *child = ReadEndSite(nodeName);
             child->mParent = node;
@@ -221,7 +219,7 @@ aiNode *BVHLoader::ReadNode() {
     }
 
     // add the child nodes if there are any
-    if (childNodes.size() > 0) {
+    if (!childNodes.empty()) {
         node->mNumChildren = static_cast<unsigned int>(childNodes.size());
         node->mChildren = new aiNode *[node->mNumChildren];
         std::copy(childNodes.begin(), childNodes.end(), node->mChildren);
@@ -235,12 +233,13 @@ aiNode *BVHLoader::ReadNode() {
 // Reads an end node and returns the created node.
 aiNode *BVHLoader::ReadEndSite(const std::string &pParentName) {
     // check opening brace
-    std::string openBrace = GetNextToken();
-    if (openBrace != "{")
+    const std::string openBrace = GetNextToken();
+    if (openBrace != "{") {
         ThrowException("Expected opening brace \"{\", but found \"", openBrace, "\".");
+    }
 
     // Create a node
-    aiNode *node = new aiNode("EndSite_" + pParentName);
+    auto *node = new aiNode("EndSite_" + pParentName);
 
     // now read the node's contents. Only possible entry is "OFFSET"
     std::string token;
@@ -283,13 +282,11 @@ void BVHLoader::ReadNodeOffset(aiNode *pNode) {
 // Reads the animation channels for the given node
 void BVHLoader::ReadNodeChannels(BVHLoader::Node &pNode) {
     // number of channels. Use the float reader because we're lazy
-    float numChannelsFloat = GetNextTokenAsFloat();
-    unsigned int numChannels = (unsigned int)numChannelsFloat;
+    const float numChannelsFloat = GetNextTokenAsFloat();
+    const unsigned int numChannels = static_cast<unsigned int>(numChannelsFloat);
 
     for (unsigned int a = 0; a < numChannels; a++) {
-        std::string channelToken = GetNextToken();
-
-        if (channelToken == "Xposition")
+        if (std::string channelToken = GetNextToken(); channelToken == "Xposition")
             pNode.mChannels.push_back(Channel_PositionX);
         else if (channelToken == "Yposition")
             pNode.mChannels.push_back(Channel_PositionY);
@@ -310,32 +307,35 @@ void BVHLoader::ReadNodeChannels(BVHLoader::Node &pNode) {
 // Reads the motion data
 void BVHLoader::ReadMotion(aiScene * /*pScene*/) {
     // Read number of frames
-    std::string tokenFrames = GetNextToken();
-    if (tokenFrames != "Frames:")
+    if (std::string tokenFrames = GetNextToken(); tokenFrames != "Frames:") {
         ThrowException("Expected frame count \"Frames:\", but found \"", tokenFrames, "\".");
+    }
 
-    float numFramesFloat = GetNextTokenAsFloat();
-    mAnimNumFrames = (unsigned int)numFramesFloat;
+    const float numFramesFloat = GetNextTokenAsFloat();
+    mAnimNumFrames = static_cast<unsigned int>(numFramesFloat);
 
     // Read frame duration
     std::string tokenDuration1 = GetNextToken();
     std::string tokenDuration2 = GetNextToken();
-    if (tokenDuration1 != "Frame" || tokenDuration2 != "Time:")
+    if (tokenDuration1 != "Frame" || tokenDuration2 != "Time:") {
         ThrowException("Expected frame duration \"Frame Time:\", but found \"", tokenDuration1, " ", tokenDuration2, "\".");
+    }
 
     mAnimTickDuration = GetNextTokenAsFloat();
 
     // resize value vectors for each node
-    for (std::vector<Node>::iterator it = mNodes.begin(); it != mNodes.end(); ++it)
+    for (std::vector<Node>::iterator it = mNodes.begin(); it != mNodes.end(); ++it) {
         it->mChannelValues.reserve(it->mChannels.size() * mAnimNumFrames);
+    }
 
     // now read all the data and store it in the corresponding node's value vector
     for (unsigned int frame = 0; frame < mAnimNumFrames; ++frame) {
         // on each line read the values for all nodes
-        for (std::vector<Node>::iterator it = mNodes.begin(); it != mNodes.end(); ++it) {
+        for (auto it = mNodes.begin(); it != mNodes.end(); ++it) {
             // get as many values as the node has channels
-            for (unsigned int c = 0; c < it->mChannels.size(); ++c)
+            for (unsigned int c = 0; c < it->mChannels.size(); ++c) {
                 it->mChannelValues.push_back(GetNextTokenAsFloat());
+            }
         }
 
         // after one frame worth of values for all nodes there should be a newline, but we better don't rely on it
@@ -347,12 +347,14 @@ void BVHLoader::ReadMotion(aiScene * /*pScene*/) {
 std::string BVHLoader::GetNextToken() {
     // skip any preceding whitespace
     while (mReader != mBuffer.end()) {
-        if (!isspace((unsigned char)*mReader))
+        if (!isspace((unsigned char)*mReader)) {
             break;
+        }
 
         // count lines
-        if (*mReader == '\n')
-            mLine++;
+        if (*mReader == '\n') {
+            ++mLine;
+        }
 
         ++mReader;
     }
@@ -360,15 +362,17 @@ std::string BVHLoader::GetNextToken() {
     // collect all chars till the next whitespace. BVH is easy in respect to that.
     std::string token;
     while (mReader != mBuffer.end()) {
-        if (isspace((unsigned char)*mReader))
+        if (isspace((unsigned char)*mReader)) {
             break;
+        }
 
         token.push_back(*mReader);
         ++mReader;
 
         // little extra logic to make sure braces are counted correctly
-        if (token == "{" || token == "}")
+        if (token == "{" || token == "}") {
             break;
+        }
     }
 
     // empty token means end of file, which is just fine
@@ -379,16 +383,18 @@ std::string BVHLoader::GetNextToken() {
 // Reads the next token as a float
 float BVHLoader::GetNextTokenAsFloat() {
     std::string token = GetNextToken();
-    if (token.empty())
+    if (token.empty()) {
         ThrowException("Unexpected end of file while trying to read a float");
+    }
 
     // check if the float is valid by testing if the atof() function consumed every char of the token
     const char *ctoken = token.c_str();
     float result = 0.0f;
     ctoken = fast_atoreal_move(ctoken, result);
 
-    if (ctoken != token.c_str() + token.length())
+    if (ctoken != token.c_str() + token.length()) {
         ThrowException("Expected a floating point number, but found \"", token, "\".");
+    }
 
     return result;
 }
@@ -412,16 +418,17 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
     anim->mChannels = new aiNodeAnim *[anim->mNumChannels];
 
     // FIX: set the array elements to nullptr to ensure proper deletion if an exception is thrown
-    for (unsigned int i = 0; i < anim->mNumChannels; ++i)
+    for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
         anim->mChannels[i] = nullptr;
+    }
 
     for (unsigned int a = 0; a < anim->mNumChannels; a++) {
         const Node &node = mNodes[a];
         const std::string nodeName = std::string(node.mNode->mName.data);
-        aiNodeAnim *nodeAnim = new aiNodeAnim;
+        auto *nodeAnim = new aiNodeAnim;
         anim->mChannels[a] = nodeAnim;
         nodeAnim->mNodeName.Set(nodeName);
-        std::map<BVHLoader::ChannelType, int> channelMap;
+        std::map<ChannelType, int> channelMap;
 
         // Build map of channels
         for (unsigned int channel = 0; channel < node.mChannels.size(); ++channel) {
@@ -437,15 +444,15 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
                 poskey->mTime = double(fr);
 
                 // Now compute all translations
-                for (BVHLoader::ChannelType channel = Channel_PositionX; channel <= Channel_PositionZ; channel = (BVHLoader::ChannelType)(channel + 1)) {
+                for (ChannelType channel = Channel_PositionX; channel <= Channel_PositionZ; channel = (ChannelType)(channel + 1)) {
                     // Find channel in node
-                    std::map<BVHLoader::ChannelType, int>::iterator mapIter = channelMap.find(channel);
-
-                    if (mapIter == channelMap.end())
+                    auto mapIter = channelMap.find(channel);
+                    if (mapIter == channelMap.end()) {
                         throw DeadlyImportError("Missing position channel in node ", nodeName);
-                    else {
-                        int channelIdx = mapIter->second;
-                        switch (channel) {
+                    }
+
+                    const int channelIdx = mapIter->second;
+                    switch (channel) {
                         case Channel_PositionX:
                             poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channelIdx];
                             break;
@@ -455,10 +462,8 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
                         case Channel_PositionZ:
                             poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channelIdx];
                             break;
-
                         default:
                             break;
-                        }
                     }
                 }
                 ++poskey;
@@ -474,7 +479,6 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
 
         // rotation part. Always present. First find value offsets
         {
-
             // Then create the number of rotation keys
             nodeAnim->mNumRotationKeys = mAnimNumFrames;
             nodeAnim->mRotationKeys = new aiQuatKey[mAnimNumFrames];
@@ -484,23 +488,23 @@ void BVHLoader::CreateAnimation(aiScene *pScene) {
                 aiMatrix3x3 rotMatrix;
                 for (unsigned int channelIdx = 0; channelIdx < node.mChannels.size(); ++channelIdx) {
                     switch (node.mChannels[channelIdx]) {
-                    case Channel_RotationX: {
-                        const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
-                        aiMatrix4x4::RotationX(angle, temp);
-                        rotMatrix *= aiMatrix3x3(temp);
-                    } break;
-                    case Channel_RotationY: {
-                        const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
-                        aiMatrix4x4::RotationY(angle, temp);
-                        rotMatrix *= aiMatrix3x3(temp);
-                    } break;
-                    case Channel_RotationZ: {
-                        const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
-                        aiMatrix4x4::RotationZ(angle, temp);
-                        rotMatrix *= aiMatrix3x3(temp);
-                    } break;
-                    default:
-                        break;
+                        case Channel_RotationX: {
+                            const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
+                            aiMatrix4x4::RotationX(angle, temp);
+                            rotMatrix *= aiMatrix3x3(temp);
+                        } break;
+                        case Channel_RotationY: {
+                            const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
+                            aiMatrix4x4::RotationY(angle, temp);
+                            rotMatrix *= aiMatrix3x3(temp);
+                        } break;
+                        case Channel_RotationZ: {
+                            const float angle = node.mChannelValues[fr * node.mChannels.size() + channelIdx] * float(AI_MATH_PI) / 180.0f;
+                            aiMatrix4x4::RotationZ(angle, temp);
+                            rotMatrix *= aiMatrix3x3(temp);
+                        } break;
+                        default:
+                            break;
                     }
                 }
                 rotkey->mTime = double(fr);

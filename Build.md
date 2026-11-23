@@ -37,6 +37,19 @@ cmake CMakeLists.txt
 ```
 This will generate the project files for the visual studio. All dependencies used to build Asset-Importer-Lib shall be part of the repo. If you want to use you own zlib installation this is possible as well. Check the options for it.
 
+### Build instructions for Windows on ARM64
+Install the *MSVC ARM64 build tools* component of Visual Studio. On an ARM64 machine you can build natively from an *ARM64 Native Tools Command Prompt*:
+```bash
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -S . -B build
+cmake --build build
+```
+To cross-compile from an x64 machine, use the Visual Studio generator with the ARM64 platform (or an *x64_arm64 Cross Tools Command Prompt* with Ninja):
+```bash
+cmake -G "Visual Studio 17 2022" -A ARM64 -S . -B build-arm64
+cmake --build build-arm64 --config Release
+```
+The assimp viewer (`ASSIMP_BUILD_ASSIMP_VIEW`) needs the legacy DirectX SDK (D3DX9), which is only available for x86 and x64, so it is disabled by default on ARM64. The library, the command line tool and the unit tests are supported.
+
 ### Build instructions for Windows with UWP
 See <https://stackoverflow.com/questions/40803170/cmake-uwp-using-cmake-to-build-universal-windows-app>
 

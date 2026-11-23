@@ -14,7 +14,7 @@ struct ShaderHandle
 {
     GLuint handle{};
 
-    ShaderHandle(GLuint h = 0): handle(h)
+    explicit ShaderHandle(GLuint h = 0): handle(h)
     {
     }
 
@@ -43,7 +43,7 @@ static Result<> compile_shader_from_file(const std::string& path, GLenum type, S
 
         const auto p1 = source.find("#version");
         const auto p2 = source.find("\n", p1);
-        if ((p1 == source.npos) || (p2 == source.npos))
+        if ((p1 == std::string::npos) || (p2 == std::string::npos))
             return "shader does not have a #version line";
 
         if (!source_prefix.empty())

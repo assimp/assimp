@@ -17,8 +17,6 @@
 
 #include <filesystem>
 
-Box<App> g_app;
-
 int main(int argc, char **argv)
 {
     static constexpr int32_t WINDOW_WIDTH = 800;
@@ -62,11 +60,15 @@ int main(int argc, char **argv)
         }
     }
 
-    while (glGetError() != GL_NO_ERROR) {}
+    while (glGetError() != GL_NO_ERROR) 
+    {
+        // clear out any GL errors so far
+    }
 
     std::printf("OpenGL version: %s\n", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
     std::printf("Renderer:       %s\n", reinterpret_cast<const char *>(glGetString(GL_RENDERER)));
 
+    Box<App> app;
     {
         auto result = App::create(
             glutGet(GLUT_WINDOW_WIDTH),
@@ -80,18 +82,23 @@ int main(int argc, char **argv)
             std::fprintf(stderr, "[ERROR]: failed to initialize the app: \"%s\".\n", result.get_error().c_str());
             return 1;
         }
-        g_app = std::move(result).take_value();
+        app = std::move(result).take_value();
+        glutSetWindowData(&app);
     }
 
     glutDisplayFunc([]()
     {
-        g_app->on_render();
+        const auto *app_box = static_cast<Box<App> *>(glutGetWindowData());
+        if (app_box && *app_box)
+            (*app_box)->on_render();
         glutSwapBuffers();
     });
 
     glutReshapeFunc([](int width, int height)
     {
-        g_app->on_resize(width, height);
+        const auto *app_box = static_cast<Box<App> *>(glutGetWindowData());
+        if (app_box && *app_box)
+            (*app_box)->on_resize(width, height);
     });
 
     glutKeyboardFunc([](unsigned char key, int, int)
@@ -106,15 +113,16 @@ int main(int argc, char **argv)
     {
         glutPostRedisplay();
     });
-    
+
     glutCloseFunc([]()
     {
-        g_app.reset();
+        if (auto *app_box = static_cast<Box<App> *>(glutGetWindowData()))
+            app_box->reset();
     });
 
     glutMainLoop();
 
-    g_app.reset();
+    app.reset();
 
     return 0;
 }

@@ -39,7 +39,7 @@ namespace TextureLoader
 {
   Result<GLuint> from_file(const std::string& fileName);
   Result<GLuint> from_memory(const uint8_t *data, size_t size);
-  Result<GLuint> from_pixels(const void *pixels, GLsizei width, GLsizei height, GLenum format);
+  Result<GLuint> from_pixels(const uint8_t *pixels, GLsizei width, GLsizei height, GLenum format);
 }
 
 Result<Box<Model>> ModelLoader::from_file(const std::string &filename)
@@ -185,12 +185,12 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiNode *node, 
             auto& vertex = vertices[weight.mVertexId];
             for (uint32_t k = 0; k < Vertex::NUM_MAX_BONES; k++)
             {
-                if (vertex.bone_weights[k] == 0.0f)
-                {
-                    vertex.bone_ids[k] = bone_id;
-                    vertex.bone_weights[k] = weight.mWeight;
-                    break;
-                }
+                if (vertex.bone_weights[k] != 0.0f)
+                    continue;
+
+                vertex.bone_ids[k] = bone_id;
+                vertex.bone_weights[k] = weight.mWeight;
+                break;
             }
         }
     }
@@ -330,7 +330,7 @@ Result<GLuint> ModelLoader::load_embedded_texture(const aiTexture *embedded_text
         GLuint texture = 0;
 
         CHECK_ASSIGN_RESULT(
-            TextureLoader::from_pixels(embedded_texture->pcData,
+            TextureLoader::from_pixels(reinterpret_cast<const uint8_t*>(embedded_texture->pcData),
                 static_cast<GLsizei>(embedded_texture->mWidth),
                 static_cast<GLsizei>(embedded_texture->mHeight),
                 GL_BGRA),
@@ -356,7 +356,7 @@ Result<GLuint> ModelLoader::load_embedded_texture(const aiTexture *embedded_text
 
 namespace TextureLoader
 {
-    Result<GLuint> from_pixels(const void *pixels, GLsizei width, GLsizei height, GLenum format)
+    Result<GLuint> from_pixels(const uint8_t *pixels, GLsizei width, GLsizei height, GLenum format)
     {
         GLuint texture = 0;
 
@@ -389,7 +389,7 @@ namespace TextureLoader
         if (pixels == nullptr)
             return "failed to decode the embedded image: " + std::string(stbi_failure_reason());
 
-        auto result = from_pixels(pixels, w, h, GL_RGBA);
+        auto result = from_pixels(reinterpret_cast<const uint8_t*>(pixels), w, h, GL_RGBA);
         stbi_image_free(pixels);
 
         return result;

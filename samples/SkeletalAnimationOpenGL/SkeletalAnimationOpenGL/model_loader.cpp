@@ -115,9 +115,16 @@ Result<int32_t> ModelLoader::find_joint(const std::string &name) const
 
 Result<GLuint> ModelLoader::add_bone(std::vector<Model::Bone> &bones, int32_t joint_index, const Mat4 &offset)
 {
+    for (size_t i = 0; i < bones.size(); i++)
+    {
+        if (bones[i].joint_index == joint_index && bones[i].offset_matrix == offset)
+            return static_cast<GLuint>(i);
+    }
+
     if (bones.size() >= Model::MAX_JOINT_COUNT)
         return "model uses too many bones";
     bones.push_back({joint_index, offset});
+    
     return static_cast<GLuint>(bones.size() - 1);
 }
 
@@ -195,21 +202,20 @@ Result<Box<Mesh>> ModelLoader::process_mesh(const aiScene *scene, aiNode *node, 
         }
     }
 
+    std::optional<GLuint> rigid_bone_id;
     for (auto& vertex : vertices)
     {
         if (vertex.bone_weights[0] != 0.0f)
             continue;
 
-        const int32_t node_joint = m_node_joints.at(node);
-        auto rigid = m_rigid_bones.find(node_joint);
-        if (rigid == m_rigid_bones.end())
+        if (!rigid_bone_id)
         {
             GLuint bone_id = 0;
-            CHECK_ASSIGN_RESULT(add_bone(bones, node_joint, Mat4{}), bone_id);
-            rigid = m_rigid_bones.emplace(node_joint, bone_id).first;
+            CHECK_ASSIGN_RESULT(add_bone(bones, m_node_joints.at(node), Mat4{}), bone_id);
+            rigid_bone_id = bone_id;
         }
 
-        vertex.bone_ids[0] = rigid->second;
+        vertex.bone_ids[0] = *rigid_bone_id;
         vertex.bone_weights[0] = 1.0f;
     }
 

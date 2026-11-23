@@ -35,6 +35,7 @@
 #include <vector>
 #include <memory>
 #include <variant>
+#include <optional>
 #include <algorithm>
 
 // -------------------------------------------------------------------------------------------------------------------------

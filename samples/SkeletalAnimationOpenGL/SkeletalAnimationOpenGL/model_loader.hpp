@@ -38,7 +38,6 @@ private:
     std::map<const aiNode*, int32_t> m_node_joints;
     std::map<std::string, int32_t> m_joint_map;
     std::set<std::string> m_duplicate_joint_names;
-    std::map<int32_t, GLuint> m_rigid_bones;
 
     Result<> setup_skeleton(aiNode *node, int32_t parent_index, std::vector<Model::Joint>& joints);
     Result<int32_t> find_joint(const std::string &name) const;

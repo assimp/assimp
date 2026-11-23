@@ -118,7 +118,9 @@ protected:
     void ParseBlendFile(Blender::FileDatabase &out, std::shared_ptr<IOStream> stream);
     void ExtractScene(Blender::Scene &out, const Blender::FileDatabase &file);
     void ParseSubCollection(const Blender::Scene &in, aiNode *root, const std::shared_ptr<Blender::Collection>& collection, Blender::ConversionData &conv_data);
-    void ConvertBlendFile(aiScene *out, const Blender::Scene &in, const Blender::FileDatabase &file);
+    /** @param blenderVersion Header file version string (e.g. "4.20"), or empty. */
+    void ConvertBlendFile(aiScene *out, const Blender::Scene &in, const Blender::FileDatabase &file,
+            const char *blenderVersion);
 
 private:
     aiNode *ConvertNode(const Blender::Scene &in,

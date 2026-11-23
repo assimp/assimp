@@ -62,6 +62,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 #include <assimp/anim.h>
 #include <assimp/camera.h>
+#include <assimp/commonMetaData.h>
+#include <assimp/metadata.h>
 
 #include <algorithm>
 #include <cctype>
@@ -2495,7 +2497,7 @@ void BlenderImporter::InternReadFile(const std::string &pFile,
     Scene scene;
     ExtractScene(scene, file);
 
-    ConvertBlendFile(pScene, scene, file);
+    ConvertBlendFile(pScene, scene, file, blenderVersionStr);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2646,7 +2648,8 @@ void BlenderImporter::ParseSubCollection(const Blender::Scene &in, aiNode *root,
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const FileDatabase &file) {
+void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const FileDatabase &file,
+        const char *blenderVersion) {
     ConversionData conv(file);
 
     aiNode *root = out->mRootNode = new aiNode("<BlenderRoot>");
@@ -2739,6 +2742,18 @@ void BlenderImporter::ConvertBlendFile(aiScene *out, const Scene &in, const File
     // not a single mesh between them.
     if (!out->mNumMeshes) {
         out->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+    }
+
+    // Typed scene metadata from the BLENDER file header only (generic container
+    // identity). No AssetMetaData.copyright / Text-ID author strings.
+    if (out->mMetaData == nullptr) {
+        out->mMetaData = new aiMetadata();
+    }
+    out->mMetaData->Add(AI_METADATA_SOURCE_FORMAT, aiString("blend"));
+    if (blenderVersion != nullptr && blenderVersion[0] != '\0') {
+        out->mMetaData->Add(AI_METADATA_SOURCE_FORMAT_VERSION, aiString(blenderVersion));
+        std::string generator = std::string("Blender ") + blenderVersion;
+        out->mMetaData->Add(AI_METADATA_SOURCE_GENERATOR, aiString(generator));
     }
 }
 

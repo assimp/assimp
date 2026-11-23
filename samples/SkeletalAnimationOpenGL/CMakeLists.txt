@@ -1,7 +1,18 @@
 FIND_PACKAGE(OpenGL REQUIRED)
 find_package(FreeGLUT CONFIG QUIET)
 
-IF ( NOT FreeGLUT_FOUND )
+IF ( TARGET FreeGLUT::freeglut )
+  SET( SAMPLE_GLUT_TARGET FreeGLUT::freeglut )
+ELSEIF ( TARGET FreeGLUT::freeglut_static )
+  SET( SAMPLE_GLUT_TARGET FreeGLUT::freeglut_static )
+ELSE ()
+  find_package(GLUT QUIET)
+  IF ( TARGET GLUT::GLUT )
+    SET( SAMPLE_GLUT_TARGET GLUT::GLUT )
+  ENDIF ()
+ENDIF ()
+
+IF ( NOT SAMPLE_GLUT_TARGET )
   MESSAGE( WARNING "Please install FreeGLUT to build this sample" )
   RETURN ()
 ENDIF ()
@@ -25,7 +36,6 @@ INCLUDE_DIRECTORIES(
   ${Assimp_SOURCE_DIR}/code
   ${SAMPLES_SHARED_CODE_DIR}
   ${Assimp_SOURCE_DIR}/contrib/utf8cpp/source
-  ${GLUT_INCLUDE_DIR}
 )
 
 LINK_DIRECTORIES(
@@ -51,7 +61,7 @@ TARGET_LINK_LIBRARIES( assimp_skeletalanimationogl PRIVATE
   ${M_LIB}
   ${CMAKE_DL_LIBS}
   ${OPENGL_LIBRARIES}
-  FreeGLUT::freeglut
+  ${SAMPLE_GLUT_TARGET}
 )
 
 TARGET_PRECOMPILE_HEADERS( assimp_skeletalanimationogl PRIVATE

@@ -1595,6 +1595,9 @@ struct BlendNodeGraph {
         if (n == nullptr || depth > 6) {
             return false;
         }
+        // Presence: only RGB sockets/nodes are colors. ShaderNodeValue is a float
+        // factor - never promote v -> (v,v,v) into an albedo/emission constant
+        // (tiger_body Value=-20 became baseColor [-20,-20,-20]).
         if (BlendNodeIsRGB(*n)) {
             // RGB node: first output socket carries the color default.
             for (std::shared_ptr<ElemBase> cur = n->outputs.first; cur;) {
@@ -1606,22 +1609,9 @@ struct BlendNodeGraph {
                 return true;
             }
         }
-        if (BlendNodeIsValue(*n)) {
-            float v = 0.f;
-            for (std::shared_ptr<ElemBase> cur = n->outputs.first; cur;) {
-                const bNodeSocket *sock = BlendCastSocket(cur.get());
-                if (sock == nullptr) {
-                    break;
-                }
-                BlendReadSocketFloat(*sock, v);
-                out[0] = out[1] = out[2] = v;
-                out[3] = 1.f;
-                return true;
-            }
-        }
-        // Follow linked inputs (same priority as Tex walk) until an RGB/Value node.
+        // Follow linked inputs (same priority as Tex walk) until an RGB node.
         if (!BlendNodeIsTexWalkBarrier(*n) && !BlendNodeIsNormalMap(*n) && !BlendNodeIsBump(*n) &&
-                !BlendNodeIsTexImage(*n)) {
+                !BlendNodeIsTexImage(*n) && !BlendNodeIsValue(*n)) {
             struct Cand {
                 int prio;
                 const bNodeLink *link;
@@ -1649,12 +1639,64 @@ struct BlendNodeGraph {
     }
 
     bool ReadConstantFloat(const Assimp::Blender::bNode *n, float &out, int depth = 0) const {
-        float tmp[4];
-        if (!ReadConstantColor(n, tmp, depth)) {
+        using namespace Assimp::Blender;
+        if (n == nullptr || depth > 6) {
             return false;
         }
-        out = tmp[0];
-        return true;
+        if (BlendNodeIsValue(*n)) {
+            for (std::shared_ptr<ElemBase> cur = n->outputs.first; cur;) {
+                const bNodeSocket *sock = BlendCastSocket(cur.get());
+                if (sock == nullptr) {
+                    break;
+                }
+                if (BlendReadSocketFloat(*sock, out)) {
+                    return true;
+                }
+                cur = sock->next;
+            }
+            return false;
+        }
+        if (BlendNodeIsRGB(*n)) {
+            float tmp[4]{};
+            for (std::shared_ptr<ElemBase> cur = n->outputs.first; cur;) {
+                const bNodeSocket *sock = BlendCastSocket(cur.get());
+                if (sock == nullptr) {
+                    break;
+                }
+                if (BlendReadSocketColor(*sock, tmp)) {
+                    out = tmp[0];
+                    return true;
+                }
+                cur = sock->next;
+            }
+            return false;
+        }
+        if (!BlendNodeIsTexWalkBarrier(*n) && !BlendNodeIsNormalMap(*n) && !BlendNodeIsBump(*n) &&
+                !BlendNodeIsTexImage(*n)) {
+            struct Cand {
+                int prio;
+                const bNodeLink *link;
+            };
+            std::vector<Cand> cands;
+            for (std::shared_ptr<ElemBase> cur = n->inputs.first; cur;) {
+                const bNodeSocket *sock = BlendCastSocket(cur.get());
+                if (sock == nullptr) {
+                    break;
+                }
+                if (const bNodeLink *l = FindLinkToSocket(*sock)) {
+                    cands.push_back({ BlendSockTexWalkPriority(*sock), l });
+                }
+                cur = sock->next;
+            }
+            std::stable_sort(cands.begin(), cands.end(),
+                    [](const Cand &a, const Cand &b) { return a.prio > b.prio; });
+            for (const Cand &c : cands) {
+                if (ReadConstantFloat(BlendCastNode(c.link->fromnode.get()), out, depth + 1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     int Rank(const Assimp::Blender::bNode &n) const {
@@ -1920,7 +1962,8 @@ bool BlendReadLinkedOrDefaultFloat(const BlendNodeGraph &g, const Assimp::Blende
         out = linked;
         return true;
     }
-    return got;
+    // Linked: unused socket default_value is not authored for this input.
+    return false;
 }
 
 bool BlendReadLinkedOrDefaultColor(const BlendNodeGraph &g, const Assimp::Blender::bNodeSocket &sock,
@@ -1944,7 +1987,9 @@ bool BlendReadLinkedOrDefaultColor(const BlendNodeGraph &g, const Assimp::Blende
         out[3] = linked[3];
         return true;
     }
-    return got;
+    // Linked: do not treat the dormant Base Color default as albedo (map may
+    // still be set). Never invent a constant; never promote ShaderNodeValue.
+    return false;
 }
 
 BlendShaderFlat BlendFlattenFromNode(const BlendNodeGraph &g, const Assimp::Blender::bNode &node) {

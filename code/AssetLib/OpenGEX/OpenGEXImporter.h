@@ -126,6 +126,7 @@ protected:
     void copyCameras( aiScene *pScene );
     void copyLights( aiScene *pScene );
     void copyMaterials( aiScene *pScene );
+    void resetReadState();
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();
@@ -144,6 +145,9 @@ private:
 
         VertexContainer() = default;
         ~VertexContainer();
+
+        /// Releases all vertex attributes.
+        void clear();
 
         VertexContainer( const VertexContainer & ) = delete;
         VertexContainer &operator = ( const VertexContainer & ) = delete;

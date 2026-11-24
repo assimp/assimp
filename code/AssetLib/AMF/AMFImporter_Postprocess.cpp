@@ -579,11 +579,7 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
                     ///TODO: clean unused vertices. "* 2": in certain cases - mesh full of triangle colors - vert_arr will contain duplicated vertices for
                     /// colored triangles and initial vertices (for colored vertices) which in real became unused. This part need more thinking about
                     /// optimization.
-                    bool *idx_vert_used;
-
-                    idx_vert_used = new bool[VertexCount_Max * 2];
-                    for (size_t i = 0, i_e = VertexCount_Max * 2; i < i_e; i++)
-                        idx_vert_used[i] = false;
+                    std::vector<bool> idx_vert_used(VertexCount_Max * 2, false);
 
                     // This ID's will be used when set materials ID in scene.
                     tmesh->mMaterialIndex = static_cast<unsigned int>(PostprocessHelper_GetTextureID_Or_Create(face_list_cur.front().TexMap->TextureID_R,
@@ -609,7 +605,6 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
                         } // for(size_t idx_ind = 0; idx_ind < face_cur.Face.mNumIndices; idx_ind++)
                     } // for(const SComplexFace& face_cur: face_list_cur)
 
-                    delete[] idx_vert_used;
                     // shrink array
                     texcoord_arr.resize(idx_vert_new);
                 } // if(face_list_cur.front().TexMap != nullptr)
@@ -862,11 +857,12 @@ nl_clean_loop:
 
         idx = 0;
         pScene->mTextures = new aiTexture *[pScene->mNumTextures];
-        for (const SPP_Texture &tex_convd : mTexture_Converted) {
+        for (SPP_Texture &tex_convd : mTexture_Converted) {
             pScene->mTextures[idx] = new aiTexture;
             pScene->mTextures[idx]->mWidth = static_cast<unsigned int>(tex_convd.Width);
             pScene->mTextures[idx]->mHeight = static_cast<unsigned int>(tex_convd.Height);
             pScene->mTextures[idx]->pcData = (aiTexel *)tex_convd.Data;
+            tex_convd.Data = nullptr;
             // texture format description.
             ai_snprintf(pScene->mTextures[idx]->achFormatHint, HINTMAXTEXTURELEN, "%s", tex_convd.FormatHint);
             idx++;

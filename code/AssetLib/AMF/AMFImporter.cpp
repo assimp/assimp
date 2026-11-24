@@ -70,6 +70,9 @@ void AMFImporter::Clear() {
     mNodeElement_Cur = nullptr;
     mUnit.clear();
     mMaterial_Converted.clear();
+    for (SPP_Texture &tex_convd : mTexture_Converted) {
+        delete[] tex_convd.Data;
+    }
     mTexture_Converted.clear();
     // Delete all elements
     if (!mNodeElement_List.empty()) {

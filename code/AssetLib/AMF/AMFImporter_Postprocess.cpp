@@ -768,7 +768,12 @@ void AMFImporter::Postprocess_BuildScene(aiScene *pScene) {
             aiNode *tnode = nullptr;
 
             // for <object> mesh and node must be built: object ID assigned to aiNode name and will be used in future for <instance>
-            Postprocess_BuildNodeAndObject(*((AMFObject *)root_child), mesh_list, &tnode);
+            try {
+                Postprocess_BuildNodeAndObject(*((AMFObject *)root_child), mesh_list, &tnode);
+            } catch (...) {
+                delete tnode;
+                throw;
+            }
             if (tnode != nullptr) {
                 nodeArray.emplace_back(tnode);
             }

@@ -242,6 +242,7 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
         throw DeadlyImportError("Failed to open AMF file ", pFile, ".");
     }
 
+    delete mXmlParser;
     mXmlParser = new XmlParser();
     if (!mXmlParser->parse(file.get())) {
         delete mXmlParser;
@@ -293,6 +294,7 @@ void AMFImporter::ParseNode_Root() {
 
     // create root node element.
     ne = new AMFRoot(nullptr);
+    mNodeElement_List.push_back(ne);
 
     mNodeElement_Cur = ne; // set first "current" element
     // and assign attribute's values
@@ -316,7 +318,6 @@ void AMFImporter::ParseNode_Root() {
         mNodeElement_Cur = ne;
     }
     mNodeElement_Cur = ne; // force restore "current" element
-    mNodeElement_List.push_back(ne); // add to node element list because its a new object in graph.
 }
 
 // <constellation
@@ -331,6 +332,7 @@ void AMFImporter::ParseNode_Constellation(XmlNode &node) {
 
     // create and if needed - define new grouping object.
     AMFNodeElementBase *ne = new AMFConstellation(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
 
     AMFConstellation &als = *((AMFConstellation *)ne); // alias for convenience
 
@@ -353,7 +355,6 @@ void AMFImporter::ParseNode_Constellation(XmlNode &node) {
     } else {
         mNodeElement_Cur->Child.push_back(ne);
     }
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <instance
@@ -375,6 +376,7 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
     }
     // create and define new grouping object.
     ne = new AMFInstance(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
     AMFInstance &als = *((AMFInstance *)ne);
     als.ObjectID = objectid;
 
@@ -400,8 +402,6 @@ void AMFImporter::ParseNode_Instance(XmlNode &node) {
     } else {
         mNodeElement_Cur->Child.push_back(ne);
     }
-
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <object
@@ -419,6 +419,7 @@ void AMFImporter::ParseNode_Object(XmlNode &node) {
 
     // create and if needed - define new geometry object.
     ne = new AMFObject(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
 
     AMFObject &als = *((AMFObject *)ne); // alias for convenience
 
@@ -443,8 +444,6 @@ void AMFImporter::ParseNode_Object(XmlNode &node) {
     } else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
-
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <metadata

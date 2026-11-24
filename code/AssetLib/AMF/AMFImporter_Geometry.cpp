@@ -60,6 +60,7 @@ void AMFImporter::ParseNode_Mesh(XmlNode &node) {
     }
     // create new mesh object.
     ne = new AMFMesh(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
     bool found_verts = false, found_volumes = false;
     if (!node.empty()) {
         ParseHelper_Node_Enter(ne);
@@ -80,9 +81,6 @@ void AMFImporter::ParseNode_Mesh(XmlNode &node) {
     if (!found_verts && !found_volumes) {
         mNodeElement_Cur->Child.push_back(ne);
     } // if(!mReader->isEmptyElement()) else
-
-    // and to node element list because its a new object in graph.
-    mNodeElement_List.push_back(ne);
 }
 
 // <vertices>
@@ -95,6 +93,7 @@ void AMFImporter::ParseNode_Vertices(XmlNode &node) {
 
     // create new mesh object.
     ne = new AMFVertices(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
     // Check for child nodes
     if (node.empty()) {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
@@ -108,7 +107,6 @@ void AMFImporter::ParseNode_Vertices(XmlNode &node) {
         }
     }
     ParseHelper_Node_Exit();
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <vertex>
@@ -121,6 +119,7 @@ void AMFImporter::ParseNode_Vertex(XmlNode &node) {
 
     // create new mesh object.
     ne = new AMFVertex(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
 
     // Check for child nodes
     pugi::xml_node colorNode = node.child("color");
@@ -143,8 +142,6 @@ void AMFImporter::ParseNode_Vertex(XmlNode &node) {
     if (!coord_read && !col_read) {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
-
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <coordinates>
@@ -161,6 +158,7 @@ void AMFImporter::ParseNode_Coordinates(XmlNode &node) {
     AMFNodeElementBase *ne = nullptr;
     if (!node.empty()) {
         ne = new AMFCoordinates(mNodeElement_Cur);
+        mNodeElement_List.push_back(ne);
         ParseHelper_Node_Enter(ne);
         for (XmlNode &currentNode : node.children()) {
             // create new color object.
@@ -179,8 +177,6 @@ void AMFImporter::ParseNode_Coordinates(XmlNode &node) {
     } else {
         mNodeElement_Cur->Child.push_back(new AMFCoordinates(mNodeElement_Cur));
     }
-
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <volume
@@ -196,6 +192,7 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
     std::string materialid;
     std::string type;
     AMFNodeElementBase *ne = new AMFVolume(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
 
     // Read attributes for node <color>.
     // and assign read data
@@ -225,8 +222,6 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
     } else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
-
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 // <triangle>
@@ -241,6 +236,7 @@ void AMFImporter::ParseNode_Volume(XmlNode &node) {
 //   Index of the desired vertices in a triangle or edge.
 void AMFImporter::ParseNode_Triangle(XmlNode &node) {
     AMFNodeElementBase *ne = new AMFTriangle(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
 
     // create new triangle object.
 
@@ -275,8 +271,6 @@ void AMFImporter::ParseNode_Triangle(XmlNode &node) {
     } else {
         mNodeElement_Cur->Child.push_back(ne); // Add element to child list of current element
     }
-
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
 }
 
 } // namespace Assimp

@@ -133,3 +133,46 @@ TEST_F(utAMFImportExport, importAMFWithMatFromFileTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AMF/test_with_mat.amf", aiProcess_ValidateDataStructure);
     EXPECT_NE(nullptr, scene);
 }
+
+TEST_F(utAMFImportExport, sameImporterReadMultipleTimes) {
+    Assimp::Importer importer;
+    for (int i = 0; i < 4; ++i) {
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/AMF/test1.amf", aiProcess_ValidateDataStructure);
+        EXPECT_NE(nullptr, scene);
+    }
+}
+
+TEST_F(utAMFImportExport, outOfRangeTriangleIndexReturnsNull) {
+    const std::string amf =
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+        "<amf>\n"
+        "  <object id=\"1\">\n"
+        "    <mesh>\n"
+        "      <vertices>\n"
+        "        <vertex><coordinates><x>0</x><y>0</y><z>0</z></coordinates></vertex>\n"
+        "      </vertices>\n"
+        "      <volume>\n"
+        "        <triangle><v1>0</v1><v2>1</v2><v3>2</v3></triangle>\n"
+        "      </volume>\n"
+        "    </mesh>\n"
+        "  </object>\n"
+        "</amf>";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(amf.c_str(), amf.length(), 0, "amf");
+    EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F(utAMFImportExport, incompleteColorReturnsNull) {
+    const std::string amf =
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+        "<amf>\n"
+        "  <object id=\"1\">\n"
+        "    <color>\n"
+        "      <r>1.0</r>\n"
+        "    </color>\n"
+        "  </object>\n"
+        "</amf>";
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(amf.c_str(), amf.length(), 0, "amf");
+    EXPECT_EQ(nullptr, scene);
+}

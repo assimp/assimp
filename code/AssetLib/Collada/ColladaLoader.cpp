@@ -98,6 +98,21 @@ static ai_real ReadFloat(const Accessor &pAccessor, const Data &pData, size_t pI
 }
 
 // ------------------------------------------------------------------------------------------------
+// Tells whether reading pNumValues values for object pIndex through the given accessor stays
+// inside a data array of pDataSize elements. The accessor offset and stride come from the file,
+// so the arithmetic is kept overflow-safe.
+static bool IsAccessorIndexInRange(const Accessor &pAccessor, size_t pDataSize, size_t pIndex, size_t pNumValues) {
+    if (pNumValues > pDataSize || pAccessor.mOffset > pDataSize - pNumValues) {
+        return false;
+    }
+    if (pAccessor.mStride == 0) {
+        return true;
+    }
+
+    return pIndex <= (pDataSize - pAccessor.mOffset - pNumValues) / pAccessor.mStride;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader() :
         noSkeletonMesh(false),
@@ -759,6 +774,16 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
 
         // create containers to collect the weights for each bone
         size_t numBones = jointNames.mStrings.size();
+
+        // a bone is created for every joint name, and each one reads its name plus the twelve
+        // values of its offset matrix. Controller sources skip the parser's accessor data-size
+        // validation, so check that both arrays cover the last joint before reading any of them.
+        if (numBones > 0 &&
+                (!IsAccessorIndexInRange(jointNamesAcc, jointNames.mStrings.size(), numBones - 1, 1) ||
+                        !IsAccessorIndexInRange(jointMatrixAcc, jointMatrices.mValues.size(), numBones - 1, 12))) {
+            throw DeadlyImportError("Collada: not enough joint data to resolve all bones of the skin");
+        }
+
         std::vector<std::vector<aiVertexWeight>> dstBones(numBones);
 
         // build a temporary array of pointers to the start of each vertex's weights
@@ -796,7 +821,8 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
                 }
                 ai_real weight = 1.0f;
                 if (!weights.mValues.empty()) {
-                    if (vertexIndex >= weightsAcc.mCount) {
+                    if (vertexIndex >= weightsAcc.mCount ||
+                            !IsAccessorIndexInRange(weightsAcc, weights.mValues.size(), vertexIndex, 1)) {
                         throw DeadlyImportError("Collada: weight index out of range while resolving skin weights");
                     }
                     weight = ReadFloat(weightsAcc, weights, vertexIndex, 0);

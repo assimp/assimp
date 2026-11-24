@@ -290,6 +290,24 @@ TEST_F(utColladaImportExport, rejectsSkinJointIndexOutOfRange) {
 }
 
 
+TEST_F(utColladaImportExport, rejectsSkinJointMatrixTooShort) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/malformed_skin_joint_matrix_truncated.dae", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_STREQ("Collada: not enough joint data to resolve all bones of the skin", importer.GetErrorString());
+}
+
+
+TEST_F(utColladaImportExport, rejectsSkinWeightIndexOutOfRange) {
+    Importer importer;
+
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/malformed_skin_weight_index_oob.dae", aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_STREQ("Collada: weight index out of range while resolving skin weights", importer.GetErrorString());
+}
+
+
 TEST_F(utColladaImportExport, importConcavePolygon) {
     Importer importer;
 

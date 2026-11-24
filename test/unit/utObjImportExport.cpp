@@ -47,6 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 
+#include <algorithm>
+#include <iterator>
+#include <limits>
+#include <memory>
+#include <string>
+
 using namespace Assimp;
 
 static constexpr float VertComponents[24 * 3] = {
@@ -581,4 +587,58 @@ TEST_F(utObjImportExport, scientific_notation_underflow_and_zero_mantissa) {
 #else
     EXPECT_FLOAT_EQ(0.0f, mesh->mVertices[4].x);
 #endif
+}
+
+// Exports a triangle, whose three vertices are at the same position, with the given colors and texture
+// coordinates and returns the OBJ file.
+static std::string exportTriangle(const aiColor4D (&colors)[3], const aiVector3D (&texCoords)[3], unsigned int flags) {
+    static constexpr char Model[] =
+            "v 0 0 0 1 1 1\nv 0 0 0 1 1 1\nv 0 0 0 1 1 1\n"
+            "vt 0 0\nvt 1 0\nvt 0 1\n"
+            "f 1/1 2/2 3/3\n";
+    Assimp::Importer importer;
+    if (importer.ReadFileFromMemory(Model, sizeof(Model) - 1, 0, "obj") == nullptr) {
+        return std::string();
+    }
+    std::unique_ptr<aiScene> scene(importer.GetOrphanedScene());
+    aiMesh *mesh = scene->mMeshes[0];
+    std::copy(std::begin(colors), std::end(colors), mesh->mColors[0]);
+    std::copy(std::begin(texCoords), std::end(texCoords), mesh->mTextureCoords[0]);
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene.get(), "obj", flags);
+    return blob == nullptr ? std::string() : std::string(static_cast<const char *>(blob->data), blob->size);
+}
+
+TEST_F(utObjImportExport, export_nan_vertex_colors) {
+    static constexpr ai_real NaN = std::numeric_limits<ai_real>::quiet_NaN();
+    static const aiVector3D texCoords[3] = { aiVector3D(0, 0, 0), aiVector3D(1, 0, 0), aiVector3D(0, 1, 0) };
+    static const aiColor4D colors[][3] = {
+        { aiColor4D(0, 1, 0, 1), aiColor4D(1, 0, 0, 1), aiColor4D(0, 0, 1, 1) },
+        { aiColor4D(NaN, 1, 0, 1), aiColor4D(1, 0, 0, 1), aiColor4D(0, NaN, 0, 1) },
+        { aiColor4D(NaN, 0, 0, 1), aiColor4D(1, 0, 0, 1), aiColor4D(0, 0, 0, 1) },
+    };
+    for (const auto &vertexColors : colors) {
+        const std::string exported = exportTriangle(vertexColors, texCoords, aiProcess_JoinIdenticalVertices);
+        EXPECT_NE(std::string::npos, exported.find("# 3 vertex positions and colors")) << exported;
+        EXPECT_NE(std::string::npos, exported.find("# 3 UV coordinates")) << exported;
+    }
+}
+
+TEST_F(utObjImportExport, export_nan_texture_coordinates) {
+    static constexpr ai_real NaN = std::numeric_limits<ai_real>::quiet_NaN();
+    static const aiColor4D colors[3] = { aiColor4D(0, 1, 0, 1), aiColor4D(1, 0, 0, 1), aiColor4D(0, 0, 1, 1) };
+    static const aiVector3D texCoords[][3] = {
+        { aiVector3D(NaN, 1, 0), aiVector3D(1, 0, 0), aiVector3D(0, NaN, 0) },
+        { aiVector3D(NaN, 0, 0), aiVector3D(1, 0, 0), aiVector3D(0, 0, 0) },
+    };
+    for (const auto &vertexTexCoords : texCoords) {
+        const std::string exported = exportTriangle(colors, vertexTexCoords, 0);
+        EXPECT_NE(std::string::npos, exported.find("# 3 vertex positions and colors")) << exported;
+        EXPECT_NE(std::string::npos, exported.find("# 3 UV coordinates")) << exported;
+    }
+    // Equal components are still merged, also when they are NaN.
+    const aiVector3D same[3] = { aiVector3D(NaN, 0, 0), aiVector3D(1, 0, 0), aiVector3D(NaN, 0, 0) };
+    const std::string exported = exportTriangle(colors, same, 0);
+    EXPECT_NE(std::string::npos, exported.find("# 2 UV coordinates")) << exported;
 }

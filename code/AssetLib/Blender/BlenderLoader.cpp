@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/importerdesc.h>
 #include <assimp/scene.h>
 
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/MemoryIOWrapper.h>
 #include <assimp/StreamReader.h>
 #include <assimp/StringComparison.h>
@@ -1180,6 +1181,22 @@ const Assimp::Blender::PackedFile *BlendImageGetPacked(const Assimp::Blender::Im
     return nullptr;
 }
 
+/** Blender relative file paths start with "//". Drop that prefix and map remaining '/' to the OS separator. */
+std::string BlendNormalizeRelativePath(const char *path) {
+    if (path == nullptr) {
+        return {};
+    }
+    std::string out(path);
+    if (out.size() >= 2 && out[0] == '/' && out[1] == '/') {
+        out.erase(0, 2);
+        const char sep = Assimp::DefaultIOSystem().getOsSeparator();
+        if (sep != '/') {
+            std::replace(out.begin(), out.end(), '/', sep);
+        }
+    }
+    return out;
+}
+
 /** Path for format hint / logging: Image.filepath|name, else ImagePackedFile.filepath, else ID name. */
 const char *BlendImageDisplayPath(const Assimp::Blender::Image *img) {
     using namespace Assimp::Blender;
@@ -1250,9 +1267,12 @@ bool BlendEnsureEmbeddedPackedTexture(const Assimp::Blender::Image *img,
     conv_data.db.reader->CopyAndAdvance(ch, curTex->mWidth);
     curTex->pcData = reinterpret_cast<aiTexel *>(ch);
     if (dispPath[0] != '\0') {
-        curTex->mFilename = aiString(dispPath);
+        const std::string filePath = BlendNormalizeRelativePath(dispPath);
+        if (!filePath.empty()) {
+            curTex->mFilename = aiString(filePath);
+        }
     }
-    ASSIMP_LOG_INFO("Reading embedded texture, original file was ", dispPath);
+    ASSIMP_LOG_INFO("Reading embedded texture, original file was ", curTex->mFilename.C_Str());
     if (outIndex) {
         *outIndex = texIndex;
     }
@@ -2274,7 +2294,7 @@ void BlendAttachNodeImage(aiMaterial *mout, const BlendTexMap &map, aiTextureTyp
         name.length = 1 + Assimp::ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1),
                 static_cast<int32_t>(texIndex));
     } else {
-        name = aiString(BlendImageDisplayPath(img));
+        name = aiString(BlendNormalizeRelativePath(BlendImageDisplayPath(img)));
     }
     const unsigned slot = conv_data.next_texture[type]++;
     mout->AddProperty(&name, AI_MATKEY_TEXTURE(type, slot));
@@ -2794,7 +2814,7 @@ void BlenderImporter::ResolveImage(aiMaterial *out, const Material *mat, const M
         name.data[0] = '*';
         name.length = 1 + ASSIMP_itoa10(name.data + 1, static_cast<unsigned int>(AI_MAXLEN - 1), static_cast<int32_t>(texIndex));
     } else {
-        name = aiString(BlendImageDisplayPath(img));
+        name = aiString(BlendNormalizeRelativePath(BlendImageDisplayPath(img)));
     }
 
     aiTextureType texture_type = aiTextureType_UNKNOWN;

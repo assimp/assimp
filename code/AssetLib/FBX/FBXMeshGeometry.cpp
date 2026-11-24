@@ -133,7 +133,9 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
     // preserve the mapping from fbx indices to *this* indexing.
     unsigned int count = 0;
     for(int index : tempFaces) {
-        const int absi = index < 0 ? (-index - 1) : index;
+        // A negative index marks the last vertex of a polygon, whose index is
+        // -index - 1. ~index computes it without overflowing for INT_MIN.
+        const int absi = index < 0 ? ~index : index;
         if(static_cast<size_t>(absi) >= vertex_count) {
             DOMError("polygon vertex index out of range",&PolygonVertexIndex);
         }
@@ -159,7 +161,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 
     cursor = 0;
     for(int index : tempFaces) {
-        const int absi = index < 0 ? (-index - 1) : index;
+        const int absi = index < 0 ? ~index : index;
         m_mappings[m_mapping_offsets[absi] + m_mapping_counts[absi]++] = cursor++;
     }
 

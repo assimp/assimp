@@ -54,3 +54,19 @@ TEST(utNDOImportExport, importMalformedEdgeIndex) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NDO/malformed_edge_index.ndo", 0);
     EXPECT_NE(nullptr, scene);
 }
+
+TEST(utNDOImportExport, importDanglingVertexIndex) {
+    Assimp::Importer importer;
+    // An edge whose next-vertex index points past the vertex table must not
+    // leave a face index behind that has no vertex to refer to.
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NDO/dangling_vertex_index.ndo", 0);
+    ASSERT_NE(nullptr, scene);
+    for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+        const aiMesh *mesh = scene->mMeshes[m];
+        for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
+            for (unsigned int i = 0; i < mesh->mFaces[f].mNumIndices; ++i) {
+                EXPECT_LT(mesh->mFaces[f].mIndices[i], mesh->mNumVertices);
+            }
+        }
+    }
+}

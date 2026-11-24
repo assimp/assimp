@@ -134,8 +134,8 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     else {
         mOutput << "format ascii 1.0" << endl;
     }
-    mOutput << "comment Created by Open Asset Import Library - http://assimp.sf.net (v"
-        << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
+    mOutput << "comment File produced by Open Asset Import Library (https://www.assimp.org)" << endl;
+    mOutput << "comment (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
         << aiGetVersionRevision() << ")" << endl;
 
     // Look through materials for a diffuse texture, and add it if found

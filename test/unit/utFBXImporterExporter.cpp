@@ -500,3 +500,51 @@ TEST_F(utFBXImporterExporter, importSkeletonTest) {
     ASSERT_NE(nullptr, scene);
     ASSERT_TRUE(scene->mRootNode);
 }
+
+namespace {
+
+std::string fbxTriangleWithLastIndex(const char *lastIndex) {
+    return std::string(
+            "; FBX 7.4.0 project file\n"
+            "FBXHeaderExtension:  {\n"
+            "\tFBXHeaderVersion: 1003\n"
+            "\tFBXVersion: 7400\n"
+            "}\n"
+            "Objects:  {\n"
+            "\tGeometry: 10, \"Geometry::\", \"Mesh\" {\n"
+            "\t\tVertices: *9 {\n"
+            "\t\t\ta: 0,0,0,1,0,0,0,1,0\n"
+            "\t\t}\n"
+            "\t\tPolygonVertexIndex: *3 {\n"
+            "\t\t\ta: 0,1,") +
+           lastIndex +
+           "\n"
+           "\t\t}\n"
+           "\t}\n"
+           "\tModel: 20, \"Model::triangle\", \"Mesh\" {\n"
+           "\t}\n"
+           "}\n"
+           "Connections:  {\n"
+           "\tC: \"OO\",10,20\n"
+           "\tC: \"OO\",20,0\n"
+           "}\n";
+}
+
+} // namespace
+
+TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
+    // The last index of a polygon is stored as -(vertex + 1); decoding INT_MIN
+    // must not overflow, and it is out of range for the mesh.
+    Assimp::Importer importer;
+    const std::string valid = fbxTriangleWithLastIndex("-3");
+    const aiScene *scene = importer.ReadFileFromMemory(valid.data(), valid.size(), aiProcess_ValidateDataStructure, "fbx");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(1u, scene->mMeshes[0]->mNumFaces);
+
+    // The geometry is rejected as out of range, so the triangle mesh is not imported.
+    const std::string intMin = fbxTriangleWithLastIndex("-2147483648");
+    scene = importer.ReadFileFromMemory(intMin.data(), intMin.size(), aiProcess_ValidateDataStructure, "fbx");
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(0u, scene->mNumMeshes);
+}

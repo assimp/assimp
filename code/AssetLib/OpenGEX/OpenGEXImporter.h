@@ -74,14 +74,16 @@ struct MetricInfo {
         Max
     };
 
-    std::string m_stringValue;
-    float m_floatValue;
-    int m_intValue;
+    std::string m_stringValue{};
+    float m_floatValue{0.0f};
+    int m_intValue{-1};
 
-    MetricInfo(): m_stringValue( ), m_floatValue( 0.0f ), m_intValue( -1 ) {}
+    MetricInfo() = default;
+    ~MetricInfo() = default;
 };
 
-/** @brief  This class is used to implement the OpenGEX importer
+/** 
+ * @brief  This class is used to implement the OpenGEX importer
  *
  *  See http://opengex.org/OpenGEX.pdf for spec.
  */
@@ -97,15 +99,9 @@ public:
     bool CanRead( const std::string &file, IOSystem *pIOHandler, bool checkSig ) const override;
 
 protected:
-    /// BaseImporter override.
     void InternReadFile( const std::string &file, aiScene *pScene, IOSystem *pIOHandler ) override;
-
-    /// BaseImporter override.
     const aiImporterDesc *GetInfo() const override;
-
-    /// BaseImporter override.
     void SetupProperties( const Importer *pImp ) override;
-
     void handleNodes( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMetricNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleNameNode( ODDLParser::DDLNode *node, aiScene *pScene );
@@ -140,13 +136,13 @@ protected:
 private:
     struct VertexContainer {
         std::vector<aiVector3D> m_vertices;
-        size_t m_numColors;
-        aiColor4D *m_colors;
-        std::vector<aiVector3D> m_normals;
-        size_t m_numUVComps[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
-        aiVector3D *m_textureCoords[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+        size_t m_numColors{0};
+        aiColor4D *m_colors{nullptr};
+        std::vector<aiVector3D> m_normals{};
+        size_t m_numUVComps[AI_MAX_NUMBER_OF_TEXTURECOORDS]{};
+        aiVector3D *m_textureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS]{};
 
-        VertexContainer();
+        VertexContainer() = default;
         ~VertexContainer();
 
         VertexContainer( const VertexContainer & ) = delete;

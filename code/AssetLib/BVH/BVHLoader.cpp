@@ -117,6 +117,9 @@ void BVHLoader::InternReadFile(const std::string &pFile, aiScene *pScene, IOSyst
     // start reading
     mReader = mBuffer.begin();
     mLine = 1;
+    // The loader is reused for the next file. The nodes of an earlier file belong to its scene,
+    // which has already been released.
+    mNodes.clear();
     ReadStructure(pScene);
 
     if (!noSkeletonMesh) {

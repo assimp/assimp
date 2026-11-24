@@ -53,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/DefaultLogger.hpp>
 
+#include <limits>
+
 using namespace Assimp;
 using namespace Assimp::MD5;
 
@@ -91,6 +93,20 @@ AI_WONT_RETURN void MD5Parser::ReportError(const char *error, unsigned int line)
     char szBuffer[1024];
     ::ai_snprintf(szBuffer, 1024, "[MD5] Line %u: %s", line, error);
     throw DeadlyImportError(szBuffer);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Grow a container so that a file-supplied index can be used to address it
+template <typename T>
+static void ResizeForIndex(std::vector<T> &container, unsigned int idx, unsigned int line) {
+    // The index is parsed without an overflow check, and idx + 1 wraps around to zero
+    // for the largest one, which would shrink the container instead of growing it.
+    if (idx == std::numeric_limits<unsigned int>::max()) {
+        MD5Parser::ReportError("Index out of range", line);
+    }
+    if (idx >= container.size()) {
+        container.resize(static_cast<size_t>(idx) + 1);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -370,8 +386,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     const unsigned int idx = ::strtoul10(sz, &sz);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    if (idx >= desc.mVertices.size())
-                        desc.mVertices.resize(idx + 1);
+                    ResizeForIndex(desc.mVertices, idx, elem.iLineNumber);
 
                     VertexDesc &vert = desc.mVertices[idx];
                     if ('(' != *sz++)
@@ -393,9 +408,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                 else if (TokenMatch(sz, "tri", 3)) {
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     const unsigned int idx = strtoul10(sz, &sz);
-                    if (idx >= desc.mFaces.size()) {
-                        desc.mFaces.resize(idx + 1);
-					}
+                    ResizeForIndex(desc.mFaces, idx, elem.iLineNumber);
 
                     aiFace &face = desc.mFaces[idx];
                     if (face.mNumIndices != 3) {
@@ -413,8 +426,7 @@ MD5MeshParser::MD5MeshParser(SectionArray &mSections) {
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
                     const unsigned int idx = strtoul10(sz, &sz);
                     AI_MD5_SKIP_SPACES(&sz, elem.end, elem.iLineNumber);
-                    if (idx >= desc.mWeights.size())
-                        desc.mWeights.resize(idx + 1);
+                    ResizeForIndex(desc.mWeights, idx, elem.iLineNumber);
 
                     WeightDesc &weight = desc.mWeights[idx];
                     weight.mBone = strtoul10(sz, &sz);

@@ -143,6 +143,7 @@ public:
 struct Component {
     int mObjectId;
     aiMatrix4x4 mTransformation;
+    std::string mPath; // production extension: external model file, empty = same file
 };
 
 class Object final : public Resource {

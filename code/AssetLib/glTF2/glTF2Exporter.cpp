@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/config.h>
+#include <assimp/StringUtils.h>
 
 // Header files, standard library.
 #include <cinttypes>
@@ -72,6 +73,19 @@ using namespace rapidjson;
 
 using namespace Assimp;
 using namespace glTF2;
+
+namespace {
+
+std::string BasisUniversalMimeType(const std::string &path) {
+    if (const std::string lower_path = ai_tolower(path);
+        lower_path.size() >= 5 &&
+        lower_path.compare(lower_path.size() - 5, 5, ".ktx2") == 0) {
+        return "image/ktx2";
+    }
+    return {};
+}
+
+}  // namespace
 
 namespace Assimp {
 
@@ -616,8 +630,8 @@ void glTF2Exporter::GetMatTex(const aiMaterial &mat, Ref<Texture> &texture, unsi
                     texture->source->SetData(reinterpret_cast<uint8_t *>(curTex->pcData), curTex->mWidth, *mAsset);
                 } else {
                     texture->source->uri = path;
-                    if (texture->source->uri.find(".ktx") != std::string::npos ||
-                            texture->source->uri.find(".basis") != std::string::npos) {
+                    texture->source->mimeType = BasisUniversalMimeType(path);
+                    if (!texture->source->mimeType.empty()) {
                         useBasisUniversal = true;
                     }
                 }
@@ -1166,6 +1180,7 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
 }
 
 void glTF2Exporter::ExportMeshes() {
+    typedef unsigned short IndicesShortType;
     typedef decltype(aiFace::mNumIndices) IndicesType;
 
     std::string fname = std::string(mFilename);
@@ -1297,17 +1312,31 @@ void glTF2Exporter::ExportMeshes() {
 
         /*************** Vertices indices ****************/
         if (aim->mNumFaces > 0) {
-            std::vector<IndicesType> indices;
             unsigned int nIndicesPerFace = aim->mFaces[0].mNumIndices;
-            indices.resize(aim->mNumFaces * nIndicesPerFace);
-            for (size_t i = 0; i < aim->mNumFaces; ++i) {
-                for (size_t j = 0; j < nIndicesPerFace; ++j) {
-                    indices[i * nIndicesPerFace + j] = IndicesType(aim->mFaces[i].mIndices[j]);
+            unsigned int nIndices = aim->mNumFaces * nIndicesPerFace;
+            if (aim->mNumVertices <= std::numeric_limits<unsigned short>::max()) {
+                std::vector<IndicesShortType> indices;
+                indices.resize(nIndices);
+                for (size_t i = 0; i < aim->mNumFaces; ++i) {
+                    for (size_t j = 0; j < nIndicesPerFace; ++j) {
+                        indices[i * nIndicesPerFace + j] = IndicesShortType(aim->mFaces[i].mIndices[j]);
+                    }
                 }
-            }
 
-            p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR,
-                    ComponentType_UNSIGNED_INT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
+                p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR,
+                        ComponentType_UNSIGNED_SHORT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
+            } else {
+                std::vector<IndicesType> indices;
+                indices.resize(nIndices);
+                for (size_t i = 0; i < aim->mNumFaces; ++i) {
+                    for (size_t j = 0; j < nIndicesPerFace; ++j) {
+                        indices[i * nIndicesPerFace + j] = IndicesType(aim->mFaces[i].mIndices[j]);
+                    }
+                }
+
+                p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR,
+                        ComponentType_UNSIGNED_INT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
+            }
         }
 
         switch (aim->mPrimitiveTypes) {
@@ -1694,7 +1723,9 @@ void glTF2Exporter::ExportAnimations() {
 
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation *anim = mScene->mAnimations[i];
-        const float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond);
+        // A zero ticks-per-second rate means "not specified" - treat key
+        // times as seconds instead of dividing by zero.
+        const float ticksPerSecond = anim->mTicksPerSecond != 0.0 ? static_cast<float>(anim->mTicksPerSecond) : 1.0f;
 
         std::string nameAnim = "anim";
         if (anim->mName.length > 0) {

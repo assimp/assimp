@@ -249,9 +249,9 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
         pMesh->mTextureCoords[0][index].y = v->uv[1];
 
         for (int i = 1; i <= pModel->setting.uv; i++) {
-            // TODO: wrong here? use quaternion transform?
-            pMesh->mTextureCoords[i][index].x = v->uva[i][0];
-            pMesh->mTextureCoords[i][index].y = v->uva[i][1];
+            // additional UV sets are stored in uva[0 .. uv-1]
+            pMesh->mTextureCoords[i][index].x = v->uva[i - 1][0];
+            pMesh->mTextureCoords[i][index].y = v->uva[i - 1][1];
         }
 
         // handle bone map

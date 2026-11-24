@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/XmlParser.h>
 #include <assimp/importerdesc.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/MathFunctions.h>
 
 // Header files, stdlib.
 #include <set>
@@ -99,25 +100,27 @@ namespace Assimp {
 ///
 class AMFImporter final : public BaseImporter {
     using AMFMetaDataArray = std::vector<AMFMetadata *>;
-    using MeshArray = std::vector<aiMesh *>;
-    using NodeArray = std::vector<aiNode *>;
+    using MeshArray = std::vector<std::unique_ptr<aiMesh> >;
+    using NodeArray = std::vector<std::unique_ptr<aiNode> >;
 
 public:
     struct SPP_Material;
 
     /// Data type for post-processing step. More suitable container for part of material's composition.
     struct SPP_Composite {
-        SPP_Material *Material; ///< Pointer to material - part of composition.
-        std::string Formula; ///< Formula for calculating ratio of \ref Material.
+        SPP_Material *Material{nullptr}; ///< Pointer to material - part of composition.
+        std::string Formula{}; ///< Formula for calculating ratio of \ref Material.
     };
 
     /// Data type for post-processing step. More suitable container for texture.
     struct SPP_Texture {
-        std::string ID;
-        size_t Width, Height, Depth;
-        bool Tiled;
-        char FormatHint[9]; // 8 for string + 1 for terminator.
-        uint8_t *Data;
+        std::string ID{};
+        size_t Width{0};
+        size_t Height{0};
+        size_t Depth{0};
+        bool Tiled{false};
+        char FormatHint[9]{}; // 8 for string + 1 for terminator.
+        uint8_t *Data{nullptr};
     };
 
     /// Data type for post-processing step. Contain face data.

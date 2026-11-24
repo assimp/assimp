@@ -1,4 +1,4 @@
-# tinyusdz
+# tinyusdz (rebranded as "lightusd" late 2026)
 "tinyusdz" C++ project provides USD/USDA/UDSC/UDSZ 3D model file format suport
 
 ## Automatic repo clone

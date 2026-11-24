@@ -189,9 +189,10 @@ void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene *scene,
 
     Q3BSPFileParser fileParser(mapName, &Archive);
     Q3BSPModel *pBSPModel = fileParser.getModel();
-    if (nullptr != pBSPModel) {
-        CreateDataFromImport(pBSPModel, scene, &Archive);
+    if (nullptr == pBSPModel) {
+        throw DeadlyImportError("Failed to parse Q3BSP map ", mapName, ".");
     }
+    CreateDataFromImport(pBSPModel, scene, &Archive);
 }
 
 // ------------------------------------------------------------------------------------------------

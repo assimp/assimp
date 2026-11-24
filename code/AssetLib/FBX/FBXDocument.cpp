@@ -85,38 +85,38 @@ const Object* LazyObject::Get(bool dieOnError) {
     const Token& key = element.KeyToken();
     const TokenList& tokens = element.Tokens();
 
-    if(tokens.size() < 3) {
-        DOMError("expected at least 3 tokens: id, name and class tag",&element);
-    }
-
-    const char* err;
-    std::string name = ParseTokenAsString(*tokens[1],err);
-    if (err) {
-        DOMError(err,&element);
-    }
-
-    // small fix for binary reading: binary fbx files don't use
-    // prefixes such as Model:: in front of their names. The
-    // loading code expects this at many places, though!
-    // so convert the binary representation (a 0x0001) to the
-    // double colon notation.
-    if(tokens[1]->IsBinary()) {
-        for (size_t i = 0; i < name.length(); ++i) {
-            if (name[i] == 0x0 && name[i+1] == 0x1) {
-                name = name.substr(i+2) + "::" + name.substr(0,i);
-            }
-        }
-    }
-
-    const std::string classtag = ParseTokenAsString(*tokens[2],err);
-    if (err) {
-        DOMError(err,&element);
-    }
-
     // prevent recursive calls
     flags |= BEING_CONSTRUCTED;
 
     try {
+        if(tokens.size() < 3) {
+            DOMError("expected at least 3 tokens: id, name and class tag",&element);
+        }
+
+        const char* err;
+        std::string name = ParseTokenAsString(*tokens[1],err);
+        if (err) {
+            DOMError(err,&element);
+        }
+
+        // small fix for binary reading: binary fbx files don't use
+        // prefixes such as Model:: in front of their names. The
+        // loading code expects this at many places, though!
+        // so convert the binary representation (a 0x0001) to the
+        // double colon notation.
+        if(tokens[1]->IsBinary()) {
+            for (size_t i = 0; i < name.length(); ++i) {
+                if (name[i] == 0x0 && name[i+1] == 0x1) {
+                    name = name.substr(i+2) + "::" + name.substr(0,i);
+                }
+            }
+        }
+
+        const std::string classtag = ParseTokenAsString(*tokens[2],err);
+        if (err) {
+            DOMError(err,&element);
+        }
+
         // this needs to be relatively fast since it happens a lot,
         // so avoid constructing strings all the time.
         const char* obtype = key.begin();

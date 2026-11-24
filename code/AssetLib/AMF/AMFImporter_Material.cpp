@@ -167,6 +167,7 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 
     // create new texture object.
     AMFNodeElementBase *ne = new AMFTexture(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
 
 	AMFTexture& als = *((AMFTexture*)ne);// alias for convenience
 
@@ -231,7 +232,6 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
     }
 
 	mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
 }
 
 // <texmap

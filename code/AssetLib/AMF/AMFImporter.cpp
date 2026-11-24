@@ -493,8 +493,13 @@ const aiImporterDesc *AMFImporter::GetInfo() const {
 
 void AMFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) {
     Clear(); // delete old graph.
-    ParseFile(pFile, pIOHandler);
-    Postprocess_BuildScene(pScene);
+    try {
+        ParseFile(pFile, pIOHandler);
+        Postprocess_BuildScene(pScene);
+    } catch (...) {
+        Clear();
+        throw;
+    }
     // scene graph is ready, exit.
 }
 

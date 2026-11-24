@@ -407,6 +407,11 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
                         }
                     } // if(tri_al.Child.size())
 
+                    // validate vertex indices against object's vertex list
+                    pVertexCoordinateArray.at(tri_al.V[0]);
+                    pVertexCoordinateArray.at(tri_al.V[1]);
+                    pVertexCoordinateArray.at(tri_al.V[2]);
+
                     // create new face and store it.
                     complex_face.Face.mNumIndices = 3;
                     complex_face.Face.mIndices = new unsigned int[3];
@@ -591,9 +596,9 @@ void AMFImporter::Postprocess_BuildMeshSet(const AMFMesh &pNodeElement, const st
                         for (size_t idx_ind = 0; idx_ind < face_cur.Face.mNumIndices; idx_ind++) {
                             const size_t idx_vert = face_cur.Face.mIndices[idx_ind];
 
-                            if (!idx_vert_used[idx_vert]) {
+                            if (!idx_vert_used.at(idx_vert)) {
                                 texcoord_arr.at(idx_vert) = face_cur.TexMap->TextureCoordinate[idx_ind];
-                                idx_vert_used[idx_vert] = true;
+                                idx_vert_used.at(idx_vert) = true;
                             } else if (texcoord_arr.at(idx_vert) != face_cur.TexMap->TextureCoordinate[idx_ind]) {
                                 // in that case one vertex is shared with many texture coordinates. We need to duplicate vertex with another texture
                                 // coordinates.

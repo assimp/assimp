@@ -62,18 +62,19 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 /**
+ * @brief Enumeration for the supported animation interpolation states.
  */
 enum aiAnimInterpolation {
-    /** */
+    /** Step-wise interpolation */
     aiAnimInterpolation_Step,
 
-    /** */
+    /** Linear interpolation */
     aiAnimInterpolation_Linear,
 
-    /** */
+    /** Spherical linear interpolation */
     aiAnimInterpolation_Spherical_Linear,
 
-    /** */
+    /** Cubic-spline interpolation*/
     aiAnimInterpolation_Cubic_Spline,
 
 /** */
@@ -83,7 +84,9 @@ enum aiAnimInterpolation {
 };
 
 // ---------------------------------------------------------------------------
-/** A time-value pair specifying a certain 3D vector for the given time. */
+/** 
+ * @brief A time-value pair specifying a certain 3D vector for the given time. 
+ */
 struct aiVectorKey {
     /** The time of this key */
     double mTime;

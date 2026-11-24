@@ -589,6 +589,8 @@ TEST_F(utObjImportExport, scientific_notation_underflow_and_zero_mantissa) {
 #endif
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
 // Exports a triangle, whose three vertices are at the same position, with the given colors and texture
 // coordinates and returns the OBJ file.
 static std::string exportTriangle(const aiColor4D (&colors)[3], const aiVector3D (&texCoords)[3], unsigned int flags) {
@@ -642,3 +644,5 @@ TEST_F(utObjImportExport, export_nan_texture_coordinates) {
     const std::string exported = exportTriangle(colors, same, 0);
     EXPECT_NE(std::string::npos, exported.find("# 2 UV coordinates")) << exported;
 }
+
+#endif // ASSIMP_BUILD_NO_EXPORT

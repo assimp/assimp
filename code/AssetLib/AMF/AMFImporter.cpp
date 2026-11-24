@@ -243,6 +243,7 @@ void AMFImporter::ParseFile(const std::string &pFile, IOSystem *pIOHandler) {
     }
 
     delete mXmlParser;
+    mXmlParser = nullptr;
     mXmlParser = new XmlParser();
     if (!mXmlParser->parse(file.get())) {
         delete mXmlParser;

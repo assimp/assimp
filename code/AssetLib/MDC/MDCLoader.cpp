@@ -136,8 +136,12 @@ void MDCImporter::ValidateHeader() {
         ASSIMP_LOG_WARN("Unsupported MDC file version (2 (AI_MDC_VERSION) was expected)");
     }
 
-    if (pcHeader->ulOffsetBorderFrames + pcHeader->ulNumFrames * sizeof(MDC::Frame) > this->fileSize ||
-            pcHeader->ulOffsetSurfaces + pcHeader->ulNumSurfaces * sizeof(MDC::Surface) > this->fileSize) {
+    // the sums below would wrap where size_t is 32 bits wide, so bound each
+    // offset first and then divide the bytes left over by the element size
+    if (pcHeader->ulOffsetBorderFrames > this->fileSize ||
+            pcHeader->ulNumFrames > (this->fileSize - pcHeader->ulOffsetBorderFrames) / sizeof(MDC::Frame) ||
+            pcHeader->ulOffsetSurfaces > this->fileSize ||
+            pcHeader->ulNumSurfaces > (this->fileSize - pcHeader->ulOffsetSurfaces) / sizeof(MDC::Surface)) {
         throw DeadlyImportError("Some of the offset values in the MDC header are invalid "
                                 "and point to something behind the file.");
     }

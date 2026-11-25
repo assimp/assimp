@@ -530,10 +530,10 @@ public:
 
 //! A view into a buffer generally representing a subset of the buffer.
 struct BufferView : public Object {
-    Ref<Buffer> buffer; //! The ID of the buffer. (required)
-    size_t byteOffset; //! The offset into the buffer in bytes. (required)
-    size_t byteLength; //! The length of the bufferView in bytes. (default: 0)
-    unsigned int byteStride; //!< The stride, in bytes, between attributes referenced by this accessor. (default: 0)
+    Ref<Buffer> buffer;         //!< The ID of the buffer. (required)
+    size_t byteOffset;          //!< The offset into the buffer in bytes. (required)
+    size_t byteLength;          //!< The length of the bufferView in bytes. (default: 0)
+    unsigned int byteStride;    //!< The stride, in bytes, between attributes referenced by this accessor. (default: 0)
 
     BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
@@ -547,15 +547,16 @@ struct BufferView : public Object {
 struct Accessor : public Object {
     struct Sparse;
 
-    Ref<BufferView> bufferView; //!< The ID of the bufferView. (required)
-    size_t byteOffset; //!< The offset relative to the start of the bufferView in bytes. (required)
-    ComponentType componentType; //!< The datatype of components in the attribute. (required)
-    size_t count; //!< The number of attributes referenced by this accessor. (required)
-    AttribType::Value type; //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
-    std::vector<double> max; //!< Maximum value of each component in this attribute.
-    std::vector<double> min; //!< Minimum value of each component in this attribute.
-    std::unique_ptr<Sparse> sparse;
-    std::unique_ptr<Buffer> decodedBuffer; // Packed decoded data, returned instead of original bufferView if present
+    Ref<BufferView> bufferView;            ///< The ID of the bufferView. (required)
+    size_t byteOffset;                     ///< The offset relative to the start of the bufferView in bytes. (required)
+    ComponentType componentType;           ///< The datatype of components in the attribute. (required)
+    bool normalized{false};                ///< Specifies whether integer data values are normalized before use.
+    size_t count;                          ///< The number of attributes referenced by this accessor. (required)
+    AttribType::Value type;                ///< Specifies if the attribute is a scalar, vector, or matrix. (required)
+    std::vector<double> max;               ///< Maximum value of each component in this attribute.
+    std::vector<double> min;               ///< Minimum value of each component in this attribute.
+    std::unique_ptr<Sparse> sparse;        ///< 
+    std::unique_ptr<Buffer> decodedBuffer; ///< Packed decoded data, returned instead of original bufferView if present
 
     unsigned int GetNumComponents();
     unsigned int GetBytesPerComponent();

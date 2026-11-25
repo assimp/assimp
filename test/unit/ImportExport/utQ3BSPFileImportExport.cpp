@@ -59,3 +59,26 @@ public:
 TEST_F(utQ3BSPImportExport, importerTest) {
     EXPECT_TRUE(importerTest());
 }
+
+TEST_F(utQ3BSPImportExport, rejectMisalignedMeshVertsLump) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_NONBSD_DIR "/PK3/invalid_meshverts_size.pk3", 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F(utQ3BSPImportExport, importMalformedLumpOutOfBounds) {
+    // A lump whose iOffset + iSize extends past the loaded file must be rejected
+    // instead of reading off the end of the data buffer.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3BSP/malformed_lump_oob.pk3", 0);
+    EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F(utQ3BSPImportExport, importTruncatedLumpTable) {
+    // The .bsp holds only the 8-byte header, so the lump directory that follows it
+    // is missing entirely. The file must be rejected before the lump table is read.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3BSP/truncated_lump_table.pk3", 0);
+    EXPECT_EQ(nullptr, scene);
+}

@@ -101,5 +101,40 @@ inline T aiPi() {
     return static_cast<T>(3.14159265358979323846);
 }
 
+/// @brief  Safely multiply two values, checking for integer overflow.
+/// @param  a   [in] First value
+/// @param  b   [in] Second value
+/// @param  result [out] Result of multiplication if no overflow
+/// @return true if multiplication succeeded without overflow, false if overflow detected
+template<typename T>
+inline bool SafeMultiply(T a, T b, T& result) {
+    // Handle zero cases
+    if (a == 0 || b == 0) {
+        result = 0;
+        return true;
+    }
+
+    // Check if multiplication would overflow
+    if (a > std::numeric_limits<T>::max() / b) {
+        return false;
+    }
+
+    result = a * b;
+    return true;
+}
+
+/// @brief  Safely multiply a size and count for buffer allocation, checking for overflow.
+/// @param  pSize   [in] Size of each element
+/// @param  pCount  [in] Number of elements
+/// @return Result of multiplication, or 0 if overflow detected
+template<typename T>
+inline T SafeMultiplySizeCount(T pSize, T pCount) {
+    T result;
+    if (!SafeMultiply(pSize, pCount, result)) {
+        return 0;  // Return 0 to indicate overflow/error
+    }
+    return result;
+}
+
 } // namespace Math
 } // namespace Assimp

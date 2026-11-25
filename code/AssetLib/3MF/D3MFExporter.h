@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_3MF_EXPORTER
 
-#include <memory>
 #include <sstream>
 #include <vector>
 #include <assimp/vector3.h>
@@ -60,7 +59,6 @@ namespace Assimp {
 class IOStream;
 
 namespace D3MF {
-
 
 struct OpcPackageRelationship;
 
@@ -92,15 +90,14 @@ protected:
 
 private:
     std::string mArchiveName;
-    zip_t *m_zipArchive;
-    const aiScene *mScene;
+    zip_t *mZipArchive{nullptr};
+    const aiScene *mScene{nullptr};
     std::ostringstream mModelOutput;
     std::ostringstream mRelOutput;
     std::ostringstream mContentOutput;
     std::vector<unsigned int> mBuildItems;
     std::vector<OpcPackageRelationship*> mRelations;
 };
-
 
 } // Namespace D3MF
 } // Namespace Assimp

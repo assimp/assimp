@@ -633,9 +633,7 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
                 try {
                     fast_atoreal_move(tUnitSizeString.data(), mUnitSize);
                 } catch (const DeadlyImportError& die) {
-                    std::string warning("Collada: Failed to parse meter parameter to real number. Exception:\n");
-                    warning.append(die.what());
-                    ASSIMP_LOG_WARN(warning.data());
+                    ASSIMP_LOG_WARN("Collada: Failed to parse meter parameter to real number. Exception:\n", die.what());
                 }
             }
         } else if (currentName == "up_axis") {

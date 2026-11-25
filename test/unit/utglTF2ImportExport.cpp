@@ -823,12 +823,10 @@ struct ExportedMaterialCase {
 };
 
 std::unique_ptr<aiScene> MakeMaterialExportScene(const ExportedMaterialCase &testCase) {
-    std::unique_ptr<aiScene> scene(new aiScene);
+    auto scene = std::make_unique<aiScene>();
+    scene->mMaterials = std::make_unique<aiMaterial *[]>(1).release();
     scene->mNumMaterials = 1;
-    scene->mMaterials = new aiMaterial *[1];
-    scene->mMaterials[0] = new aiMaterial;
-
-    aiMaterial *material = scene->mMaterials[0];
+    auto material = std::make_unique<aiMaterial>();
     aiString name("opacity_test_material");
     material->AddProperty(&name, AI_MATKEY_NAME);
     material->AddProperty(&testCase.diffuseColor, 1, AI_MATKEY_COLOR_DIFFUSE);
@@ -849,26 +847,31 @@ std::unique_ptr<aiScene> MakeMaterialExportScene(const ExportedMaterialCase &tes
         material->AddProperty(&alphaMode, AI_MATKEY_GLTF_ALPHAMODE);
     }
 
+    scene->mMeshes = std::make_unique<aiMesh *[]>(1).release();
     scene->mNumMeshes = 1;
-    scene->mMeshes = new aiMesh *[1];
-    scene->mMeshes[0] = new aiMesh;
-    aiMesh *mesh = scene->mMeshes[0];
+    auto mesh = std::make_unique<aiMesh>();
     mesh->mMaterialIndex = 0;
     mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
     mesh->mNumVertices = 3;
-    mesh->mVertices = new aiVector3D[3]{
-        aiVector3D(0.0f, 0.0f, 0.0f),
-        aiVector3D(1.0f, 0.0f, 0.0f),
-        aiVector3D(0.0f, 1.0f, 0.0f)
-    };
+    auto vertices = std::make_unique<aiVector3D[]>(3);
+    vertices[0] = aiVector3D(0.0f, 0.0f, 0.0f);
+    vertices[1] = aiVector3D(1.0f, 0.0f, 0.0f);
+    vertices[2] = aiVector3D(0.0f, 1.0f, 0.0f);
+    mesh->mVertices = vertices.release();
     mesh->mNumFaces = 1;
-    mesh->mFaces = new aiFace[1];
+    mesh->mFaces = std::make_unique<aiFace[]>(1).release();
     mesh->mFaces[0].mNumIndices = 3;
-    mesh->mFaces[0].mIndices = new unsigned int[3]{ 0, 1, 2 };
+    auto indices = std::make_unique<unsigned int[]>(3);
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    mesh->mFaces[0].mIndices = indices.release();
+    scene->mMeshes[0] = mesh.release();
+    scene->mMaterials[0] = material.release();
 
-    scene->mRootNode = new aiNode;
+    scene->mRootNode = std::make_unique<aiNode>().release();
     scene->mRootNode->mNumMeshes = 1;
-    scene->mRootNode->mMeshes = new unsigned int[1]{ 0 };
+    scene->mRootNode->mMeshes = std::make_unique<unsigned int[]>(1).release();
     return scene;
 }
 
@@ -946,17 +949,15 @@ void ExportAndCheckMaterial(const ExportedMaterialCase &testCase, const char *fo
 
 TEST_F(utglTF2ImportExport, exportMaterialOpacityWithExtensions) {
     const aiColor4D diffuseColor(0.9f, 0.1f, 0.2f, 1.0f);
-    const ExportedMaterialCase cases[] = {
-        { "transparent_specular", 0.6f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", true },
-        { "zero_specular_color", 0.6f, true, true, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", true },
-        { "zero_opacity_specular", 0.0f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.0f, "BLEND", true },
-        { "opaque_specular", 1.0f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 1.0f, "OPAQUE", true },
-        { "transparent_no_specular", 0.6f, false, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", false },
-        { "transparent_unlit", 0.6f, true, false, true, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", false },
-        { "base_color_alpha_composition", 0.5f, true, false, false, true, diffuseColor, aiColor4D(0.2f, 0.3f, 0.4f, 0.4f), nullptr, 0.2f, "BLEND", true },
-        { "base_color_precedence", 1.0f, true, false, false, true, diffuseColor, aiColor4D(0.2f, 0.3f, 0.4f, 0.7f), nullptr, 0.7f, "OPAQUE", true },
-        { "explicit_alpha_mode", 0.6f, true, false, false, false, diffuseColor, aiColor4D(), "MASK", 0.6f, "MASK", true }
-    };
+    const std::array<ExportedMaterialCase, 9> cases = { { { "transparent_specular", 0.6f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", true },
+            { "zero_specular_color", 0.6f, true, true, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", true },
+            { "zero_opacity_specular", 0.0f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.0f, "BLEND", true },
+            { "opaque_specular", 1.0f, true, false, false, false, diffuseColor, aiColor4D(), nullptr, 1.0f, "OPAQUE", true },
+            { "transparent_no_specular", 0.6f, false, false, false, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", false },
+            { "transparent_unlit", 0.6f, true, false, true, false, diffuseColor, aiColor4D(), nullptr, 0.6f, "BLEND", false },
+            { "base_color_alpha_composition", 0.5f, true, false, false, true, diffuseColor, aiColor4D(0.2f, 0.3f, 0.4f, 0.4f), nullptr, 0.2f, "BLEND", true },
+            { "base_color_precedence", 1.0f, true, false, false, true, diffuseColor, aiColor4D(0.2f, 0.3f, 0.4f, 0.7f), nullptr, 0.7f, "OPAQUE", true },
+            { "explicit_alpha_mode", 0.6f, true, false, false, false, diffuseColor, aiColor4D(), "MASK", 0.6f, "MASK", true } } };
 
     for (const ExportedMaterialCase &testCase : cases) {
         ExportAndCheckMaterial(testCase, "gltf2");

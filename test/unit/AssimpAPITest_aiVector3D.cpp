@@ -167,19 +167,60 @@ TEST_F(AssimpAPITest_aiVector3D, aiVector3RotateByQuaternionTest) {
 }
 
 TEST_F(AssimpAPITest_aiVector3D, aiTransformVecByMatrix3Test) {
-    const auto m = random_mat3();
-    aiVector3D v_c, v_cpp;
-    v_c = v_cpp = random_vec3();
-    v_cpp *= m;
-    aiTransformVecByMatrix3(&v_c, &m);
-    EXPECT_EQ(v_cpp, v_c);
+    const aiMatrix3x3 knownMatrix(1, 2, -1, -2, 3, 2, 4, -1, 2);
+    const aiVector3D knownInput(2, -3, 4);
+    const aiVector3D knownResult(-8, -5, 19);
+    aiVector3D actual = knownInput;
+    aiTransformVecByMatrix3(&actual, &knownMatrix);
+    EXPECT_EQ(knownResult, actual);
+    EXPECT_EQ(knownResult, knownMatrix * knownInput);
+
+    // Integer operands bounded by 50 keep every product and partial sum exact
+    // in both float and double. Arbitrary floats can round differently across
+    // the inline C++ operation and the separately compiled C API wrapper.
+    for (unsigned int sample = 0; sample < 32; ++sample) {
+        SCOPED_TRACE(sample);
+        auto m = random_mat3();
+        auto input = random_vec3();
+        for (unsigned int row = 0; row < 3; ++row) {
+            input[row] = static_cast<int>(input[row]) - 50;
+            for (unsigned int column = 0; column < 3; ++column) {
+                m[row][column] = static_cast<int>(m[row][column]) - 50;
+            }
+        }
+        aiVector3D v_c = input;
+        aiVector3D v_cpp = input;
+        v_cpp *= m;
+        aiTransformVecByMatrix3(&v_c, &m);
+        EXPECT_EQ(v_cpp, v_c);
+    }
 }
 
 TEST_F(AssimpAPITest_aiVector3D, aiTransformVecByMatrix4Test) {
-    const auto m = random_mat4();
-    aiVector3D v_c, v_cpp;
-    v_c = v_cpp = random_vec3();
-    v_cpp *= m;
-    aiTransformVecByMatrix4(&v_c, &m);
-    EXPECT_EQ(v_cpp, v_c);
+    const aiMatrix4x4 knownMatrix(1, 2, -1, 5, -2, 3, 2, -7, 4, -1, 2, 11, 0, 0, 0, 1);
+    const aiVector3D knownInput(2, -3, 4);
+    const aiVector3D knownResult(-3, -12, 30);
+    aiVector3D actual = knownInput;
+    aiTransformVecByMatrix4(&actual, &knownMatrix);
+    EXPECT_EQ(knownResult, actual);
+    EXPECT_EQ(knownResult, knownMatrix * knownInput);
+
+    // The largest absolute row sum is 3 * 50 * 50 + 50 = 7550, well within
+    // float's exact integer range, including when multiply-adds are contracted.
+    for (unsigned int sample = 0; sample < 32; ++sample) {
+        SCOPED_TRACE(sample);
+        auto m = random_mat4();
+        auto input = random_vec3();
+        for (unsigned int row = 0; row < 3; ++row) {
+            input[row] = static_cast<int>(input[row]) - 50;
+            for (unsigned int column = 0; column < 4; ++column) {
+                m[row][column] = static_cast<int>(m[row][column]) - 50;
+            }
+        }
+        aiVector3D v_c = input;
+        aiVector3D v_cpp = input;
+        v_cpp *= m;
+        aiTransformVecByMatrix4(&v_c, &m);
+        EXPECT_EQ(v_cpp, v_c);
+    }
 }

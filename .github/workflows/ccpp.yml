@@ -63,11 +63,22 @@ jobs:
       with:
         arch: ${{ matrix.arch || 'x64' }}
     
-    - name: Set Compiler Environment
-      uses: lukka/set-shell-env@v1
-      with:
-        CXX: ${{ matrix.cxx }}
-        CC: ${{ matrix.cc }}
+    # The Windows image may ship an older LLVM than the MSVC standard library
+    # supports. Pin a compatible official release and put it first on PATH.
+    - name: Install LLVM for Windows Clang
+      if: matrix.name == 'windows-latest-clang.exe'
+      shell: pwsh
+      run: |
+        $installer = Join-Path $env:RUNNER_TEMP 'LLVM-22.1.8-win64.exe'
+        $llvmDir = Join-Path $env:RUNNER_TEMP 'LLVM-22.1.8'
+        Invoke-WebRequest -Uri 'https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/LLVM-22.1.8-win64.exe' -OutFile $installer
+        if ((Get-FileHash -Algorithm SHA256 -LiteralPath $installer).Hash -ne '16e5709785fef73c854646241c4a92c5cd574318d1b33c63330dd7721903e55c') { throw 'LLVM installer checksum mismatch' }
+        $install = Start-Process -FilePath $installer -ArgumentList '/S', "/D=$llvmDir" -Wait -PassThru
+        if ($install.ExitCode -ne 0) { throw "LLVM installer failed: $($install.ExitCode)" }
+        $llvmBin = Join-Path $llvmDir 'bin'
+        & (Join-Path $llvmBin 'clang++.exe') --version
+        if ($LASTEXITCODE -ne 0) { throw 'Installed Clang failed to start' }
+        $llvmBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     - name: Cache DX SDK
       id: dxcache
@@ -101,6 +112,8 @@ jobs:
       uses: lukka/run-cmake@v3
       env:
         DXSDK_DIR: '${{ github.workspace }}/DX_SDK'
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
 
       with:
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced

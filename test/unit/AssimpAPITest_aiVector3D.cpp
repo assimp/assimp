@@ -50,6 +50,10 @@ protected:
         temp = random_vec3(); // Generates a random 3D vector != null vector.
     }
 
+    static ai_real RandomExactTransformOperand() {
+        return static_cast<ai_real>(static_cast<int>(RandNonZero.next()) - 50);
+    }
+
     aiVector3D result_c, result_cpp, temp;
 };
 
@@ -178,14 +182,11 @@ TEST_F(AssimpAPITest_aiVector3D, aiTransformVecByMatrix3Test) {
     // the inline C++ operation and the separately compiled C API wrapper.
     for (unsigned int sample = 0; sample < 32; ++sample) {
         SCOPED_TRACE(sample);
-        auto m = random_mat3();
-        auto input = random_vec3();
-        for (unsigned int row = 0; row < 3; ++row) {
-            input[row] = static_cast<int>(input[row]) - 50;
-            for (unsigned int column = 0; column < 3; ++column) {
-                m[row][column] = static_cast<int>(m[row][column]) - 50;
-            }
-        }
+        const aiMatrix3x3 m(
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand());
+        const aiVector3D input(RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand());
         aiVector3D v_c = input;
         aiVector3D v_cpp = input;
         v_cpp *= m;
@@ -207,14 +208,12 @@ TEST_F(AssimpAPITest_aiVector3D, aiTransformVecByMatrix4Test) {
     // float's exact integer range, including when multiply-adds are contracted.
     for (unsigned int sample = 0; sample < 32; ++sample) {
         SCOPED_TRACE(sample);
-        auto m = random_mat4();
-        auto input = random_vec3();
-        for (unsigned int row = 0; row < 3; ++row) {
-            input[row] = static_cast<int>(input[row]) - 50;
-            for (unsigned int column = 0; column < 4; ++column) {
-                m[row][column] = static_cast<int>(m[row][column]) - 50;
-            }
-        }
+        const aiMatrix4x4 m(
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandNonZero.next(), RandNonZero.next(), RandNonZero.next(), RandNonZero.next());
+        const aiVector3D input(RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand());
         aiVector3D v_c = input;
         aiVector3D v_cpp = input;
         v_cpp *= m;

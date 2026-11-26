@@ -119,4 +119,56 @@ TEST_F(utMDLImporter, Quake1MDL3SkinDimensionOverflow) {
         kMalformedMDL3, sizeof(kMalformedMDL3), 0, "mdl");
     EXPECT_EQ(nullptr, scene);
 }
+
+// A secondary MDL5 skin is only skipped, so CreateTexture_3DGS_MDL5() marks its
+// texture with the static `bad_texel` sentinel instead of reading pixels. If the
+// skin's format is unsupported the function throws while that sentinel is still
+// installed, and ~aiTexture() deletes pcData unconditionally. The sentinel must
+// therefore be cleared on the exception path: before the fix this file made the
+// importer free the sentinel and crash in the aiTexture destructor.
+TEST_F(utMDLImporter, MDL5UnsupportedSecondarySkinKeepsSentinelOutOfDestructor) {
+    std::vector<unsigned char> mdl;
+    const auto put32 = [&mdl](uint32_t v) {
+        for (int i = 0; i < 4; ++i) {
+            mdl.push_back(static_cast<unsigned char>(v >> (8 * i)));
+        }
+    };
+    const auto putf = [&put32](float f) {
+        uint32_t v;
+        std::memcpy(&v, &f, sizeof(v));
+        put32(v);
+    };
+
+    mdl.insert(mdl.end(), {'M', 'D', 'L', '5'});
+    put32(0);                          // version
+    putf(1.f); putf(1.f); putf(1.f);   // scale
+    putf(0.f); putf(0.f); putf(0.f);   // translate
+    putf(1.f);                         // boundingradius
+    putf(0.f); putf(0.f); putf(0.f);   // eye position
+    put32(2);                          // num_skins
+    put32(1); put32(1);                // skinwidth, skinheight
+    put32(3); put32(1); put32(1);      // verts, tris, frames
+    put32(0); put32(0);                // synctype, flags
+    putf(0.f);                         // size
+
+    // Skin 0: a valid 2x1 R5G6B5 texture, read for real. Its four pixel bytes
+    // keep the next skin's 32-bit fields aligned.
+    put32(2); put32(2); put32(1);
+    for (int i = 0; i < 4; ++i) {
+        mdl.push_back(0);
+    }
+
+    // Skin 1: format 14 is unsupported. As a secondary skin it is size-only, so
+    // the sentinel is installed and the format check throws.
+    put32(14); put32(0); put32(0);
+
+    // The importer requires the file to be larger than a Half-Life sequence
+    // header; nothing past the second skin is reached.
+    mdl.resize(256, 0);
+
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(
+        mdl.data(), mdl.size(), 0, "mdl");
+    EXPECT_EQ(nullptr, scene);
+}
 #endif // ASSIMP_BUILD_NO_MDL_IMPORTER

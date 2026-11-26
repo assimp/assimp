@@ -484,6 +484,19 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
         pcNew->pcData = bad_texel;
     }
 
+    // bad_texel is a sentinel, not an allocation, and ~aiTexture() deletes
+    // pcData unconditionally. Clear it on every exit from this point on -
+    // including the throw below for an unsupported secondary skin - so the
+    // scoped owner never hands the sentinel to the destructor.
+    struct ClearBadTexel {
+        aiTexture *texture;
+        ~ClearBadTexel() {
+            if (texture->pcData == bad_texel) {
+                texture->pcData = nullptr;
+            }
+        }
+    } clear_bad_texel{pcNew.get()};
+
     // this should not occur - at least the docs say it shouldn't.
     // however, one can easily try out what MED does if you have
     // a model with a DDS texture and export it to MDL5 ...

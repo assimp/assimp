@@ -583,12 +583,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     const bool vt = (!mModel->mTextureCoord.empty());
     const bool vn = (!mModel->mNormals.empty());
     int iPos = 0;
-    
-    // Pre-allocate for typical face sizes (3-4 vertices)
-    face->mVertices.reserve(4);
-    face->mTextureCoords.reserve(4);
-    face->mNormals.reserve(4);
-    
+
+    // The index arrays keep up to 4 entries inline (SmallVector), so the typical
+    // 3-4 vertex face needs no heap allocation and no explicit pre-allocation.
     while (mDataIt < mDataItEnd) {
         if (IsLineEnd(*mDataIt) || *mDataIt == '#') {
             break;

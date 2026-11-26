@@ -627,3 +627,61 @@ TEST_F(utColladaZaeImportExport, import_causes_heap_overflow_issue6373) {
     const aiScene *scene = importer.ReadFileFromMemory(kData, sizeof(kData), aiProcess_ValidateDataStructure);
     EXPECT_EQ(nullptr, scene);
 }
+
+// An accessor parameter may carry a sub-offset which is larger than the stride
+// of the accessor, so the resolved-size validation has to account for it.
+// Reading such an accessor used to run past the end of the source array.
+static constexpr char kOutOfBoundsAccessorData[] = " \
+<?xml version=\"1.0\" encoding=\"utf-8\"?> \
+<COLLADA version=\"1.4.1\"> \
+  <library_geometries> \
+    <geometry id=\"issue7098-geo\" name=\"issue7098\"> \
+      <mesh> \
+        <source id=\"issue7098-pos-src\"> \
+          <float_array id=\"issue7098-pos-array\" count=\"9\">0 0 0 1 0 0 0 1 0</float_array> \
+          <technique_common> \
+            <accessor source=\"#issue7098-pos-array\" count=\"3\" stride=\"3\"> \
+              <param name=\"X\" type=\"float\"/> \
+              <param name=\"Y\" type=\"float\"/> \
+              <param name=\"Z\" type=\"float\"/> \
+            </accessor> \
+          </technique_common> \
+        </source> \
+        <source id=\"issue7098-uv-src\"> \
+          <float_array id=\"issue7098-uv-array\" count=\"1\">0.5</float_array> \
+          <technique_common> \
+            <accessor source=\"#issue7098-uv-array\" count=\"1\" stride=\"1\"> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param type=\"float\"/> \
+              <param name=\"X\" type=\"float\"/> \
+            </accessor> \
+          </technique_common> \
+        </source> \
+        <vertices id=\"issue7098-verts\"> \
+          <input semantic=\"POSITION\" source=\"#issue7098-pos-src\"/> \
+        </vertices> \
+        <triangles count=\"1\"> \
+          <input semantic=\"VERTEX\" source=\"#issue7098-verts\" offset=\"0\"/> \
+          <input semantic=\"TEXCOORD\" source=\"#issue7098-uv-src\" offset=\"1\"/> \
+          <p>0 0 1 0 2 0</p> \
+        </triangles> \
+      </mesh> \
+    </geometry> \
+  </library_geometries> \
+</COLLADA> \
+";
+
+TEST_F(utColladaZaeImportExport, import_rejects_out_of_bounds_accessor_suboffset_issue7098) {
+    Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(kOutOfBoundsAccessorData, sizeof(kOutOfBoundsAccessorData), aiProcess_ValidateDataStructure);
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("Not enough data for accessor"));
+}

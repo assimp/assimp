@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
+#include <assimp/MathFunctions.h>
 #include <cstdint>
 #include <set>
 #include <vector>
@@ -102,13 +103,25 @@ public:
 
     // -------------------------------------------------------------------
     size_t Write(const void *pvBuffer, size_t pSize, size_t pCount) override {
-        pSize *= pCount;
-        if (cursor + pSize > cur_size) {
-            Grow(cursor + pSize);
+        // Safely compute total size, checking for integer overflow
+        size_t total_size = Assimp::Math::SafeMultiplySizeCount(pSize, pCount);
+        if (total_size == 0 && (pSize != 0 && pCount != 0)) {
+            // Overflow detected
+            return 0;
         }
 
-        memcpy(buffer + cursor, pvBuffer, pSize);
-        cursor += pSize;
+        // Guard cursor + total_size against overflow before growing
+        if (total_size > SIZE_MAX - cursor) {
+            return 0;
+        }
+
+        const size_t newEnd = cursor + total_size;
+        if (newEnd > cur_size) {
+            Grow(newEnd);
+        }
+
+        memcpy(buffer + cursor, pvBuffer, total_size);
+        cursor += total_size;
 
         file_size = std::max(file_size, cursor);
         return pCount;

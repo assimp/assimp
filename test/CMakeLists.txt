@@ -120,6 +120,7 @@ SET( IMPORTERS
   unit/ImportExport/Assxml/utAssxmlImportExport.cpp
   unit/utLWSImportExport.cpp
   unit/utLWOImportExport.cpp
+  unit/utMS3DImportExport.cpp
   unit/utSMDImportExport.cpp
   unit/utglTFImportExport.cpp
   unit/utglTF2ImportExport.cpp
@@ -156,6 +157,7 @@ SET( IMPORTERS
   unit/utCSMImportExport.cpp
   unit/utB3DImportExport.cpp
   unit/utNDOImportExport.cpp
+  unit/utUnrealImportExport.cpp
   #unit/utM3DImportExport.cpp
   unit/utMDCImportExport.cpp
   unit/utAssbinImportExport.cpp

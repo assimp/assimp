@@ -322,9 +322,11 @@ bool Structure::ReadCustomDataPtr(std::shared_ptr<ElemBase>&out, int cdtype, con
 	if (ptrval.val)	{
 		// get block for ptr
 		const FileBlockHead* block = LocateFileBlockForAddress(ptrval, db);
-		db.reader->SetCurrentPos(block->start + static_cast<size_t>((ptrval.val - block->address.val)));
+		const size_t offset = static_cast<size_t>(ptrval.val - block->address.val);
+		db.reader->SetCurrentPos(block->start + offset);
 		// read block->num instances of given type to out
-		readOk = readCustomData(out, cdtype, block->num, db);
+		readOk = readCustomData(out, cdtype, block->num,
+				block->size - std::min(offset, block->size), db);
 	}
 
 	// and recover the previous stream position

@@ -68,31 +68,20 @@ namespace COB {
 } // namespace COB
 
 // -------------------------------------------------------------------------------------------
-/** Importer class to load TrueSpace files (cob,scn) up to v6.
- *
- *  Currently relatively limited, loads only ASCII files and needs more test coverage. */
+/// @brief Importer class to load TrueSpace files (cob,scn) up to v6.
+///
+/// Currently, relatively limited, loads only ASCII files and needs more test coverage.
 // -------------------------------------------------------------------------------------------
 class COBImporter final : public BaseImporter {
 public:
     COBImporter() = default;
     ~COBImporter() override = default;
-
-    // --------------------
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler,
-            bool checkSig) const override;
-
-    // -------------------------------------------------------------------
-    /** Prepend 'COB: ' and throw msg.*/
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
     AI_WONT_RETURN static void ThrowException(const std::string &msg) AI_WONT_RETURN_SUFFIX;
 
 protected:
-    // --------------------
     const aiImporterDesc *GetInfo() const override;
-
-    // --------------------
     void SetupProperties(const Importer *pImp) override;
-
-    // --------------------
     void InternReadFile(const std::string &pFile, aiScene *pScene,
             IOSystem *pIOHandler) override;
 

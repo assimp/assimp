@@ -92,8 +92,15 @@ void AddNodeMetaData(aiNode *node, const std::string &key, const T &value) {
 // ------------------------------------------------------------------------------------------------
 // Reads a float value from an accessor and its data array.
 static ai_real ReadFloat(const Accessor &pAccessor, const Data &pData, size_t pIndex, size_t pOffset) {
+    const size_t size = pData.mValues.size();
+    // Stride and offset come from the file: reject them before the position can wrap around
+    if ((pAccessor.mStride != 0 && pIndex > size / pAccessor.mStride) || pAccessor.mOffset > size || pOffset > size) {
+        throw DeadlyImportError("Collada: accessor reads past the end of its data array.");
+    }
     const size_t pos = pAccessor.mStride * pIndex + pAccessor.mOffset + pOffset;
-    ai_assert(pos < pData.mValues.size());
+    if (pos >= size) {
+        throw DeadlyImportError("Collada: accessor reads past the end of its data array.");
+    }
     return pData.mValues[pos];
 }
 
@@ -810,7 +817,7 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
 
         // create bone array and copy bone weights one by one
         dstMesh->mNumBones = static_cast<unsigned int>(numRemainingBones);
-        dstMesh->mBones = new aiBone *[numRemainingBones];
+        dstMesh->mBones = new aiBone *[numRemainingBones]();
         size_t boneCount = 0;
         for (size_t a = 0; a < numBones; ++a) {
             // omit bones without weights
@@ -819,7 +826,9 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
             }
 
             // create bone with its weights
+            // store the bone at once, so that the mesh owns it if reading its data throws
             auto bone = new aiBone;
+            dstMesh->mBones[boneCount++] = bone;
             bone->mName = ReadString(jointNamesAcc, jointNames, a);
             bone->mOffsetMatrix.a1 = ReadFloat(jointMatrixAcc, jointMatrices, a, 0);
             bone->mOffsetMatrix.a2 = ReadFloat(jointMatrixAcc, jointMatrices, a, 1);
@@ -872,9 +881,6 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
             } else {
                 ASSIMP_LOG_WARN("ColladaLoader::CreateMesh(): could not find corresponding node for joint \"", bone->mName.data, "\".");
             }
-
-            // and insert bone
-            dstMesh->mBones[boneCount++] = bone;
         }
     }
 

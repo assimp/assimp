@@ -58,6 +58,95 @@ public:
     }
 };
 
+// A glTF 1.0 primitive with an index accessor of the given type over three uint32 values:
+// a triangle for SCALAR, a single point otherwise.
+static std::string makeTriangleWithIndexType(const char *type) {
+    const bool scalar = std::string(type) == "SCALAR";
+    // 3 x VEC3 float positions followed by 3 x uint32 indices 0, 1, 2
+    std::string json = R"({
+  "asset": { "version": "1.0" },
+  "buffers": { "buf": { "byteLength": 48, "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAEAAAACAAAA" } },
+  "bufferViews": {
+    "pos_view": { "buffer": "buf", "byteOffset": 0, "byteLength": 36, "target": 34962 },
+    "idx_view": { "buffer": "buf", "byteOffset": 36, "byteLength": 12, "target": 34963 }
+  },
+  "accessors": {
+    "pos": { "bufferView": "pos_view", "byteOffset": 0, "componentType": 5126, "count": 3, "type": "VEC3" },
+    "idx": { "bufferView": "idx_view", "byteOffset": 0, "componentType": 5125, "count": )";
+    json += scalar ? "3" : "1";
+    json += R"(, "type": ")";
+    json += type;
+    json += R"(" }
+  },
+  "meshes": { "tri": { "primitives": [ { "attributes": { "POSITION": "pos" }, "indices": "idx", "mode": )";
+    json += scalar ? "4" : "0";
+    json += R"( } ] } },
+  "nodes": { "node": { "meshes": [ "tri" ] } },
+  "scenes": { "scene": { "nodes": [ "node" ] } },
+  "scene": "scene"
+})";
+    return json;
+}
+
+TEST_F(utglTFImportExport, indexAccessorMustBeScalar) {
+    {
+        const std::string json = makeTriangleWithIndexType("SCALAR");
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(json.c_str(), json.size(), 0, "gltf");
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(1u, scene->mMeshes[0]->mNumFaces);
+    }
+    {
+        // the indices are read as unsigned ints, a VEC3 element does not fit
+        const std::string json = makeTriangleWithIndexType("VEC3");
+        Assimp::Importer importer;
+        EXPECT_EQ(nullptr, importer.ReadFileFromMemory(json.c_str(), json.size(), 0, "gltf"));
+    }
+}
+
+// A glTF 1.0 triangle with a NORMAL accessor of the given count (3 matches the vertices).
+static std::string makeTriangleWithNormalCount(unsigned int normalCount) {
+    // 3 x VEC3 float positions followed by 3 x VEC3 float normals
+    std::string json = R"({
+  "asset": { "version": "1.0" },
+  "buffers": { "buf": { "byteLength": 72, "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/" } },
+  "bufferViews": { "view": { "buffer": "buf", "byteOffset": 0, "byteLength": 72, "target": 34962 } },
+  "accessors": {
+    "pos": { "bufferView": "view", "byteOffset": 0, "componentType": 5126, "count": 3, "type": "VEC3" },
+    "nrm": { "bufferView": "view", "byteOffset": 36, "componentType": 5126, "count": )";
+    json += std::to_string(normalCount);
+    json += R"(, "type": "VEC3" }
+  },
+  "meshes": { "tri": { "primitives": [ { "attributes": { "POSITION": "pos", "NORMAL": "nrm" }, "mode": 4 } ] } },
+  "nodes": { "node": { "meshes": [ "tri" ] } },
+  "scenes": { "scene": { "nodes": [ "node" ] } },
+  "scene": "scene"
+})";
+    return json;
+}
+
+TEST_F(utglTFImportExport, normalCountMustMatchVertexCount) {
+    {
+        const std::string json = makeTriangleWithNormalCount(3);
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(json.c_str(), json.size(), 0, "gltf");
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        ASSERT_TRUE(scene->mMeshes[0]->HasNormals());
+        EXPECT_FLOAT_EQ(1.0f, scene->mMeshes[0]->mNormals[2].z);
+    }
+    {
+        // one normal for three vertices: ignored, as in the glTF 2.0 importer
+        const std::string json = makeTriangleWithNormalCount(1);
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(json.c_str(), json.size(), 0, "gltf");
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_FALSE(scene->mMeshes[0]->HasNormals());
+    }
+}
+
 TEST_F(utglTFImportExport, importglTFFromFileTest) {
     EXPECT_TRUE(importerTest());
 }

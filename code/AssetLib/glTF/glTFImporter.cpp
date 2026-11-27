@@ -283,7 +283,12 @@ void glTFImporter::ImportMeshes(Asset &r) {
             }
 
             if (attr.normal.size() > 0 && attr.normal[0]) {
-                attr.normal[0]->ExtractData(aim->mNormals);
+                // later steps read one normal per vertex
+                if (attr.normal[0]->count != aim->mNumVertices) {
+                    DefaultLogger::get()->warn("Normal count in mesh \"", mesh.id, "\" does not match the vertex count, normals ignored.");
+                } else {
+                    attr.normal[0]->ExtractData(aim->mNormals);
+                }
             }
 
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
@@ -306,6 +311,11 @@ void glTFImporter::ImportMeshes(Asset &r) {
             unsigned int nFaces = 0;
 
             if (indices) {
+                // Indices are read as unsigned ints: the accessor must be a SCALAR of at most
+                // four bytes, as the specification requires (UNSIGNED_BYTE, _SHORT or _INT)
+                if (indices->GetNumComponents() != 1 || indices->GetBytesPerComponent() > sizeof(uint32_t)) {
+                    throw DeadlyImportError("GLTF: indices of mesh \"", mesh.id, "\" are not scalars of unsigned integers");
+                }
                 unsigned int count = indices->count;
 
                 Accessor::Indexer data = indices->GetIndexer();

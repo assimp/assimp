@@ -493,8 +493,9 @@ bool Structure::ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileD
     // if the non_recursive flag is set, we don't do anything but leave
     // the cursor at the correct position to resolve the object.
     if (!non_recursive) {
-        for (size_t i = 0; i < num; ++i,++o) {
-            s.Convert(*o,db);
+        for (size_t i = 0; i < num; ++i, ++o) {
+            s.Convert(*o, db);
+            BlendElemBindTypes(static_cast<ElemBase &>(*o), s.name.c_str(), s.name.c_str());
         }
 
         db.reader->SetCurrentPos(pold);
@@ -650,10 +651,14 @@ template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shar
     (s.*builders.second)(out,db);
     db.reader->SetCurrentPos(pold);
 
-    // store a pointer to the name string of the actual type
-    // in the object itself. This allows the conversion code
-    // to perform additional type checking.
-    out->dna_type = s.name.c_str();
+    {
+        const auto genIt = db.dna.converters.find("GenericModifierData");
+        const bool usedGeneric = genIt != db.dna.converters.end() &&
+                builders.first == genIt->second.first &&
+                s.name != "GenericModifierData";
+        BlendElemBindTypes(*out, s.name.c_str(),
+                usedGeneric ? "GenericModifierData" : s.name.c_str());
+    }
 
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS

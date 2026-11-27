@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/SceneCombiner.h>
 #include <assimp/Subdivision.h>
 #include <assimp/scene.h>
+#include <cstring>
 #include <memory>
 
 #include <functional>
@@ -119,6 +120,14 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_d
 
             BlenderModifier *const modifier = *curmod;
             if (modifier->IsActive(dat)) {
+                // CodeRabbit PR7099: do not cast GenericModifierData as Mirror/Subsurf.
+                const char *need = modifier->RequiredDnaType();
+                if (need != nullptr && !BlendElemConvertedAs(*cur, need)) {
+                    const char *have = cur->converted_type ? cur->converted_type : cur->dna_type;
+                    ASSIMP_LOG_DEBUG("BlendModifier: skip `", dat.name, "` handler - converted as `",
+                            have ? have : "?", "`, need `", need, "`");
+                    continue;
+                }
                 modifier->DoIt(out, conv_data, *static_cast<const ElemBase *>(cur), in, orig_object);
                 cnt++;
 

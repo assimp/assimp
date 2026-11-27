@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <assimp/DefaultLogger.hpp>
 #include <map>
+#include <cstring>
 #include <memory>
 
 // enable verbose log output. really verbose, so be careful.
@@ -101,21 +102,36 @@ struct Error : DeadlyImportError {
 // -------------------------------------------------------------------------------
 struct ElemBase {
     ElemBase() :
-            dna_type(nullptr) {
+            dna_type(nullptr),
+            converted_type(nullptr) {
         // empty
     }
 
     virtual ~ElemBase() = default;
 
-    /** Type name of the element. The type
-     * string points is the `c_str` of the `name` attribute of the
-     * corresponding `Structure`, that is, it is only valid as long
-     * as the DNA is not modified. The dna_type is only set if the
-     * data type is not static, i.e. a std::shared_ptr<ElemBase>
-     * in the scene description would have its type resolved
-     * at runtime, so this member is always set. */
+    /** File SDNA structure name (`Structure::name` c_str). Valid while DNA lives. */
     const char *dna_type;
+
+    /**
+     * C++ converter hull actually allocated (usually same as #dna_type).
+     * GenericModifierData fallback keeps #dna_type as the file label but sets
+     * this to the stand-in name so casts cannot OOB (CodeRabbit PR7099).
+     */
+    const char *converted_type;
 };
+
+inline bool BlendElemConvertedAs(const ElemBase &e, const char *need) {
+    if (need == nullptr) {
+        return false;
+    }
+    const char *have = e.converted_type != nullptr ? e.converted_type : e.dna_type;
+    return have != nullptr && std::strcmp(have, need) == 0;
+}
+
+inline void BlendElemBindTypes(ElemBase &e, const char *fileSdnaName, const char *allocatedHullName) {
+    e.dna_type = fileSdnaName;
+    e.converted_type = allocatedHullName != nullptr ? allocatedHullName : fileSdnaName;
+}
 
 // -------------------------------------------------------------------------------
 /** Represents a generic pointer to a memory location, which can be either 32

@@ -175,7 +175,10 @@ void DNAParser::Parse() {
 
             // pointers always specify the size of the pointee instead of their own.
             // The pointer asterisk remains a property of the lookup name.
-            if (f.name[0] == '*') {
+            // Function pointers are named `(*foo)()` / `(*foo)(void)` - also pointer-sized
+            // (otherwise offsets after callbacks drift, e.g. ParticleSystem.name/seed).
+            const bool isFuncPtr = f.name.size() >= 2 && f.name[0] == '(' && f.name[1] == '*';
+            if (f.name[0] == '*' || isFuncPtr) {
                 f.size = db.i64bit ? 8 : 4;
                 f.flags |= FieldFlag_Pointer;
             }
@@ -286,7 +289,21 @@ DNA::FactoryPair DNA ::GetBlobToStructureConverter(
         const FileDatabase & /*db*/
 ) const {
     std::map<std::string, FactoryPair>::const_iterator it = converters.find(structure.name);
-    return it == converters.end() ? FactoryPair() : (*it).second;
+    if (it != converters.end()) {
+        return (*it).second;
+    }
+    // Unknown XXXModifierData: still decode ModifierData header so Object.modifiers
+    // ListBase does not collapse when the first entry is e.g. NodesModifierData.
+    static const char kSuffix[] = "ModifierData";
+    const size_t n = structure.name.size();
+    const size_t sl = sizeof(kSuffix) - 1;
+    if (n > sl && structure.name.compare(n - sl, sl, kSuffix) == 0) {
+        it = converters.find("GenericModifierData");
+        if (it != converters.end()) {
+            return (*it).second;
+        }
+    }
+    return FactoryPair();
 }
 
 // basing on http://www.blender.org/development/architecture/notes-on-sdna/

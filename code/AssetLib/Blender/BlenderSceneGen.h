@@ -80,6 +80,12 @@ template <> void Structure :: Convert<TFace> (
     ) const
 ;
 
+template <> void Structure :: Convert<GenericModifierData> (
+    GenericModifierData& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<SubsurfModifierData> (
     SubsurfModifierData& dest,
     const FileDatabase& db

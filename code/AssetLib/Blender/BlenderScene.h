@@ -788,6 +788,9 @@ struct SharedModifierData : ElemBase {
     ModifierData modifier;
 };
 
+/** Hull for unknown blender *ModifierData DNA types - header only (next/type/name). */
+struct GenericModifierData final : SharedModifierData {};
+
 // -------------------------------------------------------------------------------
 struct SubsurfModifierData final : SharedModifierData {
 

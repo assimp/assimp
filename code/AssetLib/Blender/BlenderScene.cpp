@@ -376,6 +376,16 @@ void Structure ::Convert<TFace>(
 
 //--------------------------------------------------------------------------------
 template <>
+void Structure ::Convert<GenericModifierData>(
+        GenericModifierData &dest,
+        const FileDatabase &db) const {
+    // Only the ModifierData header (next/type/name) - enough to walk the list.
+    ReadField<ErrorPolicy_Warn>(dest.modifier, "modifier", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
 void Structure ::Convert<SubsurfModifierData>(
         SubsurfModifierData &dest,
         const FileDatabase &db) const {
@@ -1410,6 +1420,7 @@ void DNA::RegisterConverters() {
     converters["Group"] = DNA::FactoryPair(&Structure::Allocate<Group>, &Structure::Convert<Group>);
     converters["MTex"] = DNA::FactoryPair(&Structure::Allocate<MTex>, &Structure::Convert<MTex>);
     converters["TFace"] = DNA::FactoryPair(&Structure::Allocate<TFace>, &Structure::Convert<TFace>);
+    converters["GenericModifierData"] = DNA::FactoryPair(&Structure::Allocate<GenericModifierData>, &Structure::Convert<GenericModifierData>);
     converters["SubsurfModifierData"] = DNA::FactoryPair(&Structure::Allocate<SubsurfModifierData>, &Structure::Convert<SubsurfModifierData>);
     converters["MFace"] = DNA::FactoryPair(&Structure::Allocate<MFace>, &Structure::Convert<MFace>);
     converters["Lamp"] = DNA::FactoryPair(&Structure::Allocate<Lamp>, &Structure::Convert<Lamp>);

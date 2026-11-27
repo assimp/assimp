@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>
+#include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
@@ -548,3 +549,80 @@ TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
     ASSERT_NE(nullptr, scene);
     EXPECT_EQ(0u, scene->mNumMeshes);
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+namespace {
+
+// Three triangles: two on the "Torso" node, which is also a joint of the skin, and one skinned to "Hips".
+const char *const skeletonNodeWithTwoMeshes =
+        R"({
+  "asset": { "version": "2.0" },
+  "scene": 0,
+  "scenes": [ { "nodes": [ 0 ] } ],
+  "nodes": [
+    { "name": "Armature", "children": [ 1, 3 ] },
+    { "name": "Hips", "children": [ 2 ] },
+    { "name": "Torso", "translation": [ 0, 1, 0 ], "mesh": 0 },
+    { "name": "Body", "mesh": 1, "skin": 0 }
+  ],
+  "meshes": [
+    { "primitives": [
+      { "attributes": { "POSITION": 0 }, "material": 0 },
+      { "attributes": { "POSITION": 1 }, "material": 1 } ] },
+    { "primitives": [ { "attributes": { "POSITION": 2, "JOINTS_0": 3, "WEIGHTS_0": 4 } } ] }
+  ],
+  "materials": [ { "name": "Plates" }, { "name": "Joints" } ],
+  "skins": [ { "joints": [ 1, 2 ], "inverseBindMatrices": 5 } ],
+  "buffers": [ { "byteLength": 296, "uri": "data:application/octet-stream;base64,)"
+        "AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAABAAACAPwAAAAAA"
+        "AABAAAAAAAAAgD8AAABAAABAQAAAAAAAAAAAAACAQAAAAAAAAAAAAABAQAAAgD8AAAAAAAAAAAAA"
+        "AAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAACA"
+        "PwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAA"
+        "AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAA"
+        "AIC/AAAAAAAAgD8="
+        R"(" } ],
+  "bufferViews": [
+    { "buffer": 0, "byteOffset": 0, "byteLength": 36 },
+    { "buffer": 0, "byteOffset": 36, "byteLength": 36 },
+    { "buffer": 0, "byteOffset": 72, "byteLength": 36 },
+    { "buffer": 0, "byteOffset": 108, "byteLength": 12 },
+    { "buffer": 0, "byteOffset": 120, "byteLength": 48 },
+    { "buffer": 0, "byteOffset": 168, "byteLength": 128 }
+  ],
+  "accessors": [
+    { "bufferView": 0, "componentType": 5126, "count": 3, "type": "VEC3", "min": [ 0, 0, 0 ], "max": [ 1, 1, 0 ] },
+    { "bufferView": 1, "componentType": 5126, "count": 3, "type": "VEC3", "min": [ 0, 0, 2 ], "max": [ 1, 1, 2 ] },
+    { "bufferView": 2, "componentType": 5126, "count": 3, "type": "VEC3", "min": [ 3, 0, 0 ], "max": [ 4, 1, 0 ] },
+    { "bufferView": 3, "componentType": 5121, "count": 3, "type": "VEC4" },
+    { "bufferView": 4, "componentType": 5126, "count": 3, "type": "VEC4" },
+    { "bufferView": 5, "componentType": 5126, "count": 2, "type": "MAT4" }
+  ]
+})";
+
+unsigned int countFaces(const aiScene *scene) {
+    unsigned int faces = 0;
+    for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+        faces += scene->mMeshes[i]->mNumFaces;
+    }
+    return faces;
+}
+
+} // namespace
+
+TEST_F(utFBXImporterExporter, exportKeepsMeshesOnSkeletonNode) {
+    Assimp::Importer importer;
+    const std::string gltf = skeletonNodeWithTwoMeshes;
+    const aiScene *source = importer.ReadFileFromMemory(gltf.data(), gltf.size(), aiProcess_ValidateDataStructure, "gltf");
+    ASSERT_NE(nullptr, source) << importer.GetErrorString();
+    ASSERT_EQ(3u, countFaces(source));
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(source, "fbx");
+    ASSERT_NE(nullptr, blob) << exporter.GetErrorString();
+
+    Assimp::Importer reimporter;
+    const aiScene *exported = reimporter.ReadFileFromMemory(blob->data, blob->size, aiProcess_ValidateDataStructure, "fbx");
+    ASSERT_NE(nullptr, exported) << reimporter.GetErrorString();
+    EXPECT_EQ(3u, countFaces(exported));
+}
+#endif // ASSIMP_BUILD_NO_EXPORT

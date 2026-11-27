@@ -88,7 +88,8 @@ struct ImportData {
 		,	showLog (false)
 		,	verbose (false)
 		,	log	    (false)
-        ,   rot     (aiVector3D(0.f, 0.f, 0.f))
+		,	readAllMaterials (false)
+		,	rot	    (aiVector3D(0.f, 0.f, 0.f))
 	{}
 
 	/// Post-processing flags
@@ -105,6 +106,8 @@ struct ImportData {
 
 	// Need to log?
 	bool log;
+
+	bool readAllMaterials;
 
 	// Export With Rotation
 	aiVector3D rot;

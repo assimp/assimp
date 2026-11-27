@@ -303,6 +303,25 @@ struct Accessor {
     std::string mSource; // URL of the source array
     mutable const Data *mData; // Pointer to the source array, if resolved. nullptr else
 
+    /// Number of values that must be present in the referenced source array so
+    /// that every component of every element of this accessor can be read.
+    /// The parameter sub-offsets are not validated against the stride, so they
+    /// have to be taken into account here as well.
+    size_t RequiredSourceSize() const {
+        size_t maxSubOffset = 0;
+        for (size_t c = 0; c < 4; ++c) {
+            if (mSubOffset[c] > maxSubOffset) {
+                maxSubOffset = mSubOffset[c];
+            }
+        }
+        const size_t strided = mCount * mStride;
+        if (mCount == 0) {
+            return mOffset + strided;
+        }
+        const size_t lastComponent = (mCount - 1) * mStride + maxSubOffset + 1;
+        return mOffset + (lastComponent > strided ? lastComponent : strided);
+    }
+
     Accessor() {
         mCount = 0;
         mSize = 0;

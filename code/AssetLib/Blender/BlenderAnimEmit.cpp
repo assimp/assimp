@@ -1265,6 +1265,7 @@ void Assimp::Blender::BlendAttachMeshCacheAnim(aiMesh *out, const Object &obj, c
     }
 
     // Do not destroy existing shape-key targets; only emit MDD when no anim meshes yet.
+    // Host must keep outToSrcVert/meshSrcVertDna and build MDD frames itself in that case.
     if (out->mNumAnimMeshes > 0) {
         return;
     }

@@ -194,8 +194,10 @@ namespace Blender {
         /** MeshCache MDD -> aiMeshAnim produced during ConvertMesh. */
         std::vector<aiAnimation *> pendingMeshAnims;
         /**
-         * Optional per-submesh DNA totvert map. ConvertMesh builds its own corner
-         * map locally; this bag is unused on 2x-5x unless a caller fills it.
+         * Optional per-submesh DNA totvert map (aiMesh vert -> Mesh.totvert).
+         * ConvertMesh usually builds an equivalent corner map locally. Keep/store
+         * outToSrcVert or this bag when the host must frame-build some anim kinds
+         * itself (MDD vs ShapeKeys coexistence, PC2, Alembic MeshSeqCache, etc.).
          */
         std::vector<std::vector<int>> meshSrcVertDna;
         /** Armature objects (bone hierarchy + pose Action -> aiNodeAnim). */

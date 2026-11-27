@@ -3048,6 +3048,10 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object *obj, const
 
     // Typed skinning / shape keys / MeshCache MDD from DNA via ConvertMesh corner map.
     // Host postprocess that remaps vertices must rebuild this mapping itself.
+    // NOTE: For some anim kinds (e.g. MeshCache MDD next to ShapeKeys, PC2, Alembic
+    // MeshSeqCache) Assimp cannot fully bake every frame as aiAnimMesh. Persist
+    // outToSrcVert / meshSrcVertDna (or equivalent) and let the host/render app
+    // build frames from the cache file when Assimp leaves that path unresolved.
     if (obj != nullptr) {
         for (size_t mi = old; mi < temp->size(); ++mi) {
             aiMesh *sub = temp[mi];

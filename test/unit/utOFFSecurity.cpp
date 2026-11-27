@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 // Test OOM vulnerability fix (OSS-Fuzz 476180586)
 TEST(utOFFSecurity, noOOMOnMaliciousCount) {
@@ -113,3 +114,24 @@ TEST(utOFFSecurity, valid2DnOFFLoadsSuccessfully) {
             aiProcess_ValidateDataStructure, "off");
     EXPECT_NE(scene, nullptr);
 }
+
+// A comment line in the header used to make the importer loop forever
+TEST(utOFFSecurity, commentLineInHeader) {
+    Assimp::Importer importer;
+    const char data[] =
+        "OFF\n"
+        "# comment\n"
+        "3 1 0\n"
+        "0 0 0\n"
+        "1 0 0\n"
+        "0 1 0\n"
+        "3 0 1 2\n";
+    const aiScene *scene = importer.ReadFileFromMemory(
+            data, sizeof(data) - 1,
+            aiProcess_ValidateDataStructure, "off");
+    ASSERT_NE(scene, nullptr);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(3u, scene->mMeshes[0]->mNumVertices);
+    EXPECT_EQ(1u, scene->mMeshes[0]->mNumFaces);
+}
+

@@ -80,3 +80,26 @@ TEST_F(utParsingUtils, tokenMatchIFollowedBySpaceTest) {
     EXPECT_EQ(content, line.c_str() + 5);
     EXPECT_STREQ(content, "30");
 }
+
+TEST_F(utParsingUtils, skipLineStopsAtTrailingCommentTest) {
+    const std::string text = "1 2 3 # comment\nnext";
+    const char *content = text.c_str();
+    const char *end = content + text.size();
+    EXPECT_TRUE(SkipLine(&content, end));
+    EXPECT_EQ('#', *content);
+}
+
+TEST_F(utParsingUtils, skipLineAdvancesOverCommentLineTest) {
+    const std::string text = "# comment\nnext";
+    const char *content = text.c_str();
+    const char *end = content + text.size();
+    EXPECT_TRUE(SkipLine(&content, end));
+    EXPECT_STREQ("next", content);
+
+    const std::string lastLine = "#";
+    content = lastLine.c_str();
+    end = content + lastLine.size();
+    EXPECT_FALSE(SkipLine(&content, end));
+    EXPECT_EQ(end, content);
+}
+

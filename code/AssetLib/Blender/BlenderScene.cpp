@@ -785,7 +785,7 @@ void Structure ::Convert<bNodeSocket>(
                         dest.default_value = ((*sVal).*builders.first)();
                         db.cache(dest.default_value).set(*sVal, dest.default_value, ptrval, cache_owner);
                         ((*sVal).*builders.second)(dest.default_value, db);
-                        BlendElemBindTypes(*dest.default_value, sVal->name.c_str(), sVal->name.c_str());
+                        BlendElemBindConvertedHull(*dest.default_value, sVal->name.c_str(), sVal->name.c_str());
                         db.reader->SetCurrentPos(pold);
                     }
                 }
@@ -854,7 +854,7 @@ void Structure ::Convert<bNode>(
                         dest.storage = ((*sVal).*builders.first)();
                         db.cache(dest.storage).set(*sVal, dest.storage, ptrval, cache_owner);
                         ((*sVal).*builders.second)(dest.storage, db);
-                        BlendElemBindTypes(*dest.storage, sVal->name.c_str(), sVal->name.c_str());
+                        BlendElemBindConvertedHull(*dest.storage, sVal->name.c_str(), sVal->name.c_str());
                         db.reader->SetCurrentPos(pold);
                     }
                 }

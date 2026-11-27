@@ -120,11 +120,11 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_d
 
             BlenderModifier *const modifier = *curmod;
             if (modifier->IsActive(dat)) {
-                // CodeRabbit PR7099: do not cast GenericModifierData as Mirror/Subsurf.
+                // Generic converted hull must not be cast as Mirror/Subsurf.
                 const char *need = modifier->RequiredDnaType();
-                if (need != nullptr && !BlendElemConvertedAs(*cur, need)) {
-                    const char *have = cur->converted_type ? cur->converted_type : cur->dna_type;
-                    ASSIMP_LOG_DEBUG("BlendModifier: skip `", dat.name, "` handler - converted as `",
+                if (need != nullptr && !BlendElemConvertedHullIs(*cur, need)) {
+                    const char *have = cur->converted_hull ? cur->converted_hull : cur->dna_type;
+                    ASSIMP_LOG_DEBUG("BlendModifier: skip `", dat.name, "` handler - converted hull `",
                             have ? have : "?", "`, need `", need, "`");
                     continue;
                 }

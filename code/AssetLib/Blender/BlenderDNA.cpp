@@ -284,7 +284,7 @@ std::shared_ptr<ElemBase> DNA ::ConvertBlobToStructure(
         const bool usedGeneric = genIt != converters.end() &&
                 structure.name != "GenericModifierData" &&
                 (*it).second.first == genIt->second.first;
-        BlendElemBindTypes(*ret, structure.name.c_str(),
+        BlendElemBindConvertedHull(*ret, structure.name.c_str(),
                 usedGeneric ? "GenericModifierData" : structure.name.c_str());
     }
 

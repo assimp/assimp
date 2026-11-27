@@ -103,7 +103,7 @@ struct Error : DeadlyImportError {
 struct ElemBase {
     ElemBase() :
             dna_type(nullptr),
-            converted_type(nullptr) {
+            converted_hull(nullptr) {
         // empty
     }
 
@@ -117,20 +117,20 @@ struct ElemBase {
      * GenericModifierData fallback keeps #dna_type as the file label but sets
      * this to the stand-in name so casts cannot OOB (CodeRabbit PR7099).
      */
-    const char *converted_type;
+    const char *converted_hull;
 };
 
-inline bool BlendElemConvertedAs(const ElemBase &e, const char *need) {
+inline bool BlendElemConvertedHullIs(const ElemBase &e, const char *need) {
     if (need == nullptr) {
         return false;
     }
-    const char *have = e.converted_type != nullptr ? e.converted_type : e.dna_type;
+    const char *have = e.converted_hull != nullptr ? e.converted_hull : e.dna_type;
     return have != nullptr && std::strcmp(have, need) == 0;
 }
 
-inline void BlendElemBindTypes(ElemBase &e, const char *fileSdnaName, const char *allocatedHullName) {
+inline void BlendElemBindConvertedHull(ElemBase &e, const char *fileSdnaName, const char *allocatedHullName) {
     e.dna_type = fileSdnaName;
-    e.converted_type = allocatedHullName != nullptr ? allocatedHullName : fileSdnaName;
+    e.converted_hull = allocatedHullName != nullptr ? allocatedHullName : fileSdnaName;
 }
 
 // -------------------------------------------------------------------------------

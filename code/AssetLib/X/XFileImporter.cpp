@@ -191,10 +191,8 @@ aiNode *XFileImporter::CreateNodes(aiScene *pScene, aiNode *pParent, const XFile
 
     // create node
     aiNode *node = new aiNode;
-    node->mName.length = (ai_uint32)pNode->mName.length();
+    node->mName = aiString(pNode->mName);
     node->mParent = pParent;
-    memcpy(node->mName.data, pNode->mName.c_str(), pNode->mName.length());
-    node->mName.data[node->mName.length] = 0;
     node->mTransformation = pNode->mTrafoMatrix;
 
     // convert meshes from the source node

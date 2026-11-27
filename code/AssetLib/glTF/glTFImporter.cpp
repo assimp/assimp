@@ -363,18 +363,21 @@ void glTFImporter::ImportMeshes(Asset &r) {
                 case PrimitiveMode_TRIANGLE_STRIP: {
                     nFaces = count - 2;
                     faces = new aiFace[nFaces];
-                    SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
-                    for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], data.GetUInt(i));
+                    for (unsigned int i = 0; i < nFaces; ++i) {
+                        // every second triangle swaps its first two vertices to keep the winding of the strip
+                        if (i % 2 == 0) {
+                            SetFace(faces[i], data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+                        } else {
+                            SetFace(faces[i], data.GetUInt(i + 1), data.GetUInt(i), data.GetUInt(i + 2));
+                        }
                     }
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
                     nFaces = count - 2;
                     faces = new aiFace[nFaces];
-                    SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
-                    for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i));
+                    for (unsigned int i = 0; i < nFaces; ++i) {
+                        SetFace(faces[i], data.GetUInt(0), data.GetUInt(i + 1), data.GetUInt(i + 2));
                     }
                     break;
                 }
@@ -435,18 +438,21 @@ void glTFImporter::ImportMeshes(Asset &r) {
                 case PrimitiveMode_TRIANGLE_STRIP: {
                     nFaces = count - 2;
                     faces = new aiFace[nFaces];
-                    SetFace(faces[0], 0, 1, 2);
-                    for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], i);
+                    for (unsigned int i = 0; i < nFaces; ++i) {
+                        // every second triangle swaps its first two vertices to keep the winding of the strip
+                        if (i % 2 == 0) {
+                            SetFace(faces[i], i, i + 1, i + 2);
+                        } else {
+                            SetFace(faces[i], i + 1, i, i + 2);
+                        }
                     }
                     break;
                 }
                 case PrimitiveMode_TRIANGLE_FAN:
                     nFaces = count - 2;
                     faces = new aiFace[nFaces];
-                    SetFace(faces[0], 0, 1, 2);
-                    for (unsigned int i = 3; i < count; ++i) {
-                        SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], i);
+                    for (unsigned int i = 0; i < nFaces; ++i) {
+                        SetFace(faces[i], 0, i + 1, i + 2);
                     }
                     break;
                 }

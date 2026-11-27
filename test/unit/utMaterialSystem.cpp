@@ -205,11 +205,21 @@ TEST_F(MaterialSystemTest, testStringProperty) {
 }
 
 // ------------------------------------------------------------------------------------------------
+TEST_F(MaterialSystemTest, testFloatGetOnNonNumericStringReturnsFailure) {
+    aiString label;
+    label.Set("density");
+    this->pcMat->AddProperty(&label, "$tex.blend.particleInfluence", aiTextureType_UNKNOWN, 0);
+    float f = 42.f;
+    EXPECT_EQ(AI_FAILURE, pcMat->Get("$tex.blend.particleInfluence", aiTextureType_UNKNOWN, 0, f));
+    EXPECT_FLOAT_EQ(42.f, f);
+}
+
+// ------------------------------------------------------------------------------------------------
 TEST_F(MaterialSystemTest, testMalformedStringPropertyFails) {
-    auto prop = CreateMaterialStringProperty("testKeyBad", 5u, {'A', '\0'});
+    auto prop = CreateMaterialStringProperty("testKeyBad", 5u, { 'A', '\0' });
     prop->mDataLength = 6u;
     delete[] prop->mData;
-    prop->mData = new char[6u]{0, 0, 0, 0, 'A', '\0'};
+    prop->mData = new char[6u]{ 0, 0, 0, 0, 'A', '\0' };
     AddPropertyToMaterial(this->pcMat, prop);
 
     aiString s;
@@ -221,7 +231,7 @@ TEST_F(MaterialSystemTest, testTruncatedStringPropertyFails) {
     auto prop = CreateMaterialStringProperty("testTruncated", 0u, {});
     prop->mDataLength = 2u;
     delete[] prop->mData;
-    prop->mData = new char[2u]{0, 0};
+    prop->mData = new char[2u]{ 0, 0 };
     AddPropertyToMaterial(this->pcMat, prop);
 
     aiString s;
@@ -230,7 +240,7 @@ TEST_F(MaterialSystemTest, testTruncatedStringPropertyFails) {
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(MaterialSystemTest, testDeclaredLengthTooLargeFails) {
-    std::vector<char> payload = {'a', 'b', 'c', '\0'};
+    std::vector<char> payload = { 'a', 'b', 'c', '\0' };
     auto prop = CreateMaterialStringProperty("testTooLarge", 10u, payload);
     AddPropertyToMaterial(this->pcMat, prop);
 
@@ -240,7 +250,7 @@ TEST_F(MaterialSystemTest, testDeclaredLengthTooLargeFails) {
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(MaterialSystemTest, testNonNullTerminatedStringPropertyFails) {
-    std::vector<char> payload = {'a', 'b', 'c', 'd', 'e'};
+    std::vector<char> payload = { 'a', 'b', 'c', 'd', 'e' };
     auto prop = CreateMaterialStringProperty("testNoNull", 5u, payload);
     AddPropertyToMaterial(this->pcMat, prop);
 
@@ -429,5 +439,5 @@ TEST_F(MaterialSystemTest, testMaterialTextureTypeEnum) {
 }
 
 #if defined(_MSC_VER)
-__pragma (warning(pop))
+__pragma(warning(pop))
 #endif

@@ -45,14 +45,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MaterialSystem.h"
 #include <assimp/Hash.h>
+#include <assimp/MathFunctions.h>
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/material.h>
 #include <assimp/types.h>
 #include <assimp/DefaultLogger.hpp>
-#include <assimp/MathFunctions.h>
-#include <memory>
 #include <cstring>
+#include <exception>
+#include <memory>
 
 using namespace Assimp;
 
@@ -100,7 +101,7 @@ aiReturn GetMaterialFloatArray(const aiMaterial *pMat,
     ai_assert(pOut != nullptr);
     ai_assert(pMat != nullptr);
 
-    const aiMaterialProperty *prop{nullptr};
+    const aiMaterialProperty *prop{ nullptr };
     aiGetMaterialProperty(pMat, pKey, type, index, &prop);
     if (nullptr == prop) {
         return AI_FAILURE;
@@ -153,16 +154,25 @@ aiReturn GetMaterialFloatArray(const aiMaterial *pMat,
         const char *cur = prop->mData + 4;
         ai_assert(prop->mDataLength >= 5);
         ai_assert(!prop->mData[prop->mDataLength - 1]);
-        for (unsigned int a = 0;; ++a) {
-            cur = fast_atoreal_move(cur, pOut[a]);
-            if (a == iWrite - 1) {
-                break;
+        try {
+            for (unsigned int a = 0;; ++a) {
+                cur = fast_atoreal_move(cur, pOut[a]);
+                if (a == iWrite - 1) {
+                    break;
+                }
+                if (!IsSpace(*cur)) {
+                    ASSIMP_LOG_ERROR("Material property", pKey,
+                            " is a string; failed to parse a float array out of it.");
+                    return AI_FAILURE;
+                }
             }
-            if (!IsSpace(*cur)) {
-                ASSIMP_LOG_ERROR("Material property", pKey,
-                                 " is a string; failed to parse a float array out of it.");
-                return AI_FAILURE;
+        } catch (const std::exception &) {
+            // Type-mismatched Get (e.g. float on "$tex.blend.particleInfluence"="density"):
+            // return AI_FAILURE - never throw through the C material API.
+            if (pMax) {
+                *pMax = 0;
             }
+            return AI_FAILURE;
         }
 
         if (pMax) {
@@ -263,7 +273,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial *pMat,
             }
             if (!IsSpace(*cur)) {
                 ASSIMP_LOG_ERROR("Material property", pKey,
-                                 " is a string; failed to parse an integer array out of it.");
+                        " is a string; failed to parse an integer array out of it.");
                 return AI_FAILURE;
             }
         }
@@ -323,7 +333,7 @@ aiReturn aiGetMaterialString(const aiMaterial *pMat,
         aiString *pOut) {
     ai_assert(pOut != nullptr);
 
-    const aiMaterialProperty *prop{nullptr};
+    const aiMaterialProperty *prop{ nullptr };
     aiGetMaterialProperty(pMat, pKey, type, index, &prop);
     if (!prop) {
         return AI_FAILURE;
@@ -362,7 +372,7 @@ aiReturn aiGetMaterialString(const aiMaterial *pMat,
 // ------------------------------------------------------------------------------------------------
 // Get a c-like string fron an aiString
 const char *aiGetStringC_Str(const aiString *str) {
-	return str->data;
+    return str->data;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -541,7 +551,7 @@ aiReturn aiMaterial::AddBinaryProperty(const void *pInput,
     if (keyLen >= AI_MAXLEN) {
         ASSIMP_LOG_WARN("aiMaterial: property key '", pKey, "' exceeds AI_MAXLEN and will be truncated.");
     }
-	memcpy(pcNew->mKey.data, pKey, pcNew->mKey.length);
+    memcpy(pcNew->mKey.data, pKey, pcNew->mKey.length);
     pcNew->mKey.data[pcNew->mKey.length] = '\0';
 
     if (UINT_MAX != iOutIndex) {
@@ -623,10 +633,10 @@ void aiMaterial::CopyPropertyList(aiMaterial *const pcDest,
 
     // Safely check for integer overflow before adding allocations
     if (pcDest->mNumAllocated > UINT_MAX - pcSrc->mNumAllocated) {
-        throw std::bad_alloc();  // Overflow would occur
+        throw std::bad_alloc(); // Overflow would occur
     }
     if (pcDest->mNumProperties > UINT_MAX - pcSrc->mNumProperties) {
-        throw std::bad_alloc();  // Overflow would occur
+        throw std::bad_alloc(); // Overflow would occur
     }
 
     const unsigned int iOldNum = pcDest->mNumProperties;

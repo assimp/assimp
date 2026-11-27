@@ -640,9 +640,9 @@ struct Camera : ElemBase {
 
     Type type, flag WARN;
     float lens WARN;
-    float sensor_x WARN;
-    float sensor_y WARN; // film height - aspect = sensor_x/sensor_y when both set
-    float ortho_scale WARN; // Blender full ortho scale; aiCamera wants half-width
+    float sensor_x WARN; // film width (mm) - not screen aspect
+    float sensor_y WARN; // film height (mm) - not screen aspect
+    float ortho_scale WARN; // Blender full ortho scale (Presence; not typed half-width)
     float clipsta, clipend;
 
     Camera() :

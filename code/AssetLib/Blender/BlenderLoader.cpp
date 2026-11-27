@@ -3560,6 +3560,45 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object * /*obj*/, 
     return;
 }
 
+/**
+ * Film DNA Presence on the Camera Object's aiNode (aiCamera has no lens/sensor fields).
+ * Keys: $cam.blend.type|lens|sensor_x|sensor_y|ortho_scale - emit only when DNA > 0 / typed.
+ */
+static void BlendEmitCameraFilmNodeMetadata(aiNode *node, const Assimp::Blender::Camera *cam) {
+    using namespace Assimp::Blender;
+    if (node == nullptr || cam == nullptr) {
+        return;
+    }
+    auto ensure = [&]() {
+        if (node->mMetaData == nullptr) {
+            node->mMetaData = new aiMetadata();
+        }
+    };
+    if (cam->type == Camera::Type_ORTHO) {
+        ensure();
+        node->mMetaData->Add("$cam.blend.type", aiString("ORTHO"));
+    } else if (cam->type == Camera::Type_PERSP) {
+        ensure();
+        node->mMetaData->Add("$cam.blend.type", aiString("PERSP"));
+    }
+    if (cam->lens > 0.f) {
+        ensure();
+        node->mMetaData->Add("$cam.blend.lens", cam->lens);
+    }
+    if (cam->sensor_x > 0.f) {
+        ensure();
+        node->mMetaData->Add("$cam.blend.sensor_x", cam->sensor_x);
+    }
+    if (cam->sensor_y > 0.f) {
+        ensure();
+        node->mMetaData->Add("$cam.blend.sensor_y", cam->sensor_y);
+    }
+    if (cam->ortho_scale > 0.f) {
+        ensure();
+        node->mMetaData->Add("$cam.blend.ortho_scale", cam->ortho_scale);
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 aiCamera *BlenderImporter::ConvertCamera(const Scene & /*in*/, const Object *obj, const Camera *cam, ConversionData & /*conv_data*/) {
     std::unique_ptr<aiCamera> out(new aiCamera());
@@ -3567,20 +3606,15 @@ aiCamera *BlenderImporter::ConvertCamera(const Scene & /*in*/, const Object *obj
     out->mPosition = aiVector3D(0.f, 0.f, 0.f);
     out->mUp = aiVector3D(0.f, 1.f, 0.f);
     out->mLookAt = aiVector3D(0.f, 0.f, -1.f);
-    // Presence: only emit FOV/aspect/ortho from DNA fields that resolved (no invent).
-    if (cam->sensor_x && cam->lens) {
-        out->mHorizontalFOV = 2.f * std::atan2(cam->sensor_x, 2.f * cam->lens);
+    // aiCamera ctor defaults stay unless DNA has a matching value (no Assimp
+    // formulas). Film DNA (lens/sensor/ortho) has no aiCamera field -> Presence
+    // on the Camera aiNode as mMetaData ($cam.blend.*), see ConvertNode.
+    if (cam->clipsta > 0.f) {
+        out->mClipPlaneNear = cam->clipsta;
     }
-    if (cam->sensor_x > 0.f && cam->sensor_y > 0.f) {
-        out->mAspect = cam->sensor_x / cam->sensor_y;
+    if (cam->clipend > cam->clipsta && cam->clipend > 0.f) {
+        out->mClipPlaneFar = cam->clipend;
     }
-    if (cam->type == Camera::Type_ORTHO && cam->ortho_scale > 0.f) {
-        // Blender ortho_scale is full fit size; aiCamera wants half horizontal width.
-        out->mOrthographicWidth = cam->ortho_scale * 0.5f;
-        out->mHorizontalFOV = 0.f;
-    }
-    out->mClipPlaneNear = cam->clipsta;
-    out->mClipPlaneFar = cam->clipend;
 
     return out.release();
 }
@@ -3867,12 +3901,15 @@ aiNode *BlenderImporter::ConvertNode(const Scene &in, const Object *obj, Convers
         } break;
         case Object ::Type_CAMERA: {
             CheckActualType(obj->data.get(), "Camera");
-            aiCamera *mesh = ConvertCamera(in, obj, static_cast<const Camera *>(obj->data.get()), conv_data);
+            const Camera *camData = static_cast<const Camera *>(obj->data.get());
+            aiCamera *mesh = ConvertCamera(in, obj, camData, conv_data);
 
             if (mesh) {
                 conv_data.cameras->push_back(mesh);
                 conv_data.camera_objects.push_back(obj);
             }
+            // Film DNA Presence on Camera aiNode (aiCamera has no lens/sensor fields).
+            BlendEmitCameraFilmNodeMetadata(node.get(), camData);
         } break;
 
         case Object ::Type_ARMATURE: {

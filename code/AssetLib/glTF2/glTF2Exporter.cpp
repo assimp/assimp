@@ -59,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 
 // Header files, standard library.
+#include <algorithm>
 #include <cinttypes>
 #include <cmath>
 #include <limits>
@@ -1482,52 +1483,89 @@ void glTF2Exporter::ExportMeshes() {
     }
 }
 
+namespace {
+
+// A glTF node stores a single mesh. A node that references the same mesh more
+// than once would merge it into itself and then lose the mesh it referenced, so
+// collapse duplicate references first.
+void RemoveDuplicateMeshRefs(Ref<Node> &node) {
+    std::vector<Ref<Mesh>> unique;
+    unique.reserve(node->meshes.size());
+    for (const Ref<Mesh> &mesh : node->meshes) {
+        const bool duplicate = std::any_of(unique.begin(), unique.end(),
+                [&mesh](const Ref<Mesh> &kept) { return kept.GetIndex() == mesh.GetIndex(); });
+        if (!duplicate) {
+            unique.push_back(mesh);
+        }
+    }
+
+    node->meshes.swap(unique);
+}
+
+// Removing a mesh from the asset renumbers every later entry. Rebuild the list
+// instead of erasing in place: a forward erase would skip the entry that moved
+// into the erased slot and leave it pointing at the wrong mesh.
+void RemapMeshRefs(Asset &asset, Ref<Node> &node, unsigned int removedIndex) {
+    std::vector<Ref<Mesh>> remapped;
+    remapped.reserve(node->meshes.size());
+    for (const Ref<Mesh> &meshRef : node->meshes) {
+        const unsigned int meshIndex = meshRef.GetIndex();
+        if (meshIndex == removedIndex) {
+            continue;
+        }
+
+        remapped.push_back(meshIndex > removedIndex ? asset.meshes.Get(meshIndex - 1) : meshRef);
+    }
+
+    node->meshes.swap(remapped);
+}
+
+} // namespace
+
 // Merges a node's multiple meshes (with one primitive each) into one mesh with multiple primitives
 void glTF2Exporter::MergeMeshes() {
     for (unsigned int n = 0; n < mAsset->nodes.Size(); ++n) {
         Ref<Node> node = mAsset->nodes.Get(n);
+        RemoveDuplicateMeshRefs(node);
+    }
 
-        unsigned int nMeshes = static_cast<unsigned int>(node->meshes.size());
+    for (unsigned int n = 0; n < mAsset->nodes.Size(); ++n) {
+        Ref<Node> node = mAsset->nodes.Get(n);
+
+        const unsigned int nMeshes = static_cast<unsigned int>(node->meshes.size());
 
         // skip if it's 1 or less meshes per node
-        if (nMeshes > 1) {
-            Ref<Mesh> firstMesh = node->meshes.at(0);
-
-            // loop backwards to allow easy removal of a mesh from a node once it's merged
-            for (unsigned int m = nMeshes - 1; m >= 1; --m) {
-                Ref<Mesh> mesh = node->meshes.at(m);
-
-                // append this mesh's primitives to the first mesh's primitives
-                firstMesh->primitives.insert(
-                        firstMesh->primitives.end(),
-                        mesh->primitives.begin(),
-                        mesh->primitives.end());
-
-                // remove the mesh from the list of meshes
-                unsigned int removedIndex = mAsset->meshes.Remove(mesh->id.c_str());
-
-                // find the presence of the removed mesh in other nodes
-                for (unsigned int nn = 0; nn < mAsset->nodes.Size(); ++nn) {
-                    Ref<Node> curNode = mAsset->nodes.Get(nn);
-
-                    for (unsigned int mm = 0; mm < curNode->meshes.size(); ++mm) {
-                        Ref<Mesh> &meshRef = curNode->meshes.at(mm);
-                        unsigned int meshIndex = meshRef.GetIndex();
-
-                        if (meshIndex == removedIndex) {
-                            curNode->meshes.erase(curNode->meshes.begin() + mm);
-                        } else if (meshIndex > removedIndex) {
-                            Ref<Mesh> newMeshRef = mAsset->meshes.Get(meshIndex - 1);
-
-                            meshRef = newMeshRef;
-                        }
-                    }
-                }
-            }
-
-            // since we were looping backwards, reverse the order of merged primitives to their original order
-            std::reverse(firstMesh->primitives.begin() + 1, firstMesh->primitives.end());
+        if (nMeshes <= 1) {
+            continue;
         }
+
+        // loop backwards to allow easy removal of a mesh from a node once it's merged
+        for (unsigned int m = nMeshes - 1; m >= 1; --m) {
+            // The merge target is the node's first mesh. Removing a mesh
+            // renumbers every later entry, so it has to be read again on each
+            // iteration instead of once before the loop.
+            Ref<Mesh> firstMesh = node->meshes.at(0);
+            Ref<Mesh> mesh = node->meshes.at(m);
+
+            // append this mesh's primitives to the first mesh's primitives
+            firstMesh->primitives.insert(
+                    firstMesh->primitives.end(),
+                    mesh->primitives.begin(),
+                    mesh->primitives.end());
+
+            // remove the mesh from the list of meshes
+            const unsigned int removedIndex = mAsset->meshes.Remove(mesh->id.c_str());
+
+            // find the presence of the removed mesh in other nodes
+            for (unsigned int nn = 0; nn < mAsset->nodes.Size(); ++nn) {
+                Ref<Node> curNode = mAsset->nodes.Get(nn);
+                RemapMeshRefs(*mAsset, curNode, removedIndex);
+            }
+        }
+
+        // since we were looping backwards, reverse the order of merged primitives to their original order
+        Ref<Mesh> mergedMesh = node->meshes.at(0);
+        std::reverse(mergedMesh->primitives.begin() + 1, mergedMesh->primitives.end());
     }
 }
 

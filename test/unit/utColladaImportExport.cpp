@@ -377,6 +377,46 @@ TEST_F(utColladaImportExport, importAnimationLibrary) {
 }
 
 
+// A triangle with a VERTEX input and the given <p> contents.
+static std::string makeTriangleWithIndexList(const std::string &indices) {
+    return R"(<?xml version="1.0" encoding="utf-8"?>
+<COLLADA version="1.4.1">
+  <library_geometries>
+    <geometry id="g" name="g">
+      <mesh>
+        <source id="p">
+          <float_array id="p-a" count="9">0 0 0 1 0 0 0 1 0</float_array>
+          <technique_common><accessor source="#p-a" count="3" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common>
+        </source>
+        <vertices id="v"><input semantic="POSITION" source="#p"/></vertices>
+        <triangles count="1"><input semantic="VERTEX" source="#v" offset="0"/><p>)" + indices + R"(</p></triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="s"><node id="n" name="n"><instance_geometry url="#g"/></node></visual_scene>
+  </library_visual_scenes>
+  <scene><instance_visual_scene url="#s"/></scene>
+</COLLADA>)";
+}
+
+TEST_F(utColladaImportExport, indexListWithInvalidCharacter) {
+    {
+        const std::string data = makeTriangleWithIndexList("0 1 2");
+        Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(data.c_str(), data.size(), aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(1u, scene->mMeshes[0]->mNumFaces);
+    }
+    {
+        // used to append zeros to the index list until memory ran out
+        const std::string data = makeTriangleWithIndexList("0 1 x");
+        Importer importer;
+        EXPECT_EQ(nullptr, importer.ReadFileFromMemory(data.c_str(), data.size(), 0));
+    }
+}
+
 TEST_F(utColladaImportExport, importLights) {
     Importer importer;
 

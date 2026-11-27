@@ -225,8 +225,9 @@ void STLImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSy
 // ------------------------------------------------------------------------------------------------
 // Read an ASCII STL file
 void STLImporter::LoadASCIIFile(aiNode *root) {
-    std::vector<aiMesh *> meshes;
-    std::vector<aiNode *> nodes;
+    // Owned here until the whole file has been parsed, so that a parse error does not leak them
+    std::vector<std::unique_ptr<aiMesh>> meshes;
+    std::vector<std::unique_ptr<aiNode>> nodes;
     const char *sz = mBuffer;
     const char *bufferEnd = mBuffer + mFileSize;
     std::vector<aiVector3D> positionBuffer;
@@ -240,13 +241,13 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
 
     while (IsAsciiSTL(sz, static_cast<unsigned int>(bufferEnd - sz))) {
         std::vector<unsigned int> meshIndices;
-        aiMesh *pMesh = new aiMesh();
-        pMesh->mMaterialIndex = 0;
         meshIndices.push_back((unsigned int)meshes.size());
-        meshes.push_back(pMesh);
-        aiNode *node = new aiNode;
+        meshes.emplace_back(new aiMesh());
+        aiMesh *pMesh = meshes.back().get();
+        pMesh->mMaterialIndex = 0;
+        nodes.emplace_back(new aiNode);
+        aiNode *node = nodes.back().get();
         node->mParent = root;
-        nodes.push_back(node);
         SkipSpaces(&sz, bufferEnd);
         ai_assert(!IsLineEnd(sz));
 
@@ -388,13 +389,13 @@ void STLImporter::LoadASCIIFile(aiNode *root) {
     mScene->mNumMeshes = (unsigned int)meshes.size();
     mScene->mMeshes = new aiMesh *[mScene->mNumMeshes];
     for (size_t i = 0; i < meshes.size(); i++) {
-        mScene->mMeshes[i] = meshes[i];
+        mScene->mMeshes[i] = meshes[i].release();
     }
 
     root->mNumChildren = (unsigned int)nodes.size();
     root->mChildren = new aiNode *[root->mNumChildren];
     for (size_t i = 0; i < nodes.size(); ++i) {
-        root->mChildren[i] = nodes[i];
+        root->mChildren[i] = nodes[i].release();
     }
 }
 

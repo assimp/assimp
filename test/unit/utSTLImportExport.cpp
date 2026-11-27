@@ -121,6 +121,30 @@ TEST_F(utSTLImporterExporter, test_with_empty_solid) {
     EXPECT_EQ(nullptr, scene2);
 }
 
+TEST_F(utSTLImporterExporter, test_ascii_file_ending_inside_facet) {
+    const std::string facet = "facet normal 0 0 1\n"
+                              "outer loop\n"
+                              "vertex 0 0 0\n"
+                              "vertex 1 0 0\n"
+                              "vertex 0 1 0\n"
+                              "endloop\n"
+                              "endfacet\n";
+    const std::string complete = "solid x\n" + facet + facet + facet + "endsolid x\n";
+    {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(complete.data(), complete.size(), aiProcess_ValidateDataStructure, "stl");
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        EXPECT_EQ(3u, scene->mMeshes[0]->mNumFaces);
+    }
+
+    // The file ends inside the third facet: the import fails, and the mesh and node built
+    // so far must be released (checked by LeakSanitizer in the sanitizer builds)
+    const std::string truncated = "solid x\n" + facet + facet + "facet normal 0 0 1\nouter loop\nvertex 0 0 0\n";
+    Assimp::Importer importer;
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(truncated.data(), truncated.size(), 0, "stl"));
+}
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 TEST_F(utSTLImporterExporter, exporterTest) {

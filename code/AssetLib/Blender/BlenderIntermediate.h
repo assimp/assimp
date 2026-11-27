@@ -49,11 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderLoader.h"
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
+#include <assimp/anim.h>
+#include <assimp/camera.h>
+#include <assimp/light.h>
+#include <assimp/material.h>
+#include <assimp/texture.h>
 #include <deque>
 #include <unordered_map>
-#include <assimp/material.h>
-
-struct aiTexture;
 
 namespace Assimp {
 namespace Blender {

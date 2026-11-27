@@ -194,8 +194,8 @@ namespace Blender {
         /** MeshCache MDD -> aiMeshAnim produced during ConvertMesh. */
         std::vector<aiAnimation *> pendingMeshAnims;
         /**
-         * Per submesh: map aiMesh vertex index -> DNA Mesh totvert index.
-         * Left empty here; BlendAttachMeshBones/ShapeKeys/MeshCache skip when empty.
+         * Optional per-submesh DNA totvert map. ConvertMesh builds its own corner
+         * map locally; this bag is unused on 2x-5x unless a caller fills it.
          */
         std::vector<std::vector<int>> meshSrcVertDna;
         /** Armature objects (bone hierarchy + pose Action -> aiNodeAnim). */

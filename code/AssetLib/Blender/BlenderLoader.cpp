@@ -2754,6 +2754,10 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object *obj, const
             out->mMaterialIndex = static_cast<unsigned int>(-1);
     }
 
+    // Per expanded aiMesh vertex: DNA Mesh totvert index (built while writing positions).
+    // Needed because ConvertMesh duplicates corners; identity i->i would be wrong.
+    std::vector<std::vector<int>> outToSrcVert(temp->size() - old);
+
     for (int i = 0; i < mesh->totface; ++i) {
 
         const MFace &mf = mesh->mface[i];
@@ -2782,6 +2786,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object *obj, const
         vn->y = v->no[1];
         vn->z = v->no[2];
         f.mIndices[0] = out->mNumVertices++;
+        outToSrcVert[mat_num_to_mesh_idx[mf.mat_nr] - old].push_back(mf.v1);
         ++vo;
         ++vn;
 
@@ -2797,6 +2802,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object *obj, const
         vn->y = v->no[1];
         vn->z = v->no[2];
         f.mIndices[1] = out->mNumVertices++;
+        outToSrcVert[mat_num_to_mesh_idx[mf.mat_nr] - old].push_back(mf.v2);
         ++vo;
         ++vn;
 
@@ -2812,6 +2818,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object *obj, const
         vn->y = v->no[1];
         vn->z = v->no[2];
         f.mIndices[2] = out->mNumVertices++;
+        outToSrcVert[mat_num_to_mesh_idx[mf.mat_nr] - old].push_back(mf.v3);
         ++vo;
         ++vn;
 
@@ -2828,6 +2835,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object *obj, const
             vn->y = v->no[1];
             vn->z = v->no[2];
             f.mIndices[3] = out->mNumVertices++;
+            outToSrcVert[mat_num_to_mesh_idx[mf.mat_nr] - old].push_back(mf.v4);
             ++vo;
             ++vn;
 
@@ -2878,6 +2886,7 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object *obj, const
             vn->y = v.no[1];
             vn->z = v.no[2];
             f.mIndices[j] = out->mNumVertices++;
+            outToSrcVert[mat_num_to_mesh_idx[mf.mat_nr] - old].push_back(loop.v);
 
             ++vo;
             ++vn;
@@ -3037,27 +3046,32 @@ void BlenderImporter::ConvertMesh(const Scene & /*in*/, const Object *obj, const
     }
 
 
-    // Typed skinning / shape keys / MeshCache MDD (Assimp anim interfaces).
-    // meshSrcVertDna stays empty on this branch -> attach paths no-op (no invent).
+    // Typed skinning / shape keys / MeshCache MDD from DNA via ConvertMesh corner map.
+    // Host postprocess that remaps vertices must rebuild this mapping itself.
     if (obj != nullptr) {
         for (size_t mi = old; mi < temp->size(); ++mi) {
             aiMesh *sub = temp[mi];
             if (sub == nullptr) {
                 continue;
             }
-            std::vector<int> map;
-            if (mi < conv_data.meshSrcVertDna.size()) {
-                map.assign(conv_data.meshSrcVertDna[mi].begin(), conv_data.meshSrcVertDna[mi].end());
+            const size_t local = mi - old;
+            if (local >= outToSrcVert.size()) {
+                continue;
             }
-            if (map.empty()) {
+            std::vector<int> &map = outToSrcVert[local];
+            if (map.empty() || map.size() != sub->mNumVertices) {
+                // UV/color passes re-walk faces and must keep the same vertex count.
+                if (map.size() != sub->mNumVertices) {
+                    LogWarn("mesh '", mesh->id.name + 2,
+                            "' DNA corner map size ", map.size(),
+                            " != mNumVertices ", sub->mNumVertices, "; skip bone/shape/MDD attach");
+                }
                 continue;
             }
             Assimp::Blender::BlendAttachMeshBones(sub, *obj, *mesh, conv_data, map);
             Assimp::Blender::BlendAttachShapeKeyTargets(sub, obj, *mesh, map, conv_data);
-            if (mi == old) {
-                Assimp::Blender::BlendAttachMeshCacheAnim(sub, *obj, *mesh, conv_data, map,
-                        conv_data.pendingMeshAnims);
-            }
+            Assimp::Blender::BlendAttachMeshCacheAnim(sub, *obj, *mesh, conv_data, map,
+                    conv_data.pendingMeshAnims);
         }
     }
 

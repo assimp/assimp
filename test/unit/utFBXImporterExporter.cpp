@@ -49,6 +49,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 #include <assimp/Importer.hpp>
 
+#include <algorithm>
+#include <fstream>
+#include <iterator>
+#include <string>
+#include <vector>
+
 using namespace Assimp;
 
 class utFBXImporterExporter : public AbstractImportExportBase {
@@ -101,6 +107,35 @@ TEST_F(utFBXImporterExporter, rejectNonNumericTextureUV) {
     ASSERT_EQ(1u, scene->mNumMaterials);
     EXPECT_EQ(0u, scene->mNumTextures);
     EXPECT_EQ(0u, scene->mMaterials[0]->GetTextureCount(aiTextureType_DIFFUSE));
+}
+
+TEST_F(utFBXImporterExporter, rejectCompressedArrayLongerThanItsData) {
+    const char *path = ASSIMP_TEST_MODELS_DIR "/FBX/embedded_float_uv.fbx";
+    std::ifstream file(path, std::ios::binary);
+    std::vector<char> data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    ASSERT_FALSE(data.empty());
+    {
+        Assimp::Importer importer;
+        ASSERT_NE(nullptr, importer.ReadFileFromMemory(data.data(), data.size(), 0, "fbx"));
+    }
+
+    // The polygon vertex index array: type 'i', element count, encoding, compressed length.
+    // Declare one million elements stored compressed in the same 12 bytes.
+    const std::string name = "PolygonVertexIndexi";
+    auto it = std::search(data.begin(), data.end(), name.begin(), name.end());
+    ASSERT_NE(data.end(), it);
+    const size_t header = static_cast<size_t>(it - data.begin()) + name.size();
+    ASSERT_LT(header + 12, data.size());
+    const unsigned char count[4] = { 0x00, 0x00, 0x10, 0x00 }; // 1048576, little endian
+    const unsigned char deflate[4] = { 0x01, 0x00, 0x00, 0x00 };
+    std::copy(count, count + 4, data.begin() + header);
+    std::copy(deflate, deflate + 4, data.begin() + header + 4);
+
+    // In strict mode the parse error fails the import instead of only dropping the mesh
+    Assimp::Importer importer;
+    importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, true);
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(data.data(), data.size(), 0, "fbx"));
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("does not match its compressed data")) << importer.GetErrorString();
 }
 
 TEST_F(utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords) {

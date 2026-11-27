@@ -572,6 +572,11 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
     if (encmode == 0 && full_length64 != static_cast<uint64_t>(comp_len)) {
         ParseError("binary data array length mismatch", &el);
     }
+    // deflate cannot expand data by more than 1032:1, so a larger element count is not backed
+    // by the compressed data that follows; reject it before allocating the buffer
+    if (encmode == 1 && full_length64 > static_cast<uint64_t>(comp_len) * 1032) {
+        ParseError("binary data array length does not match its compressed data", &el);
+    }
 
     const auto full_length = static_cast<uint32_t>(full_length64);
     buff.resize(full_length);
@@ -587,8 +592,12 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         // see http://www.ietf.org/rfc/rfc1950.txt
          Compression compress;
         if (compress.open(Compression::Format::Binary, Compression::FlushMode::Finish, 0)) {
-            compress.decompress(data, comp_len, buff);
+            // returns the number of bytes of the buffer that the stream did not fill
+            const size_t unfilled = compress.decompress(data, comp_len, buff);
             compress.close();
+            if (unfilled != 0) {
+                ParseError("binary data array length does not match its compressed data", &el);
+            }
         }
     }
 #ifdef ASSIMP_BUILD_DEBUG

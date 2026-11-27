@@ -62,6 +62,47 @@ TEST_F(utglTFImportExport, importglTFFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
 
+// A glTF 1.0 triangle whose material uses one embedded image, given as a data URI of the
+// given media type.
+static std::string makeTriangleWithImage(const char *mediaType) {
+    std::string json = R"({
+  "asset": { "version": "1.0" },
+  "buffers": { "buf": { "byteLength": 36, "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAA" } },
+  "bufferViews": { "pos_view": { "buffer": "buf", "byteOffset": 0, "byteLength": 36, "target": 34962 } },
+  "accessors": { "pos": { "bufferView": "pos_view", "byteOffset": 0, "componentType": 5126, "count": 3, "type": "VEC3" } },
+  "meshes": { "tri": { "primitives": [ { "attributes": { "POSITION": "pos" }, "material": "mat", "mode": 4 } ] } },
+  "materials": { "mat": { "values": { "diffuse": "tex" } } },
+  "textures": { "tex": { "source": "img" } },
+  "images": { "img": { "uri": "data:)";
+    json += mediaType;
+    json += R"(;base64,AAECAw==" } },
+  "nodes": { "node": { "meshes": [ "tri" ] } },
+  "scenes": { "scene": { "nodes": [ "node" ] } },
+  "scene": "scene"
+})";
+    return json;
+}
+
+TEST_F(utglTFImportExport, embeddedImageFormatHint) {
+    {
+        const std::string json = makeTriangleWithImage("image/png");
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(json.c_str(), json.size(), 0, "gltf");
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumTextures);
+        EXPECT_STREQ("png", scene->mTextures[0]->achFormatHint);
+    }
+    {
+        // A media type without '/' leaves the format hint empty
+        const std::string json = makeTriangleWithImage("png");
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(json.c_str(), json.size(), 0, "gltf");
+        ASSERT_NE(nullptr, scene);
+        ASSERT_EQ(1u, scene->mNumTextures);
+        EXPECT_STREQ("", scene->mTextures[0]->achFormatHint);
+    }
+}
+
 TEST_F(utglTFImportExport, incorrect_vertex_arrays) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF/IncorrectVertexArrays/Cube_v1.gltf",

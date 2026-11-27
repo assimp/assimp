@@ -195,6 +195,13 @@ void MD2Importer::ValidateHeader( )
 
     if (m_pcHeader->numFrames <= configFrameID )
         throw DeadlyImportError("MD2: The requested frame (", configFrameID, ") does not exist in the file");
+
+    // The frame table check above uses the frame size computed from numVertices, but the frames
+    // are navigated with the frameSize stored in the header, which is never validated. Make sure
+    // that the requested frame, including all of its vertices, is really inside the file.
+    if ((uint64_t)m_pcHeader->offsetFrames + (uint64_t)m_pcHeader->frameSize * configFrameID + frameSize > fileSize) {
+        throw DeadlyImportError("Invalid MD2 header: The requested frame is outside the file");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

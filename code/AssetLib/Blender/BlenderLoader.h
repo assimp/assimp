@@ -120,7 +120,7 @@ protected:
     void ParseSubCollection(const Blender::Scene &in, aiNode *root, const std::shared_ptr<Blender::Collection>& collection, Blender::ConversionData &conv_data);
     /** @param blenderVersion Header file version string (e.g. "4.20"), or empty. */
     void ConvertBlendFile(aiScene *out, const Blender::Scene &in, const Blender::FileDatabase &file,
-            const char *blenderVersion);
+            const char *blenderVersion, const std::string &pFile, IOSystem *pIOHandler);
 
 private:
     aiNode *ConvertNode(const Blender::Scene &in,

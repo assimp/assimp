@@ -112,6 +112,7 @@ void Structure ::Convert<Object>(
     ReadFieldPtr<ErrorPolicy_Fail>(dest.data, "*data", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.adt, "*adt", db);
     ReadField<ErrorPolicy_Igno>(dest.modifiers, "modifiers", db);
+    ReadField<ErrorPolicy_Igno>(dest.defbase, "defbase", db);
 
     db.reader->IncPtr(size);
 }
@@ -134,6 +135,7 @@ void Structure ::Convert<FCurve>(
     ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
     ReadField<ErrorPolicy_Igno>(dest.totvert, "totvert", db);
     ReadField<ErrorPolicy_Igno>(dest.array_index, "array_index", db);
+    ReadField<ErrorPolicy_Igno>(dest.extend, "extend", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.bezt, "*bezt", db);
 
     // char *rna_path -> C string in a DATA block
@@ -234,6 +236,9 @@ void Structure ::Convert<NlaStrip>(
     ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
     ReadField<ErrorPolicy_Igno>(dest.start, "start", db);
     ReadField<ErrorPolicy_Igno>(dest.end, "end", db);
+    ReadField<ErrorPolicy_Igno>(dest.actstart, "actstart", db);
+    ReadField<ErrorPolicy_Igno>(dest.actend, "actend", db);
+    ReadField<ErrorPolicy_Igno>(dest.scale, "scale", db);
     db.reader->IncPtr(size);
 }
 
@@ -1007,6 +1012,9 @@ void Structure ::Convert<Mesh>(
         dest.attribute_dna_num = as.dna_attributes_num;
     }
 
+    ReadField<ErrorPolicy_Igno>(dest.vertex_group_names, "vertex_group_names", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.key, "*key", db);
+
     db.reader->IncPtr(size);
 }
 
@@ -1404,6 +1412,101 @@ void Structure::Convert<CustomDataLayer>(
 }
 
 //--------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<ArmatureModifierData>(
+        ArmatureModifierData &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Warn>(dest.modifier, "modifier", db);
+    {
+        std::shared_ptr<Object> armOb;
+        ReadFieldPtr<ErrorPolicy_Igno>(armOb, "*object", db);
+        dest.object = armOb;
+    }
+    ReadFieldArray<ErrorPolicy_Igno>(dest.defgrp_name, "defgrp_name", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<MeshCacheModifierData>(
+        MeshCacheModifierData &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Fail>(dest.modifier, "modifier", db);
+    ReadField<ErrorPolicy_Igno>(dest.type, "type", db);
+    ReadField<ErrorPolicy_Igno>(dest.time_mode, "time_mode", db);
+    ReadField<ErrorPolicy_Igno>(dest.play_mode, "play_mode", db);
+    ReadField<ErrorPolicy_Igno>(dest.factor, "factor", db);
+    ReadField<ErrorPolicy_Igno>(dest.frame_start, "frame_start", db);
+    ReadField<ErrorPolicy_Igno>(dest.frame_scale, "frame_scale", db);
+    ReadField<ErrorPolicy_Igno>(dest.eval_frame, "eval_frame", db);
+    ReadField<ErrorPolicy_Igno>(dest.eval_time, "eval_time", db);
+    ReadField<ErrorPolicy_Igno>(dest.eval_factor, "eval_factor", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.filepath, "filepath", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<bDeformGroup>(
+        bDeformGroup &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.prev, "*prev", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<KeyBlock>(
+        KeyBlock &dest,
+        const FileDatabase &db) const {
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadField<ErrorPolicy_Igno>(dest.curval, "curval", db);
+    ReadField<ErrorPolicy_Igno>(dest.totelem, "totelem", db);
+    ReadFieldArray<ErrorPolicy_Igno>(dest.name, "name", db);
+    dest.co.clear();
+    try {
+        const Field &f = (*this)["*data"];
+        const StreamReaderAny::pos old = db.reader->GetCurrentPos();
+        db.reader->IncPtr(f.offset);
+        Pointer ptrval;
+        Convert(ptrval, db);
+        db.reader->SetCurrentPos(old);
+        if (ptrval.val && dest.totelem > 0) {
+            const FileBlockHead *block = LocateFileBlockForAddress(ptrval, db);
+            if (block != nullptr && block->size >= static_cast<size_t>(dest.totelem) * 12u) {
+                const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
+                db.reader->SetCurrentPos(block->start + static_cast<size_t>(ptrval.val - block->address.val));
+                dest.co.resize(static_cast<size_t>(dest.totelem) * 3u);
+                for (size_t i = 0; i < dest.co.size(); ++i) {
+                    dest.co[i] = db.reader->GetF4();
+                }
+                db.reader->SetCurrentPos(pold);
+            }
+        }
+    } catch (const Error &) {
+        dest.co.clear();
+    }
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure ::Convert<Key>(
+        Key &dest,
+        const FileDatabase &db) const {
+    ReadField<ErrorPolicy_Warn>(dest.id, "id", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.adt, "*adt", db);
+    ReadField<ErrorPolicy_Igno>(dest.block, "block", db);
+    ReadField<ErrorPolicy_Igno>(dest.elemsize, "elemsize", db);
+    ReadField<ErrorPolicy_Igno>(dest.totkey, "totkey", db);
+    ReadField<ErrorPolicy_Igno>(dest.type, "type", db);
+    db.reader->IncPtr(size);
+}
+
 void DNA::RegisterConverters() {
 
     converters["Object"] = DNA::FactoryPair(&Structure::Allocate<Object>, &Structure::Convert<Object>);
@@ -1421,6 +1524,11 @@ void DNA::RegisterConverters() {
     converters["MTex"] = DNA::FactoryPair(&Structure::Allocate<MTex>, &Structure::Convert<MTex>);
     converters["TFace"] = DNA::FactoryPair(&Structure::Allocate<TFace>, &Structure::Convert<TFace>);
     converters["GenericModifierData"] = DNA::FactoryPair(&Structure::Allocate<GenericModifierData>, &Structure::Convert<GenericModifierData>);
+    converters["ArmatureModifierData"] = DNA::FactoryPair(&Structure::Allocate<ArmatureModifierData>, &Structure::Convert<ArmatureModifierData>);
+    converters["MeshCacheModifierData"] = DNA::FactoryPair(&Structure::Allocate<MeshCacheModifierData>, &Structure::Convert<MeshCacheModifierData>);
+    converters["bDeformGroup"] = DNA::FactoryPair(&Structure::Allocate<bDeformGroup>, &Structure::Convert<bDeformGroup>);
+    converters["KeyBlock"] = DNA::FactoryPair(&Structure::Allocate<KeyBlock>, &Structure::Convert<KeyBlock>);
+    converters["Key"] = DNA::FactoryPair(&Structure::Allocate<Key>, &Structure::Convert<Key>);
     converters["SubsurfModifierData"] = DNA::FactoryPair(&Structure::Allocate<SubsurfModifierData>, &Structure::Convert<SubsurfModifierData>);
     converters["MFace"] = DNA::FactoryPair(&Structure::Allocate<MFace>, &Structure::Convert<MFace>);
     converters["Lamp"] = DNA::FactoryPair(&Structure::Allocate<Lamp>, &Structure::Convert<Lamp>);

@@ -595,6 +595,10 @@ struct Mesh final : ElemBase {
     vector<MTexPoly> mtpoly;
     vector<MDeformVert> dvert;
     vector<MCol> mcol;
+    /** DNA Mesh.vertex_group_names (Blender 2.8+; else Object.defbase). */
+    ListBase vertex_group_names;
+    /** DNA Mesh.key - shape keys. */
+    std::shared_ptr<struct Key> key WARN;
 
     vector<std::shared_ptr<Material>> mat FAIL;
 
@@ -791,6 +795,44 @@ struct SharedModifierData : ElemBase {
 /** Hull for unknown blender *ModifierData DNA types - header only (next/type/name). */
 struct GenericModifierData final : SharedModifierData {};
 
+/** DNA ArmatureModifierData - armature Object* for skinning bind. */
+struct ArmatureModifierData final : SharedModifierData {
+    std::weak_ptr<Object> object;
+    char defgrp_name[64];
+
+    ArmatureModifierData() {
+        memset(defgrp_name, 0, sizeof defgrp_name);
+    }
+};
+
+/**
+ * DNA MeshCacheModifierData - MDD/PC2 filepath on the modifier.
+ * type: MOD_MESHCACHE_TYPE_MDD=1, PC2=2.
+ */
+struct MeshCacheModifierData final : SharedModifierData {
+    enum CacheType {
+        Type_MDD = 1,
+        Type_PC2 = 2
+    };
+
+    char type;
+    char time_mode;
+    char play_mode;
+    float factor;
+    float frame_start;
+    float frame_scale;
+    float eval_frame;
+    float eval_time;
+    float eval_factor;
+    char filepath[1024];
+
+    MeshCacheModifierData() :
+            type(Type_MDD), time_mode(0), play_mode(0), factor(1.f), frame_start(0.f), frame_scale(1.f),
+            eval_frame(0.f), eval_time(0.f), eval_factor(0.f) {
+        filepath[0] = '\0';
+    }
+};
+
 // -------------------------------------------------------------------------------
 struct SubsurfModifierData final : SharedModifierData {
 
@@ -894,6 +936,8 @@ struct Object final : ElemBase {
     std::shared_ptr<struct AnimData> adt WARN; // object animation (Actions / NLA)
 
     ListBase modifiers;
+    /** DNA Object.defbase - vertex group names (legacy; Mesh may own names). */
+    ListBase defbase; // bDeformGroup
 
     Object() :
             type(Type_EMPTY),
@@ -1184,15 +1228,69 @@ struct BezTriple final : ElemBase {
 
 /** DNA FCurve - one animated RNA path component. */
 struct FCurve final : ElemBase {
+    enum Extend {
+        Extend_Constant = 0,
+        Extend_Linear = 1
+    };
+
     std::shared_ptr<ElemBase> next WARN;
     int totvert;
     int array_index;
+    short extend WARN; // eFCurve_Extend
     std::string rna_path; // from char *rna_path
     vector<BezTriple> bezt;
 
     FCurve() :
             totvert(0),
-            array_index(0) {}
+            array_index(0),
+            extend(Extend_Constant) {}
+};
+
+/** DNA bDeformGroup - vertex group name. */
+struct bDeformGroup final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    std::shared_ptr<ElemBase> prev WARN;
+    char name[64] WARN;
+
+    bDeformGroup() {
+        name[0] = '\0';
+    }
+};
+
+/** DNA KeyBlock - one shape key. */
+struct KeyBlock final : ElemBase {
+    std::shared_ptr<ElemBase> next WARN;
+    float curval WARN;
+    int totelem WARN;
+    char name[64];
+    /** Mesh keys: totelem XYZ floats from DNA *data. */
+    vector<float> co;
+
+    KeyBlock() :
+            curval(0.f),
+            totelem(0) {
+        memset(name, 0, sizeof name);
+    }
+};
+
+/** DNA Key - shape key container on Mesh.key. */
+struct Key final : ElemBase {
+    enum Type {
+        Type_Normal = 0,
+        Type_Relative = 1
+    };
+
+    ID id;
+    std::shared_ptr<struct AnimData> adt WARN;
+    ListBase block; // KeyBlock
+    int elemsize WARN;
+    int totkey WARN;
+    short type WARN;
+
+    Key() :
+            elemsize(0),
+            totkey(0),
+            type(Type_Relative) {}
 };
 
 /** DNA Bone - rest pose bone in an Armature. */
@@ -1245,10 +1343,16 @@ struct NlaStrip final : ElemBase {
     std::shared_ptr<bAction> act;
     char name[64];
     float start, end;
+    float actstart WARN;
+    float actend WARN;
+    float scale WARN;
 
     NlaStrip() :
             start(0.f),
-            end(0.f) {
+            end(0.f),
+            actstart(0.f),
+            actend(0.f),
+            scale(1.f) {
         memset(name, 0, sizeof name);
     }
 };

@@ -557,6 +557,8 @@ ADD_ASSIMP_IMPORTER( COB
 ADD_ASSIMP_IMPORTER( BLEND
   AssetLib/Blender/BlenderLoader.cpp
   AssetLib/Blender/BlenderLoader.h
+  AssetLib/Blender/BlenderAnimEmit.cpp
+  AssetLib/Blender/BlenderAnimEmit.h
   AssetLib/Blender/BlenderDNA.cpp
   AssetLib/Blender/BlenderDNA.h
   AssetLib/Blender/BlenderDNA.inl

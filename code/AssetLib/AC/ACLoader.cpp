@@ -508,7 +508,6 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     needMat.begin(), needMat.end(),
                     [](const IntPair &entry) { return entry.first != 0; }));
             unsigned int *pip = node->mMeshes = new unsigned int[node->mNumMeshes];
-            auto *pip = node->mMeshes = new unsigned int[node->mNumMeshes];
             unsigned int mat = 0;
             const size_t oldm = meshes.size();
             for (auto cit = needMat.begin(), cend = needMat.end(); cit != cend; ++cit, ++mat) {

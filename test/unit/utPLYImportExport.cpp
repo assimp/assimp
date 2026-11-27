@@ -304,6 +304,44 @@ TEST_F(utPLYImportExport, parseInvalidFaceTexcoordCount) {
     EXPECT_EQ(nullptr, scene);
 }
 
+TEST_F(utPLYImportExport, rejectFaceVertexIndexOutOfRange) {
+    static const char data[] = "ply\n"
+                               "format ascii 1.0\n"
+                               "element vertex 3\n"
+                               "property float x\n"
+                               "property float y\n"
+                               "property float z\n"
+                               "element face 1\n"
+                               "property list uchar int vertex_indices\n"
+                               "end_header\n"
+                               "0 0 0\n"
+                               "1 0 0\n"
+                               "0 1 0\n"
+                               "3 0 1 3\n";
+
+    Assimp::Importer importer;
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(data, sizeof(data) - 1, 0, "ply"));
+}
+
+TEST_F(utPLYImportExport, rejectTriStripVertexIndexOutOfRange) {
+    static const char data[] = "ply\n"
+                               "format ascii 1.0\n"
+                               "element vertex 3\n"
+                               "property float x\n"
+                               "property float y\n"
+                               "property float z\n"
+                               "element tristrips 1\n"
+                               "property list int int vertex_indices\n"
+                               "end_header\n"
+                               "0 0 0\n"
+                               "1 0 0\n"
+                               "0 1 0\n"
+                               "4 0 1 2 3\n";
+
+    Assimp::Importer importer;
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(data, sizeof(data) - 1, 0, "ply"));
+}
+
 TEST_F(utPLYImportExport, parseQuadFaceTexcoordCount) {
     const char data[] = "ply\n"
                         "format ascii 1.0\n"

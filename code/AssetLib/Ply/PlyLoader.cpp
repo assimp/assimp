@@ -613,7 +613,11 @@ namespace Assimp {
                             GetProperty(instElement->alProperties, iProperty).avList.begin();
 
                     for (unsigned int a = 0; a < iNum; ++a, ++p) {
-                        mGeneratedMesh->mFaces[pos].mIndices[a] = PropertyInstance::ConvertTo<unsigned int>(*p, eType);
+                        const unsigned int index = PropertyInstance::ConvertTo<unsigned int>(*p, eType);
+                        if (index >= mGeneratedMesh->mNumVertices) {
+                            throw DeadlyImportError("Invalid .ply file: Vertex index is out of range.");
+                        }
+                        mGeneratedMesh->mFaces[pos].mIndices[a] = index;
                     }
                 }
 
@@ -676,6 +680,9 @@ namespace Assimp {
                 aiTable[0] = aiTable[1] = -1;
                 flip = false;
                 continue;
+            }
+            if (p < 0 || static_cast<unsigned int>(p) >= mGeneratedMesh->mNumVertices) {
+                throw DeadlyImportError("Invalid .ply file: Vertex index is out of range.");
             }
             
             if (-1 == aiTable[0]) {

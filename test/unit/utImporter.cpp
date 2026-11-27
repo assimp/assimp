@@ -374,6 +374,46 @@ struct ExtensionTestCase {
 
 using ExtensionTest = ::testing::TestWithParam<ExtensionTestCase>;
 
+namespace {
+const char kGoodObj[] = "v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n";
+const char kNotAModel[] = "\x01\x02 this is not a model file";
+const char kBadObj[] = "v 0 0 0\nf 1 2 9\n"; // the OBJ loader throws: face index out of range
+} // namespace
+
+TEST_F(ImporterTest, successfulReadAfterFailedReadHasNoError) {
+    // No reader for this buffer
+    EXPECT_EQ(nullptr, pImp->ReadFileFromMemory(kNotAModel, sizeof(kNotAModel) - 1, 0));
+    EXPECT_STRNE("", pImp->GetErrorString());
+
+    EXPECT_NE(nullptr, pImp->ReadFileFromMemory(kGoodObj, sizeof(kGoodObj) - 1, 0, "obj"));
+    EXPECT_STREQ("", pImp->GetErrorString());
+    EXPECT_EQ(nullptr, pImp->GetException());
+
+    // The loader throws
+    EXPECT_EQ(nullptr, pImp->ReadFileFromMemory(kBadObj, sizeof(kBadObj) - 1, 0, "obj"));
+    EXPECT_STRNE("", pImp->GetErrorString());
+    EXPECT_NE(nullptr, pImp->GetException());
+
+    EXPECT_NE(nullptr, pImp->ReadFileFromMemory(kGoodObj, sizeof(kGoodObj) - 1, 0, "obj"));
+    EXPECT_STREQ("", pImp->GetErrorString());
+    EXPECT_EQ(nullptr, pImp->GetException());
+}
+
+TEST_F(ImporterTest, rejectedReadFromMemoryDeletesPreviousResult) {
+    ASSERT_NE(nullptr, pImp->ReadFileFromMemory(kGoodObj, sizeof(kGoodObj) - 1, 0, "obj"));
+
+    // An empty buffer is rejected; the previous scene must not be returned by GetScene()
+    EXPECT_EQ(nullptr, pImp->ReadFileFromMemory(kGoodObj, 0, 0, "obj"));
+    EXPECT_EQ(nullptr, pImp->GetScene());
+    EXPECT_STRNE("", pImp->GetErrorString());
+
+    // Nor the exception of a previous failed read
+    EXPECT_EQ(nullptr, pImp->ReadFileFromMemory(kBadObj, sizeof(kBadObj) - 1, 0, "obj"));
+    ASSERT_NE(nullptr, pImp->GetException());
+    EXPECT_EQ(nullptr, pImp->ReadFileFromMemory(kGoodObj, 0, 0, "obj"));
+    EXPECT_EQ(nullptr, pImp->GetException());
+}
+
 TEST_P(ExtensionTest, testGetAndHasExtension) {
     const ExtensionTestCase& testCase = GetParam();
     EXPECT_EQ(testCase.getExtensionResult, BaseImporter::GetExtension(testCase.filename));

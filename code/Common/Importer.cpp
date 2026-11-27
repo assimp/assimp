@@ -491,6 +491,8 @@ const aiScene* Importer::ReadFileFromMemory(const void* pBuffer, size_t pLength,
             pHint = "";
         }
         if (!pBuffer || !pLength || strlen(pHint) > MaxLenHint ) {
+            // The previous scene is deleted by every read, also by one that is rejected here
+            FreeScene();
             pimpl->mErrorString = "Invalid parameters passed to ReadFileFromMemory()";
             return nullptr;
         }
@@ -604,13 +606,12 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags) {
     try
 #endif // ! ASSIMP_CATCH_GLOBAL_EXCEPTIONS
     {
-        // Check whether this Importer instance has already loaded
-        // a scene. In this case we need to delete the old one
-        if (pimpl->mScene)  {
-
+        // Delete the result of the previous read: its scene if there is one, and the
+        // error string and exception of a failed read, so they do not leak into this one
+        if (pimpl->mScene) {
             ASSIMP_LOG_DEBUG("(Deleting previous scene)");
-            FreeScene();
         }
+        FreeScene();
 
         // First check if the file is accessible at all
         if( !pimpl->mIOHandler->Exists( pFile)) {

@@ -127,7 +127,7 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_d
             }
         }
         if (curgod) {
-            ASSIMP_LOG_WARN("Couldn't find a handler for modifier: ", dat.name);
+            ASSIMP_LOG_DEBUG("Couldn't find a handler for modifier: ", dat.name);
         }
     }
 

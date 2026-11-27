@@ -1254,6 +1254,14 @@ void ColladaLoader::CreateAnimation(aiScene *pScene, const ColladaParser &pParse
                 throw DeadlyImportError("Time count / value count mismatch in animation channel \"", e.mChannel->mTarget, "\".");
             }
 
+            // The value accessor feeds a fixed 16-element key buffer and is copied
+            // into aiMatrix4x4-sized Transform::f starting at mSubElement. Both are 16
+            // floats, so a crafted <accessor> whose size (or sub-element offset) exceeds
+            // that range would overflow those buffers in the loops below.
+            if (e.mValueAccessor->mSize > 16 || e.mSubElement + e.mValueAccessor->mSize > 16) {
+                throw DeadlyImportError("Invalid value accessor size in animation channel \"", e.mChannel->mTarget, "\".");
+            }
+
             if (e.mTimeAccessor->mCount > 0) {
                 // find bounding times
                 startTime = std::min(startTime, ReadFloat(*e.mTimeAccessor, *e.mTimeData, 0, 0));

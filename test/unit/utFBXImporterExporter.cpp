@@ -64,6 +64,45 @@ TEST_F(utFBXImporterExporter, importXFromFileTest) {
     EXPECT_TRUE(importerTest());
 }
 
+TEST_F(utFBXImporterExporter, importEmbeddedTextureNumericUV) {
+    for (const char *variant : { "integer", "float", "double", "override" }) {
+        SCOPED_TRACE(variant);
+        const std::string path = std::string(ASSIMP_TEST_MODELS_DIR) + "/FBX/embedded_" + variant + "_uv.fbx";
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(path, aiProcess_ValidateDataStructure);
+        ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+        ASSERT_EQ(1u, scene->mNumMeshes);
+        ASSERT_EQ(1u, scene->mNumMaterials);
+        ASSERT_EQ(1u, scene->mNumTextures);
+        ASSERT_EQ(21u, scene->mTextures[0]->mWidth);
+        EXPECT_EQ(0u, scene->mTextures[0]->mHeight);
+        ASSERT_NE(nullptr, scene->mTextures[0]->pcData);
+        const auto *pixel = reinterpret_cast<const unsigned char *>(scene->mTextures[0]->pcData);
+        EXPECT_EQ(255u, pixel[20]);
+        EXPECT_STREQ("tga", scene->mTextures[0]->achFormatHint);
+        const aiMaterial *material = scene->mMaterials[0];
+        aiString texture;
+        ASSERT_EQ(AI_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &texture));
+        EXPECT_EQ(scene->mTextures[0], scene->GetEmbeddedTexture(texture.C_Str()));
+        aiUVTransform uv;
+        ASSERT_EQ(AI_SUCCESS, material->Get(AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE, 0), uv));
+        const bool overridden = std::string(variant) == "override";
+        EXPECT_FLOAT_EQ(overridden ? 6.f : -2.f, uv.mTranslation.x);
+        EXPECT_FLOAT_EQ(overridden ? 7.f : 3.f, uv.mTranslation.y);
+        EXPECT_FLOAT_EQ(overridden ? 8.f : 4.f, uv.mScaling.x);
+        EXPECT_FLOAT_EQ(overridden ? 9.f : 5.f, uv.mScaling.y);
+    }
+}
+
+TEST_F(utFBXImporterExporter, rejectNonNumericTextureUV) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/embedded_invalid_uv.fbx", 0);
+    ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+    ASSERT_EQ(1u, scene->mNumMaterials);
+    EXPECT_EQ(0u, scene->mNumTextures);
+    EXPECT_EQ(0u, scene->mMaterials[0]->GetTextureCount(aiTextureType_DIFFUSE));
+}
+
 TEST_F(utFBXImporterExporter, importBareBoxWithoutColorsAndTextureCoords) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/box.fbx", aiProcess_ValidateDataStructure);
@@ -460,4 +499,52 @@ TEST_F(utFBXImporterExporter, importSkeletonTest) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/FBX/animation_with_skeleton.fbx", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
     ASSERT_TRUE(scene->mRootNode);
+}
+
+namespace {
+
+std::string fbxTriangleWithLastIndex(const char *lastIndex) {
+    return std::string(
+            "; FBX 7.4.0 project file\n"
+            "FBXHeaderExtension:  {\n"
+            "\tFBXHeaderVersion: 1003\n"
+            "\tFBXVersion: 7400\n"
+            "}\n"
+            "Objects:  {\n"
+            "\tGeometry: 10, \"Geometry::\", \"Mesh\" {\n"
+            "\t\tVertices: *9 {\n"
+            "\t\t\ta: 0,0,0,1,0,0,0,1,0\n"
+            "\t\t}\n"
+            "\t\tPolygonVertexIndex: *3 {\n"
+            "\t\t\ta: 0,1,") +
+           lastIndex +
+           "\n"
+           "\t\t}\n"
+           "\t}\n"
+           "\tModel: 20, \"Model::triangle\", \"Mesh\" {\n"
+           "\t}\n"
+           "}\n"
+           "Connections:  {\n"
+           "\tC: \"OO\",10,20\n"
+           "\tC: \"OO\",20,0\n"
+           "}\n";
+}
+
+} // namespace
+
+TEST_F(utFBXImporterExporter, importPolygonVertexIndexIntMin) {
+    // The last index of a polygon is stored as -(vertex + 1); decoding INT_MIN
+    // must not overflow, and it is out of range for the mesh.
+    Assimp::Importer importer;
+    const std::string valid = fbxTriangleWithLastIndex("-3");
+    const aiScene *scene = importer.ReadFileFromMemory(valid.data(), valid.size(), aiProcess_ValidateDataStructure, "fbx");
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    EXPECT_EQ(1u, scene->mMeshes[0]->mNumFaces);
+
+    // The geometry is rejected as out of range, so the triangle mesh is not imported.
+    const std::string intMin = fbxTriangleWithLastIndex("-2147483648");
+    scene = importer.ReadFileFromMemory(intMin.data(), intMin.size(), aiProcess_ValidateDataStructure, "fbx");
+    ASSERT_NE(nullptr, scene);
+    EXPECT_EQ(0u, scene->mNumMeshes);
 }

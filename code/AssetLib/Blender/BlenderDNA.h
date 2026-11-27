@@ -189,15 +189,14 @@ struct Field {
 enum ErrorPolicy {
     /** Substitute default value and ignore */
     ErrorPolicy_Igno,
-    /** Substitute default value and write to log */
+    /** Substitute default value; no log (DNA version gaps are routine, not Warn spam). */
     ErrorPolicy_Warn,
     /** Substitute a massive error message and crash the whole matrix. Its time for another zion */
     ErrorPolicy_Fail
 };
 
-#ifdef ASSIMP_BUILD_BLENDER_DEBUG
-#   define ErrorPolicy_Igno ErrorPolicy_Warn
-#endif
+// Do NOT remap Igno->Warn under ASSIMP_BUILD_DEBUG: that flooded logs with
+// thousands of expected missing-field lines (unlike other importers).
 
 // -------------------------------------------------------------------------------
 /** Represents a data structure in a BLEND file. A Structure defines n fields
@@ -393,7 +392,9 @@ template<>
 struct Structure::_defaultInitializer<ErrorPolicy_Warn> {
     template <typename T>
     void operator()(T &out, const char *reason = "<add reason>") {
-        ASSIMP_LOG_WARN(reason);
+        // Silent like Igno for volume: missing fields across Blender versions are
+        // expected. Real issues use explicit ASSIMP_LOG_WARN/ERROR elsewhere.
+        (void)reason;
 
         // ... and let the show go on
         _defaultInitializer<0 /*ErrorPolicy_Igno*/>()(out);

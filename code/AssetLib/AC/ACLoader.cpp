@@ -475,10 +475,6 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     }
                 }
 
-                if (!needMat[idx].first) {
-                    ++node->mNumMeshes;
-                }
-
                 switch (it->GetType()) {
                 case Surface::ClosedLine: // closed line
                     needMat[idx].first += static_cast<unsigned int>(it->entries.size());

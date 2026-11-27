@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TestIOStream.h"
 #include "Tools/TestTools.h"
 #include "UnitTestFileGenerator.h"
+#include <assimp/MemoryIOWrapper.h>
 
 class IOStreamBufferTest : public ::testing::Test {
     // empty
@@ -143,6 +144,36 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
     EXPECT_TRUE(myBuffer.open(&myStream));
     EXPECT_EQ(numBlocks, myBuffer.getNumBlocks() );
     EXPECT_TRUE(myBuffer.close() );
+}
+
+TEST_F(IOStreamBufferTest, getNextBlockReturnsOnlyReadData) {
+    // 30 bytes read through a 26-byte cache: a full block, then the 4 bytes that are left
+    const char text[] = "abcdefghijklmnopqrstuvwxyz0123";
+    MemoryIOStream stream(reinterpret_cast<const uint8_t *>(text), sizeof(text) - 1);
+    IOStreamBuffer<char> buffer(26);
+    ASSERT_TRUE(buffer.open(&stream));
+
+    std::vector<char> block;
+    ASSERT_TRUE(buffer.getNextBlock(block));
+    EXPECT_EQ(std::string(text, 26), std::string(block.begin(), block.end()));
+    ASSERT_TRUE(buffer.getNextBlock(block));
+    EXPECT_EQ(std::string("0123"), std::string(block.begin(), block.end()));
+    EXPECT_FALSE(buffer.getNextBlock(block));
+}
+
+TEST_F(IOStreamBufferTest, getNextBlockAfterLineInSmallFile) {
+    // The file is smaller than the default cache: the block after the first line holds
+    // the rest of the file and nothing more
+    const char text[] = "header\nbody";
+    MemoryIOStream stream(reinterpret_cast<const uint8_t *>(text), sizeof(text) - 1);
+    IOStreamBuffer<char> buffer;
+    ASSERT_TRUE(buffer.open(&stream));
+
+    std::vector<char> line;
+    ASSERT_TRUE(buffer.getNextLine(line));
+    std::vector<char> block;
+    ASSERT_TRUE(buffer.getNextBlock(block));
+    EXPECT_EQ(std::string("body"), std::string(block.begin(), block.end()));
 }
 
 TEST_F( IOStreamBufferTest, accessBlockIndexTest ) {

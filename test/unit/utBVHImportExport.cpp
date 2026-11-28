@@ -43,6 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+
+#include <string>
 
 using namespace Assimp;
 
@@ -71,4 +74,36 @@ TEST_F(utBVHImportExport, importBoxingToes) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/BVH/Boxing_Toes.bvh", aiProcess_ValidateDataStructure);
     ASSERT_NE(nullptr, scene);
+}
+
+TEST_F(utBVHImportExport, importSeveralFilesWithOneImporter) {
+    static const std::string hierarchy =
+            "HIERARCHY\n"
+            "ROOT Hips\n{\n"
+            "  OFFSET 0 0 0\n"
+            "  CHANNELS 6 Xposition Yposition Zposition Zrotation Xrotation Yrotation\n"
+            "  JOINT Spine\n  {\n"
+            "    OFFSET 0 5 0\n"
+            "    CHANNELS 3 Zrotation Xrotation Yrotation\n"
+            "    End Site\n    {\n      OFFSET 0 5 0\n    }\n"
+            "  }\n"
+            "}\n"
+            "MOTION\nFrames: 2\nFrame Time: 0.0333\n";
+    const std::string file = hierarchy + "0 0 0 0 0 0 0 0 0\n1 0 0 10 0 0 5 0 0\n";
+    // The same motion, followed by values that the loader does not need.
+    const std::string longFile = file + "2 2 2 2 2 2 2 2 2\n3 3 3 3 3 3 3 3 3\n4 4 4 4 4 4 4 4 4\n5 5 5 5 5 5 5 5 5\n";
+
+    Assimp::Importer importer;
+    const std::string *files[] = { &file, &longFile, &file };
+    for (const std::string *current : files) {
+        const aiScene *scene = importer.ReadFileFromMemory(current->data(), current->size(), 0, "bvh");
+        ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+        ASSERT_EQ(1u, scene->mNumAnimations);
+        const aiAnimation *animation = scene->mAnimations[0];
+        ASSERT_EQ(2u, animation->mNumChannels);
+        EXPECT_STREQ("Hips", animation->mChannels[0]->mNodeName.C_Str());
+        EXPECT_STREQ("Spine", animation->mChannels[1]->mNodeName.C_Str());
+        ASSERT_EQ(2u, animation->mChannels[0]->mNumPositionKeys);
+        EXPECT_EQ(aiVector3D(1, 0, 0), animation->mChannels[0]->mPositionKeys[1].mValue);
+    }
 }

@@ -127,40 +127,46 @@ bool X3DXmlHelper::getInt32ArrayAttribute(XmlNode &node, const char *attributeNa
     return false;
 }
 
+// An MFString in the XML encoding (ISO/IEC 19776-1, 5.15) is zero or more strings, each in double
+// quotes, separated by whitespace (commas count as whitespace between values): url='"a.png"' and
+// url='"a.png" "https://example.com/a.png"'. Inside a string, \" is a double quote and \\ a backslash;
+// any other character, whitespace included, is taken as it is. A word outside quotes is read as a
+// string of its own, as before, since files written that way (url="a.png") are common.
 bool X3DXmlHelper::getStringListAttribute(XmlNode &node, const char *attributeName, std::list<std::string> &stringList) {
     std::string val;
-    if (XmlParser::getStdStrAttribute(node, attributeName, val)) {
-        std::vector<std::string> values;
-        tokenize<std::string>(val, values, " ");
-        auto it = values.begin();
-        std::string currentConcat = "";
-        bool inQuotes = false;
-        while (it != values.end()) {
-            auto s = *it++;
-            if (!s.empty()) {
-                if (inQuotes) {
-                    if (*(s.rbegin()) == '"') {
-                        stringList.push_back(currentConcat + s.substr(0, s.length() - 1));
-                        currentConcat = "";
-                        inQuotes = false;
-                    } else {
-                        currentConcat += " " + s;
-                    }
-                } else {
-                    if (s[0] == '"') {
-                        currentConcat = s.substr(1);
-                        inQuotes = true;
-                    } else {
-                        stringList.push_back(s);
-                    }
-                }
-            } else if (!inQuotes)
-                Throw_ConvertFail_Str2ArrI(node.name(), attributeName);
-        }
-        if (inQuotes) Throw_ConvertFail_Str2ArrI(node.name(), attributeName);
-        return true;
+    if (!XmlParser::getStdStrAttribute(node, attributeName, val)) {
+        return false;
     }
-    return false;
+    const auto isWhitespace = [](char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; };
+    size_t pos = 0;
+    while (pos < val.size()) {
+        if (isWhitespace(val[pos]) || val[pos] == ',') {
+            ++pos;
+        } else if (val[pos] == '"') {
+            std::string str;
+            bool closed = false;
+            for (++pos; pos < val.size(); ++pos) {
+                if (val[pos] == '\\' && pos + 1 < val.size() && (val[pos + 1] == '"' || val[pos + 1] == '\\')) {
+                    str += val[++pos];
+                } else if (val[pos] == '"') {
+                    closed = true;
+                    ++pos;
+                    break;
+                } else {
+                    str += val[pos];
+                }
+            }
+            if (!closed) Throw_ConvertFail_Str2ArrS(node.name(), attributeName);
+            stringList.push_back(str);
+        } else {
+            const size_t start = pos;
+            while (pos < val.size() && !isWhitespace(val[pos])) {
+                ++pos;
+            }
+            stringList.push_back(val.substr(start, pos - start));
+        }
+    }
+    return true;
 }
 
 bool X3DXmlHelper::getStringArrayAttribute(XmlNode &node, const char *attributeName, std::vector<std::string> &stringArray) {

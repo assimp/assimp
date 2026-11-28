@@ -85,7 +85,8 @@ void X3DImporter::readInline(XmlNode &node) {
         // at this place new group mode created and made current, so we can name it.
         if (!def.empty()) mNodeElementCur->ID = def;
 
-        if (load && !url.empty()) {
+        // An empty first string (url='""') names no file, so there is nothing to load.
+        if (load && !url.empty() && !url.front().empty()) {
             std::string full_path = mpIOHandler->CurrentDirectory() + url.front();
 
             //full_path = std::regex_replace(full_path, pattern_parentDir, "$1");

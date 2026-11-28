@@ -58,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
+#include <algorithm>
 #include <memory>
 
 namespace Assimp {
@@ -474,10 +475,6 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     }
                 }
 
-                if (!needMat[idx].first) {
-                    ++node->mNumMeshes;
-                }
-
                 switch (it->GetType()) {
                 case Surface::ClosedLine: // closed line
                     needMat[idx].first += static_cast<unsigned int>(it->entries.size());
@@ -507,7 +504,10 @@ aiNode *AC3DImporter::ConvertObjectSection(Object &object,
                     needMat[idx].second += static_cast<unsigned int>(it->entries.size()) * doubleSidedFactor;
                 };
             }
-            auto *pip = node->mMeshes = new unsigned int[node->mNumMeshes];
+            node->mNumMeshes = static_cast<unsigned int>(std::count_if(
+                    needMat.begin(), needMat.end(),
+                    [](const IntPair &entry) { return entry.first != 0; }));
+            unsigned int *pip = node->mMeshes = new unsigned int[node->mNumMeshes];
             unsigned int mat = 0;
             const size_t oldm = meshes.size();
             for (auto cit = needMat.begin(), cend = needMat.end(); cit != cend; ++cit, ++mat) {

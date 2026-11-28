@@ -1353,3 +1353,88 @@ TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
         }
     }
 }
+
+TEST_F(utglTF2ImportExport, exportKeepsMeshIndicesAlignedForPointClouds) {
+    // ExportMeshes() used to skip meshes without faces, but nodes refer to the
+    // glTF meshes by the aiScene mesh index. A point cloud therefore shifted
+    // every later index, and writing a node dereferenced an empty Ref.
+    Assimp::Importer importer;
+    const aiScene *imported = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/dwarf.cob", 0);
+    ASSERT_NE(nullptr, imported) << importer.GetErrorString();
+
+    aiScene *scene = nullptr;
+    aiCopyScene(imported, &scene);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(2u, scene->mNumMeshes);
+    ASSERT_EQ(1u, scene->mRootNode->mNumChildren);
+    ASSERT_EQ(1u, scene->mRootNode->mChildren[0]->mNumChildren);
+
+    // Turn the first mesh into a point cloud and keep the leaf referencing the
+    // second mesh. The exported node index must still resolve.
+    aiMesh *points = scene->mMeshes[0];
+    delete[] points->mFaces;
+    points->mFaces = nullptr;
+    points->mNumFaces = 0;
+    points->mPrimitiveTypes = aiPrimitiveType_POINT;
+
+    // Reference only the triangle, so MergeMeshes() leaves the node alone.
+    aiNode *leaf = scene->mRootNode->mChildren[0]->mChildren[0];
+    ASSERT_EQ(2u, leaf->mNumMeshes);
+    leaf->mMeshes[0] = 1;
+    leaf->mNumMeshes = 1;
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "glb2");
+    ASSERT_NE(nullptr, blob) << exporter.GetErrorString();
+
+    Assimp::Importer reimporter;
+    const aiScene *exported = reimporter.ReadFileFromMemory(
+            blob->data, blob->size, aiProcess_ValidateDataStructure, "glb");
+    ASSERT_NE(nullptr, exported) << reimporter.GetErrorString();
+    // The glTF importer only loads the mesh the node references.
+    ASSERT_EQ(1u, exported->mNumMeshes);
+    EXPECT_GT(exported->mMeshes[0]->mNumVertices, 0u);
+    EXPECT_GT(exported->mMeshes[0]->mNumFaces, 0u);
+
+    aiFreeScene(scene);
+}
+
+TEST_F(utglTF2ImportExport, exportFaceWithoutIndices) {
+    // A face without indices leaves the index array empty. Taking the address
+    // of its first element used to be undefined behavior.
+    Assimp::Importer importer;
+    const aiScene *imported = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", 0);
+    ASSERT_NE(nullptr, imported) << importer.GetErrorString();
+
+    aiScene *scene = nullptr;
+    aiCopyScene(imported, &scene);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_GE(scene->mMeshes[0]->mNumFaces, 1u);
+
+    aiFace &face = scene->mMeshes[0]->mFaces[0];
+    delete[] face.mIndices;
+    face.mIndices = nullptr;
+    face.mNumIndices = 0;
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "glb2");
+    EXPECT_NE(nullptr, blob) << exporter.GetErrorString();
+
+    aiFreeScene(scene);
+}
+
+TEST_F(utglTF2ImportExport, exportFailsForBoneWithoutNode) {
+    // Bones are linked to nodes by name. Nodes are registered under the id
+    // FindUniqueID created, so a bone name that does not resolve must fail the
+    // export instead of dereferencing an empty Ref.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/X/anim_test.x", 0);
+    ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "glb2");
+    EXPECT_EQ(nullptr, blob);
+    EXPECT_NE(std::string::npos,
+            std::string(exporter.GetErrorString()).find("no node found for bone"));
+}

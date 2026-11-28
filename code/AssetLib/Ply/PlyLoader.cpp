@@ -320,32 +320,32 @@ namespace Assimp {
         ai_assert(nullptr != pcElement);
         ai_assert(nullptr != instElement);
 
-        std::array<ai_uint, 3> aiPositions{ NotSet, NotSet, NotSet };
-        std::array<EDataType, 3> aiTypes{ EDT_Char, EDT_Char, EDT_Char };
+        std::array<ai_uint, 3> aiPositions{{ NotSet, NotSet, NotSet }};
+        std::array<EDataType, 3> aiTypes{{ EDT_Char, EDT_Char, EDT_Char }};
 
-        std::array<ai_uint, 3> aiNormal{ NotSet, NotSet, NotSet };
-        EDataType aiNormalTypes[3]{ EDT_Char, EDT_Char, EDT_Char };
+        std::array<ai_uint, 3> aiNormal{{ NotSet, NotSet, NotSet }};
+        EDataType aiNormalTypes[3]{{ EDT_Char, EDT_Char, EDT_Char }};
 
-        std::array<unsigned int, 4> aiColors{ NotSet, NotSet, NotSet, NotSet };
-        std::array<EDataType, 4> aiColorsTypes{ EDT_Char, EDT_Char, EDT_Char, EDT_Char };
+        std::array<unsigned int, 4> aiColors{{ NotSet, NotSet, NotSet, NotSet }};
+        std::array<EDataType, 4> aiColorsTypes{{ EDT_Char, EDT_Char, EDT_Char, EDT_Char }};
 
-        std::array<unsigned int, 2> aiTexcoord{ NotSet, NotSet };
-        std::array<EDataType, 2> aiTexcoordTypes{ EDT_Char, EDT_Char };
+        std::array<unsigned int, 2> aiTexcoord{{ NotSet, NotSet }};
+        std::array<EDataType, 2> aiTexcoordTypes{{ EDT_Char, EDT_Char }};
 
         // GAUSSIAN PROPERTIES
-        std::array<unsigned int, 3> aiGaussianDC{ NotSet, NotSet, NotSet };
-        std::array<PLY::EDataType, 3> aiGaussianDCTypes{ EDT_Char, EDT_Char, EDT_Char };
+        std::array<unsigned int, 3> aiGaussianDC{{ NotSet, NotSet, NotSet }};
+        std::array<PLY::EDataType, 3> aiGaussianDCTypes{{ EDT_Char, EDT_Char, EDT_Char }};
 
-        std::array<unsigned int, 45> aiGaussianRest{};
+        std::array<unsigned int, 45> aiGaussianRest;
         aiGaussianRest.fill(45, NotSet);
-        std::array<PLY::EDataType, 45> aiGaussianRestTypes{};
+        std::array<PLY::EDataType, 45> aiGaussianRestTypes;
         aiGaussianRestTypes.fill(45, EDT_Char);
 
-        std::array<unsigned int, 3> aiGaussianScale{ NotSet, NotSet, NotSet };
-        std::array<PLY::EDataType, 3> aiGaussianScaleTypes{ EDT_Char, EDT_Char, EDT_Char };
+        std::array<unsigned int, 3> aiGaussianScale{{ NotSet, NotSet, NotSet }};
+        std::array<PLY::EDataType, 3> aiGaussianScaleTypes{{ EDT_Char, EDT_Char, EDT_Char }};
 
-        std::array<unsigned int, 4> aiGaussianRot{ NotSet, NotSet, NotSet, NotSet };
-        std::array<PLY::EDataType, 4> aiGaussianRotTypes{ EDT_Char, EDT_Char, EDT_Char, EDT_Char };
+        std::array<unsigned int, 4> aiGaussianRot{{ NotSet, NotSet, NotSet, NotSet }};
+        std::array<PLY::EDataType, 4> aiGaussianRotTypes{{ EDT_Char, EDT_Char, EDT_Char, EDT_Char }};
 
         unsigned int aiGaussianOpacity = NotSet;
         PLY::EDataType aiGaussianOpacityType = EDT_Char;

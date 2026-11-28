@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "MathTest.h"
-#include <limits>
 
 using namespace Assimp;
 
@@ -49,6 +48,10 @@ protected:
     virtual void SetUp() {
         result_c = result_cpp = aiVector3D();
         temp = random_vec3(); // Generates a random 3D vector != null vector.
+    }
+
+    static ai_real RandomExactTransformOperand() {
+        return static_cast<ai_real>(static_cast<int>(RandNonZero.next()) - 50);
     }
 
     aiVector3D result_c, result_cpp, temp;
@@ -166,19 +169,55 @@ TEST_F(AssimpAPITest_aiVector3D, aiVector3RotateByQuaternionTest) {
 }
 
 TEST_F(AssimpAPITest_aiVector3D, aiTransformVecByMatrix3Test) {
-    const auto m = random_mat3();
-    aiVector3D v_c, v_cpp;
-    v_c = v_cpp = random_vec3();
-    v_cpp *= m;
-    aiTransformVecByMatrix3(&v_c, &m);
-    EXPECT_EQ(v_cpp, v_c);
+    const aiMatrix3x3 knownMatrix(1, 2, -1, -2, 3, 2, 4, -1, 2);
+    const aiVector3D knownInput(2, -3, 4);
+    const aiVector3D knownResult(-8, -5, 19);
+    aiVector3D actual = knownInput;
+    aiTransformVecByMatrix3(&actual, &knownMatrix);
+    EXPECT_EQ(knownResult, actual);
+    EXPECT_EQ(knownResult, knownMatrix * knownInput);
+
+    // Integer operands bounded by 50 keep every product and partial sum exact
+    // in both float and double. Arbitrary floats can round differently across
+    // the inline C++ operation and the separately compiled C API wrapper.
+    for (unsigned int sample = 0; sample < 32; ++sample) {
+        SCOPED_TRACE(sample);
+        const aiMatrix3x3 m(
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand());
+        const aiVector3D input(RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand());
+        aiVector3D v_c = input;
+        aiVector3D v_cpp = input;
+        v_cpp *= m;
+        aiTransformVecByMatrix3(&v_c, &m);
+        EXPECT_EQ(v_cpp, v_c);
+    }
 }
 
 TEST_F(AssimpAPITest_aiVector3D, aiTransformVecByMatrix4Test) {
-    const auto m = random_mat4();
-    aiVector3D v_c, v_cpp;
-    v_c = v_cpp = random_vec3();
-    v_cpp *= m;
-    aiTransformVecByMatrix4(&v_c, &m);
-    EXPECT_TRUE(v_cpp.Equal(v_c, std::numeric_limits<ai_real>::min()));
+    const aiMatrix4x4 knownMatrix(1, 2, -1, 5, -2, 3, 2, -7, 4, -1, 2, 11, 0, 0, 0, 1);
+    const aiVector3D knownInput(2, -3, 4);
+    const aiVector3D knownResult(-3, -12, 30);
+    aiVector3D actual = knownInput;
+    aiTransformVecByMatrix4(&actual, &knownMatrix);
+    EXPECT_EQ(knownResult, actual);
+    EXPECT_EQ(knownResult, knownMatrix * knownInput);
+
+    // The largest absolute row sum is 3 * 50 * 50 + 50 = 7550, well within
+    // float's exact integer range, including when multiply-adds are contracted.
+    for (unsigned int sample = 0; sample < 32; ++sample) {
+        SCOPED_TRACE(sample);
+        const aiMatrix4x4 m(
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand(),
+                RandNonZero.next(), RandNonZero.next(), RandNonZero.next(), RandNonZero.next());
+        const aiVector3D input(RandomExactTransformOperand(), RandomExactTransformOperand(), RandomExactTransformOperand());
+        aiVector3D v_c = input;
+        aiVector3D v_cpp = input;
+        v_cpp *= m;
+        aiTransformVecByMatrix4(&v_c, &m);
+        EXPECT_EQ(v_cpp, v_c);
+    }
 }

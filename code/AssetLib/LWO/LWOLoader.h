@@ -121,6 +121,11 @@ private:
     void LoadLWO3Surface(unsigned int size);
 
     // -------------------------------------------------------------------
+    /// Dispatches a BLOK sub-chunk of a LWO2 surface.
+    /// @param size Maximum size to be read, in bytes.
+    void LoadLWO2BlokChunk(unsigned int size);
+
+    // -------------------------------------------------------------------
     /// Loads a texture block from a LWO2 file.
     /// @param size Maximum size to be read, in bytes.
     /// @param head Header of the SUF.BLOK header

@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/TinyFormatter.h>
 #include <assimp/DefaultLogger.hpp>
 
+#include <memory>
+
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 // Define as 1 to get verbose logging.
@@ -190,17 +192,18 @@ Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream) {
                                                     " Supported versions: ", MESH_VERSION_1_8);
     }
 
-    Mesh *mesh = new Mesh();
+    // Owned until the import succeeded, so that a malformed file does not leak it.
+    auto mesh = std::make_unique<Mesh>();
     while (!serializer.AtEnd()) {
         id = serializer.ReadHeader();
         switch (id) {
             case M_MESH: {
-                serializer.ReadMesh(mesh);
+                serializer.ReadMesh(mesh.get());
                 break;
             }
         }
     }
-    return mesh;
+    return mesh.release();
 }
 
 void OgreBinarySerializer::ReadMesh(Mesh *mesh) {
@@ -355,7 +358,8 @@ void OgreBinarySerializer::ReadBoneAssignment(VertexData *dest) {
 void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
     uint16_t id = 0;
 
-    SubMesh *submesh = new SubMesh();
+    // Owned until it is added to the mesh, so that a malformed file does not leak it.
+    auto submesh = std::make_unique<SubMesh>();
     submesh->materialRef = ReadLine();
     submesh->usesSharedVertexData = Read<bool>();
 
@@ -398,7 +402,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
                         id == M_SUBMESH_TEXTURE_ALIAS)) {
             switch (id) {
                 case M_SUBMESH_OPERATION: {
-                    ReadSubMeshOperation(submesh);
+                    ReadSubMeshOperation(submesh.get());
                     break;
                 }
                 case M_SUBMESH_BONE_ASSIGNMENT: {
@@ -406,7 +410,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
                     break;
                 }
                 case M_SUBMESH_TEXTURE_ALIAS: {
-                    ReadSubMeshTextureAlias(submesh);
+                    ReadSubMeshTextureAlias(submesh.get());
                     break;
                 }
             }
@@ -421,7 +425,9 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh) {
     NormalizeBoneWeights(submesh->vertexData);
 
     submesh->index = static_cast<unsigned int>(mesh->subMeshes.size());
-    mesh->subMeshes.push_back(submesh);
+    // Release only once the vector holds the pointer, push_back can throw.
+    mesh->subMeshes.push_back(submesh.get());
+    submesh.release();
 }
 
 void OgreBinarySerializer::NormalizeBoneWeights(VertexData *vertexData) const {
@@ -552,7 +558,12 @@ void OgreBinarySerializer::ReadGeometryVertexBuffer(VertexData *dest) {
     if (dest->VertexSize(bindIndex) != vertexSize)
         throw DeadlyImportError("Vertex buffer size does not agree with vertex declaration in M_GEOMETRY_VERTEX_BUFFER");
 
-    size_t numBytes = dest->count * vertexSize;
+    // The count comes from the file: compute the size in 64-bit and check it before allocating.
+    const uint64_t vertexBytes = static_cast<uint64_t>(dest->count) * vertexSize;
+    if (vertexBytes > m_reader->GetRemainingSize()) {
+        throw DeadlyImportError("Vertex buffer of M_GEOMETRY_VERTEX_BUFFER_DATA is larger than the remaining data");
+    }
+    const auto numBytes = static_cast<size_t>(vertexBytes);
     uint8_t *vertexBuffer = ReadBytes(numBytes);
     dest->vertexBindings[bindIndex] = MemoryStreamPtr(new Assimp::MemoryIOStream(vertexBuffer, numBytes, true));
 

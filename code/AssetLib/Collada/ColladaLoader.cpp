@@ -777,6 +777,13 @@ aiMesh *ColladaLoader::CreateMesh(const ColladaParser &pParser, const Mesh *pSrc
             // which position index was responsible for this vertex? that's also the index by which
             // the controller assigns the vertex weights
             size_t orgIndex = pSrcMesh->mFacePosIndices[a];
+            // a malformed document can reference a position index that is not covered by the
+            // controller's per-vertex weight-count array, which would read past weightStartPerVertex
+            if (orgIndex >= pSrcController->mWeightCounts.size()) {
+                throw DeadlyImportError("Collada: vertex position index ", orgIndex,
+                    " is out of range for the skin controller's vertex weights (",
+                    pSrcController->mWeightCounts.size(), ").");
+            }
             // find the vertex weights for this vertex
             auto iit = weightStartPerVertex[orgIndex];
             size_t pairCount = pSrcController->mWeightCounts[orgIndex];

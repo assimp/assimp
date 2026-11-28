@@ -338,6 +338,12 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
         if (nullptr != bone->mWeights) {
             for ( unsigned int b = 0; b < bone->mNumWeights; b++ ) {
                 const aiVertexWeight& ow = bone->mWeights[ b ];
+                // Ignore weights that point outside the old vertex array. A
+                // malformed input may leave such weights behind and looking up
+                // the replacement index would read out of bounds.
+                if ( ow.mVertexId >= replaceIndex.size() ) {
+                    continue;
+                }
                 // if the vertex is a unique one, translate it
 				// filter out joined vertices by JOINED_VERTICES_MARK.
                 if ( !( replaceIndex[ ow.mVertexId ] & JOINED_VERTICES_MARK ) ) {
@@ -351,11 +357,15 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
             ASSIMP_LOG_ERROR( "X-Export: aiBone shall contain weights, but pointer to them is nullptr." );
         }
 
-        if (newWeights.size() > 0) {
-            // kill the old and replace them with the translated weights
-            delete [] bone->mWeights;
-            bone->mNumWeights = (unsigned int)newWeights.size();
-
+        // Kill the old weights and replace them with the translated ones. This
+        // must happen unconditionally: if every vertex referenced by this bone
+        // was merged into another one, newWeights is empty and the old indices
+        // are stale. Keeping them would leave weights pointing past the new
+        // vertex count, which exporters and other consumers assume to be valid.
+        delete [] bone->mWeights;
+        bone->mNumWeights = (unsigned int)newWeights.size();
+        bone->mWeights = nullptr;
+        if ( !newWeights.empty() ) {
             bone->mWeights = new aiVertexWeight[bone->mNumWeights];
             memcpy( bone->mWeights, &newWeights[0], bone->mNumWeights * sizeof( aiVertexWeight));
         }

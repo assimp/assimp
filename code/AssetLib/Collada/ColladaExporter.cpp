@@ -977,7 +977,14 @@ void ColladaExporter::WriteController(size_t pIndex) {
     std::vector<ai_uint> num_influences(mesh->mNumVertices, (ai_uint)0);
     for (size_t i = 0; i < mesh->mNumBones; ++i) {
         for (size_t j = 0; j < mesh->mBones[i]->mNumWeights; ++j) {
-            ++num_influences[mesh->mBones[i]->mWeights[j].mVertexId];
+            const unsigned int vertexId = mesh->mBones[i]->mWeights[j].mVertexId;
+            // A scene may contain weights for vertices that do not exist (for
+            // example when it was assembled by hand); never index past the
+            // vertex array because of such a weight.
+            if (vertexId >= mesh->mNumVertices) {
+                continue;
+            }
+            ++num_influences[vertexId];
         }
     }
 
@@ -1002,14 +1009,20 @@ void ColladaExporter::WriteController(size_t pIndex) {
     for (unsigned int i = 0; i < mesh->mNumBones; ++i) {
         for (unsigned j = 0; j < mesh->mBones[i]->mNumWeights; ++j) {
             unsigned int vId = mesh->mBones[i]->mWeights[j].mVertexId;
+            // skin_weights contains an entry for every weight, including the
+            // ones that are skipped here, so the index into that array has to
+            // advance even for weights of non-existing vertices.
+            const ai_uint current_weight_index = weight_index++;
+            if (vId >= mesh->mNumVertices) {
+                continue;
+            }
             for (ai_uint k = 0; k < num_influences[vId]; ++k) {
                 if (joint_weight_indices[2 * (accum_influences[vId] + k)] == -1) {
                     joint_weight_indices[2 * (accum_influences[vId] + k)] = i;
-                    joint_weight_indices[2 * (accum_influences[vId] + k) + 1] = weight_index;
+                    joint_weight_indices[2 * (accum_influences[vId] + k) + 1] = current_weight_index;
                     break;
                 }
             }
-            ++weight_index;
         }
     }
 

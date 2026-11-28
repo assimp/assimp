@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/config.h>
 #include <assimp/postprocess.h>
+#include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
@@ -181,6 +182,38 @@ TEST_F(utASEImportExport, importInvalidUVIndex) {
     const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/invalid/InvalidUVIndex.ase", aiProcess_ValidateDataStructure);
 
     EXPECT_EQ(nullptr, scene);
+}
+
+TEST_F(utASEImportExport, importSkeletonMeshBoneWeightsInRange) {
+    // This file contains no usable mesh, so the importer builds a placeholder
+    // skeleton mesh whose nodes share identical transformations. Joining the
+    // identical vertices used to leave the stale vertex ids of bones whose
+    // vertices had all been merged away, so bone weights could point past the
+    // end of the vertex array.
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/ASE/invalid/BoneWeightsOutOfRange.ase",
+            aiProcessPreset_TargetRealtime_Quality | aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+
+    for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+        const aiMesh *mesh = scene->mMeshes[m];
+        for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
+            ASSERT_NE(nullptr, mesh->mBones[b]);
+            for (unsigned int w = 0; w < mesh->mBones[b]->mNumWeights; ++w) {
+                EXPECT_LT(mesh->mBones[b]->mWeights[w].mVertexId, mesh->mNumVertices)
+                        << "mesh " << m << ", bone " << b << ", weight " << w;
+            }
+        }
+    }
+
+#if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_COLLADA_EXPORTER)
+    // Exporting such a scene used to trigger an out-of-bounds read in the
+    // COLLADA exporter.
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "collada");
+    ASSERT_NE(nullptr, blob);
+    EXPECT_NE(0u, blob->size);
+#endif
 }
 
 TEST_F(utASEImportExport, importEmptyMeshWithNonZeroMaterialRef) {

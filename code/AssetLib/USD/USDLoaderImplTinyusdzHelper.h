@@ -46,15 +46,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/BaseImporter.h>
 #include <assimp/scene.h>
 #include <assimp/types.h>
+#if defined(ASSIMP_BUILD_USD_BETA)
+#include "lightusd.hh"
+#else
 #include "tinyusdz.hh"
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
 #include "tydra/render-data.hh"
 #include <type_traits>
+
+#if !defined(ASSIMP_BUILD_USD_BETA)
+namespace lightusd = tinyusdz;
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
 
 namespace Assimp {
 
 std::string tinyusdzAnimChannelTypeFor(
+#if defined(ASSIMP_BUILD_USD_BETA)
+        lightusd::tydra::AnimationPath animChannel);
+#else
         tinyusdz::tydra::AnimationChannel::ChannelType animChannel);
-std::string tinyusdzNodeTypeFor(tinyusdz::tydra::NodeType type);
+#endif //#if defined(ASSIMP_BUILD_USD_BETA)
+std::string tinyusdzNodeTypeFor(lightusd::tydra::NodeType type);
 
 template <typename T>
 aiMatrix4x4 tinyUsdzMat4ToAiMat4(const T matIn[4][4]) {

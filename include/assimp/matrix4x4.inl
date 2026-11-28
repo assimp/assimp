@@ -60,10 +60,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
 aiMatrix4x4t<TReal>::aiMatrix4x4t() AI_NO_EXCEPT :
-        a1(1.0f), a2(), a3(), a4(),
-        b1(), b2(1.0f), b3(), b4(),
-        c1(), c2(), c3(1.0f), c4(),
-        d1(), d2(), d3(), d4(1.0f) {
+        a1(1.0f), a2(0),    a3(0),    a4(0),
+        b1(0),    b2(1.0f), b3(0),    b4(0),
+        c1(0),    c2(0),    c3(1.0f), c4(0),
+        d1(0),    d2(0),    d3(0),    d4(1.0f) {
     // empty
 }
 

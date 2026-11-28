@@ -108,17 +108,19 @@ public:
 
     /// Data type for post-processing step. More suitable container for part of material's composition.
     struct SPP_Composite {
-        SPP_Material *Material; ///< Pointer to material - part of composition.
-        std::string Formula; ///< Formula for calculating ratio of \ref Material.
+        SPP_Material *Material{nullptr}; ///< Pointer to material - part of composition.
+        std::string Formula{}; ///< Formula for calculating ratio of \ref Material.
     };
 
     /// Data type for post-processing step. More suitable container for texture.
     struct SPP_Texture {
-        std::string ID;
-        size_t Width, Height, Depth;
-        bool Tiled;
-        char FormatHint[9]; // 8 for string + 1 for terminator.
-        uint8_t *Data;
+        std::string ID{};
+        size_t Width{0};
+        size_t Height{0};
+        size_t Depth{0};
+        bool Tiled{false};
+        char FormatHint[9]{}; // 8 for string + 1 for terminator.
+        uint8_t *Data{nullptr};
     };
 
     /// Data type for post-processing step. Contain face data.

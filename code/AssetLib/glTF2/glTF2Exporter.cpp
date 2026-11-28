@@ -1180,6 +1180,7 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
 }
 
 void glTF2Exporter::ExportMeshes() {
+    typedef unsigned short IndicesShortType;
     typedef decltype(aiFace::mNumIndices) IndicesType;
 
     std::string fname = std::string(mFilename);
@@ -1311,17 +1312,31 @@ void glTF2Exporter::ExportMeshes() {
 
         /*************** Vertices indices ****************/
         if (aim->mNumFaces > 0) {
-            std::vector<IndicesType> indices;
             unsigned int nIndicesPerFace = aim->mFaces[0].mNumIndices;
-            indices.resize(aim->mNumFaces * nIndicesPerFace);
-            for (size_t i = 0; i < aim->mNumFaces; ++i) {
-                for (size_t j = 0; j < nIndicesPerFace; ++j) {
-                    indices[i * nIndicesPerFace + j] = IndicesType(aim->mFaces[i].mIndices[j]);
+            unsigned int nIndices = aim->mNumFaces * nIndicesPerFace;
+            if (aim->mNumVertices <= std::numeric_limits<unsigned short>::max()) {
+                std::vector<IndicesShortType> indices;
+                indices.resize(nIndices);
+                for (size_t i = 0; i < aim->mNumFaces; ++i) {
+                    for (size_t j = 0; j < nIndicesPerFace; ++j) {
+                        indices[i * nIndicesPerFace + j] = IndicesShortType(aim->mFaces[i].mIndices[j]);
+                    }
                 }
-            }
 
-            p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR,
-                    ComponentType_UNSIGNED_INT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
+                p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR,
+                        ComponentType_UNSIGNED_SHORT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
+            } else {
+                std::vector<IndicesType> indices;
+                indices.resize(nIndices);
+                for (size_t i = 0; i < aim->mNumFaces; ++i) {
+                    for (size_t j = 0; j < nIndicesPerFace; ++j) {
+                        indices[i * nIndicesPerFace + j] = IndicesType(aim->mFaces[i].mIndices[j]);
+                    }
+                }
+
+                p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR,
+                        ComponentType_UNSIGNED_INT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
+            }
         }
 
         switch (aim->mPrimitiveTypes) {
@@ -1632,6 +1647,24 @@ void glTF2Exporter::ExportMetadata() {
     }
 }
 
+// Keyframe times are stored in ticks and glTF wants seconds, so the exporters divide
+// by the tick rate. Formats that carry no tick rate leave aiAnimation::mTicksPerSecond
+// at its default 0 (3DS and Irr never set it, X leaves it 0 when the file has no
+// AnimTicksPerSecond object), which turned every exported timestamp into inf or NaN.
+// Fall back to treating ticks as seconds, the same way the FBX exporter does.
+static float GetSafeTicksPerSecond(const aiAnimation *anim) {
+    // Compare after the narrowing cast so a double that underflows to 0.0f is caught too.
+    // isfinite() first rejects NaN and the infinities; <= 0 then rejects both zeroes AND
+    // negatives, which are finite and non-zero and would otherwise turn positive source
+    // key times into negative glTF timestamps.
+    const float ticksPerSecond = static_cast<float>(anim->mTicksPerSecond);
+    if (!std::isfinite(ticksPerSecond) || ticksPerSecond <= 0.0f) {
+        return 1.0f;
+    }
+
+    return ticksPerSecond;
+}
+
 inline Ref<Accessor> GetSamplerInputRef(Asset &asset, std::string &animId, Ref<Buffer> &buffer, std::vector<ai_real> &times) {
     return ExportData(asset, animId, buffer, (unsigned int)times.size(), &times[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
 }
@@ -1708,9 +1741,7 @@ void glTF2Exporter::ExportAnimations() {
 
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation *anim = mScene->mAnimations[i];
-        // A zero ticks-per-second rate means "not specified" - treat key
-        // times as seconds instead of dividing by zero.
-        const float ticksPerSecond = anim->mTicksPerSecond != 0.0 ? static_cast<float>(anim->mTicksPerSecond) : 1.0f;
+        const float ticksPerSecond = GetSafeTicksPerSecond(anim);
 
         std::string nameAnim = "anim";
         if (anim->mName.length > 0) {

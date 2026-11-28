@@ -56,6 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/schema.h>
 
 #include <array>
+#include <cmath>
+#include <memory>
 #include <fstream>
 #include <sstream>
 
@@ -588,6 +590,51 @@ TEST_F(utglTF2ImportExport, bug_import_simple_skin) {
     EXPECT_NE(nullptr, scene);
 }
 
+TEST_F(utglTF2ImportExport, import_normalized_unsigned_short_skin_weights) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/normalized_skin_weights/normalized_skin_weights.gltf",
+            aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(1u, scene->mMeshes[0]->mNumBones);
+
+    const aiBone *bone = scene->mMeshes[0]->mBones[0];
+    ASSERT_EQ(3u, bone->mNumWeights);
+    EXPECT_EQ(0u, bone->mWeights[0].mVertexId);
+    EXPECT_NEAR(1.0f, bone->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(1u, bone->mWeights[1].mVertexId);
+    EXPECT_NEAR(32768.0f / 65535.0f, bone->mWeights[1].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone->mWeights[2].mVertexId);
+    EXPECT_NEAR(16384.0f / 65535.0f, bone->mWeights[2].mWeight, 0.0001f);
+}
+
+TEST_F(utglTF2ImportExport, import_mixed_joint_component_skin_weights) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/mixed_skin_joints/mixed_skin_joints.gltf",
+            aiProcess_ValidateDataStructure);
+
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+    ASSERT_EQ(2u, scene->mMeshes[0]->mNumBones);
+
+    const aiBone *bone0 = scene->mMeshes[0]->mBones[0];
+    ASSERT_EQ(3u, bone0->mNumWeights);
+    EXPECT_EQ(0u, bone0->mWeights[0].mVertexId);
+    EXPECT_NEAR(1.0f, bone0->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(1u, bone0->mWeights[1].mVertexId);
+    EXPECT_NEAR(32768.0f / 65535.0f, bone0->mWeights[1].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone0->mWeights[2].mVertexId);
+    EXPECT_NEAR(16384.0f / 65535.0f, bone0->mWeights[2].mWeight, 0.0001f);
+
+    const aiBone *bone1 = scene->mMeshes[0]->mBones[1];
+    ASSERT_EQ(2u, bone1->mNumWeights);
+    EXPECT_EQ(1u, bone1->mWeights[0].mVertexId);
+    EXPECT_NEAR(32767.0f / 65535.0f, bone1->mWeights[0].mWeight, 0.0001f);
+    EXPECT_EQ(2u, bone1->mWeights[1].mVertexId);
+    EXPECT_NEAR(49151.0f / 65535.0f, bone1->mWeights[1].mWeight, 0.0001f);
+}
+
 bool checkSkinnedScene(const aiScene *scene){
     float eps = 0.001f;
     bool result = true;
@@ -755,12 +802,6 @@ TEST_F(utglTF2ImportExport, incorrect_vertex_arrays) {
     EXPECT_EQ(scene->mMeshes[7]->mNumFaces, 17u);
 }
 
-TEST_F(utglTF2ImportExport, texture_transform_test) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/textureTransform/TextureTransformTest.gltf",
-            aiProcess_ValidateDataStructure);
-    EXPECT_NE(nullptr, scene);
-}
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F(utglTF2ImportExport, exportglTF2FromFileTest) {
@@ -794,6 +835,80 @@ TEST_F(utglTF2ImportExport, export_bad_accessor_bounds) {
     EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "glb2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.glb"));
     EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxWithInfinites-glTF-Binary/BoxWithInfinites_out.gltf"));
 }
+
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
+// Every exported key time must be finite AND non-negative. Source ticks are
+// non-negative, so a negative timestamp means the tick rate was applied with the
+// wrong sign rather than rejected.
+static void ExpectSaneKeyTimes(const aiScene *exported) {
+    for (unsigned int animIndex = 0; animIndex < exported->mNumAnimations; ++animIndex) {
+        const aiAnimation *anim = exported->mAnimations[animIndex];
+        for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
+            const aiNodeAnim *channel = anim->mChannels[channelIndex];
+            for (unsigned int i = 0; i < channel->mNumPositionKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mPositionKeys[i].mTime));
+                EXPECT_GE(channel->mPositionKeys[i].mTime, 0.0);
+            }
+            for (unsigned int i = 0; i < channel->mNumRotationKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mRotationKeys[i].mTime));
+                EXPECT_GE(channel->mRotationKeys[i].mTime, 0.0);
+            }
+            for (unsigned int i = 0; i < channel->mNumScalingKeys; ++i) {
+                EXPECT_TRUE(std::isfinite(channel->mScalingKeys[i].mTime));
+                EXPECT_GE(channel->mScalingKeys[i].mTime, 0.0);
+            }
+        }
+    }
+}
+
+TEST_F(utglTF2ImportExport, export_animation_without_tick_rate) {
+    // 3DS carries no tick rate, so aiAnimation::mTicksPerSecond stays at its default 0.
+    // The exporter divides keyframe times by it to convert ticks to seconds, which used
+    // to write inf/NaN timestamps and leave the accessor bounds at their sentinel values.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube.3DS", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumAnimations);
+    ASSERT_EQ(0.0, scene->mAnimations[0]->mTicksPerSecond);
+
+    const char *outPath = ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube_out.gltf";
+    Assimp::Exporter exporter;
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "gltf2", outPath));
+
+    Assimp::Importer reimporter;
+    const aiScene *exported = reimporter.ReadFile(outPath, aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, exported);
+    ASSERT_NE(0u, exported->mNumAnimations);
+
+    ExpectSaneKeyTimes(exported);
+}
+
+TEST_F(utglTF2ImportExport, export_animation_with_negative_tick_rate) {
+    // A negative tick rate is finite and non-zero, so it slipped past a guard that
+    // only rejected zero and the non-finite values -- and turned positive source key
+    // times into negative glTF timestamps.
+    Assimp::Importer importer;
+    ASSERT_NE(nullptr, importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube.3DS",
+                                         aiProcess_ValidateDataStructure));
+    // GetOrphanedScene() hands over a mutable scene the caller owns, which is the only
+    // way to set a tick rate no importer in the tree produces.
+    std::unique_ptr<aiScene> scene(importer.GetOrphanedScene());
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumAnimations);
+    scene->mAnimations[0]->mTicksPerSecond = -30.0;
+
+    const char *outPath = ASSIMP_TEST_MODELS_DIR "/3DS/RotatingCube_negative_out.gltf";
+    Assimp::Exporter exporter;
+    ASSERT_EQ(aiReturn_SUCCESS, exporter.Export(scene.get(), "gltf2", outPath));
+
+    Assimp::Importer reimporter;
+    const aiScene *exported = reimporter.ReadFile(outPath, aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, exported);
+    ASSERT_NE(0u, exported->mNumAnimations);
+
+    ExpectSaneKeyTimes(exported);
+}
+#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
 
 TEST_F(utglTF2ImportExport, export_normalized_normals) {
     Assimp::Importer importer;

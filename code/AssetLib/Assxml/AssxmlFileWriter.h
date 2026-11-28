@@ -52,6 +52,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+/// @brief Will dump a scene to Assxml file.
+/// @param [in] pFile       The filename for the dump.
+/// @param [in] cmd         Commands to parametrize the dump
+/// @param [in] pIOSystem   IO system to use
+/// @param [in] pScene      The scene to dump
+/// @param [in] shortened   true for shortened dump.
 void ASSIMP_API DumpSceneToAssxml(
     const char* pFile,
     const char* cmd,

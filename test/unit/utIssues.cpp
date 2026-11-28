@@ -47,6 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "TestModelFactory.h"
 
+#if !(defined(ASSIMP_BUILD_NO_IRR_IMPORTER) && defined(ASSIMP_BUILD_NO_IRRMESH_IMPORTER))
+#include "AssetLib/Irr/IRRShared.h"
+#endif
+
 using namespace Assimp;
 
 class utIssues : public ::testing::Test {};
@@ -81,3 +85,23 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT
+
+#if !(defined(ASSIMP_BUILD_NO_IRR_IMPORTER) && defined(ASSIMP_BUILD_NO_IRRMESH_IMPORTER))
+
+namespace {
+
+class IrrPropertyReader : public IrrlichtBase {
+public:
+    using FloatProperty = IrrlichtBase::FloatProperty;
+};
+
+} // namespace
+
+TEST_F(utIssues, IrrMissingFloatValue_6790) {
+    IrrPropertyReader::FloatProperty property;
+
+    EXPECT_TRUE(property.name.empty());
+    EXPECT_FLOAT_EQ(0.0f, property.value);
+}
+
+#endif // IRR or IRRMESH importer

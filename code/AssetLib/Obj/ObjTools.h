@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
+#include <string_view>
 #include <vector>
 
 namespace Assimp {
@@ -277,6 +278,139 @@ bool hasLineEnd(T it, T end) {
     }
 
     return hasLineEnd;
+}
+
+// ---------------------------------------------------------------------------
+// String view utilities for zero-copy parsing
+// ---------------------------------------------------------------------------
+
+/**
+ * @brief Trim whitespace from both ends of a string_view
+ * @param[in] sv The string_view to trim
+ * @return Trimmed string_view
+ */
+static inline std::string_view trimStringView(std::string_view sv) {
+    const std::string_view whitespace = " \t\r\n";
+    size_t start = sv.find_first_not_of(whitespace);
+    if (start == std::string_view::npos) {
+        return std::string_view();
+    }
+    size_t end = sv.find_last_not_of(whitespace);
+    return sv.substr(start, end - start + 1);
+}
+
+/**
+ * @brief Get a name from the current line as string_view. Preserve space in the middle,
+ *        but trim it at the end.
+ * @param[in]  it      set to current position
+ * @param[in]  end     set to end of scratch buffer for readout
+ * @return string_view with the name
+ */
+template <class char_t>
+inline std::string_view getNameAsStringView(char_t it, char_t end) {
+    if (isEndOfBuffer(it, end)) {
+        return std::string_view();
+    }
+
+    const char* pStart = &(*it);
+    while (!isEndOfBuffer(it, end) && !IsLineEnd(*it)) {
+        ++it;
+    }
+
+    while (it != end && IsSpace(*it)) {
+        --it;
+    }
+    // Adjust if we went past start
+    while (&(*it) < pStart) {
+        ++it;
+    }
+    return std::string_view(pStart, static_cast<size_t>(&(*it) - pStart));
+}
+
+/**
+ * @brief  Get a name from the current line as string_view. Do not preserve space
+ *         in the middle, but trim it at the end.
+ * @param  it      set to current position
+ * @param  end     set to end of scratch buffer for readout
+ * @return string_view with the name
+ */
+template <class char_t>
+inline std::string_view getNameNoSpaceAsStringView(char_t it, char_t end) {
+    if (isEndOfBuffer(it, end)) {
+        return std::string_view();
+    }
+
+    const char* pStart = &(*it);
+    while (!isEndOfBuffer(it, end) && !IsLineEnd(*it) && !IsSpaceOrNewLine(*it)) {
+        ++it;
+    }
+
+    while (isEndOfBuffer(it, end) || IsLineEnd(*it) || IsSpaceOrNewLine(*it)) {
+        if (it != end) --it;
+    }
+    ++it;
+
+    // Adjust if we went past start
+    while (&(*it) < pStart) {
+        ++it;
+    }
+    return std::string_view(pStart, static_cast<size_t>(&(*it) - pStart));
+}
+
+/**
+ * @brief Get next word from given line as string_view
+ * @param[in] it      set to current position
+ * @param[in] end     set to end of scratch buffer for readout
+ * @return string_view with the next word
+ */
+template <class char_t>
+inline std::string_view getNextWordAsStringView(char_t it, char_t end) {
+    it = getNextWord<char_t>(it, end);
+    if (isEndOfBuffer(it, end)) {
+        return std::string_view();
+    }
+    const char* pStart = &(*it);
+    while (!isEndOfBuffer(it, end) && !IsSpaceOrNewLine(*it) && !IsLineEnd(*it)) {
+        ++it;
+    }
+    return std::string_view(pStart, static_cast<size_t>(&(*it) - pStart));
+}
+
+/**
+ * @brief Get next token from given line as string_view
+ * @param[in] it      set to current position
+ * @param[in] end     set to end of scratch buffer for readout
+ * @return string_view with the next token
+ */
+template <class char_t>
+inline std::string_view getNextTokenAsStringView(char_t it, char_t end) {
+    it = getNextToken<char_t>(it, end);
+    if (isEndOfBuffer(it, end)) {
+        return std::string_view();
+    }
+    const char* pStart = &(*it);
+    while (!isEndOfBuffer(it, end) && !IsSpaceOrNewLine(*it) && !IsLineEnd(*it)) {
+        ++it;
+    }
+    return std::string_view(pStart, static_cast<size_t>(&(*it) - pStart));
+}
+
+/**
+ * @brief Get the rest of the line as string_view
+ * @param[in] it      set to current position
+ * @param[in] end     set to end of scratch buffer for readout
+ * @return string_view with the rest of the line
+ */
+template <class char_t>
+inline std::string_view getRestOfLineAsStringView(char_t it, char_t end) {
+    if (isEndOfBuffer(it, end)) {
+        return std::string_view();
+    }
+    const char* pStart = &(*it);
+    while (!isEndOfBuffer(it, end) && !IsLineEnd(*it)) {
+        ++it;
+    }
+    return std::string_view(pStart, static_cast<size_t>(&(*it) - pStart));
 }
 
 } // Namespace Assimp

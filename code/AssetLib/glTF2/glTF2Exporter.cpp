@@ -1070,6 +1070,13 @@ void ExportSkin(Asset &mAsset, const aiMesh *aimesh, Ref<Mesh> &meshRef, Ref<Buf
         // aib->mName   =====>  skinRef->jointNames
         // Find the node with id = mName.
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
+        // Nodes are registered under the id FindUniqueID created, which differs
+        // for empty or duplicate names, so a bone name may not resolve. Fail the
+        // export instead of dereferencing an empty Ref.
+        if (!nodeRef) {
+            delete[] jointsPerVertex;
+            throw DeadlyExportError("GLTF2: no node found for bone \"", aib->mName.C_Str(), "\"");
+        }
         nodeRef->jointName = nodeRef->name;
 
         unsigned int jointNamesIndex = 0;
@@ -1214,9 +1221,11 @@ void glTF2Exporter::ExportMeshes() {
 
     for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
         const aiMesh *aim = mScene->mMeshes[idx_mesh];
-        if (aim->mNumFaces == 0) {
-            continue;
-        }
+
+        // A mesh without faces (a point cloud) is exported as well: nodes refer
+        // to the glTF meshes by the aiScene mesh index, so skipping one would
+        // shift every later index. The primitive below writes indices only when
+        // the faces have some.
 
         std::string name = aim->mName.C_Str();
 
@@ -1323,7 +1332,9 @@ void glTF2Exporter::ExportMeshes() {
                     }
                 }
 
-                p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR,
+                // Faces without indices leave the index array empty: there is no
+                // element to take the address of, and nothing to export.
+                p.indices = ExportData(*mAsset, meshId, b, indices.size(), indices.data(), AttribType::SCALAR, AttribType::SCALAR,
                         ComponentType_UNSIGNED_SHORT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
             } else {
                 std::vector<IndicesType> indices;
@@ -1334,7 +1345,7 @@ void glTF2Exporter::ExportMeshes() {
                     }
                 }
 
-                p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR,
+                p.indices = ExportData(*mAsset, meshId, b, indices.size(), indices.data(), AttribType::SCALAR, AttribType::SCALAR,
                         ComponentType_UNSIGNED_INT, BufferViewTarget_ELEMENT_ARRAY_BUFFER);
             }
         }

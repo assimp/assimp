@@ -96,6 +96,11 @@ inline void Throw_ConvertFail_Str2ArrI(const std::string &nodeName, const std::s
                             "\" from string to array of integers.");
 }
 
+inline void Throw_ConvertFail_Str2ArrS(const std::string &nodeName, const std::string &pAttrValue) {
+    throw DeadlyImportError("In <" + nodeName + "> failed to convert attribute value \"" + pAttrValue +
+                            "\" from string to array of strings.");
+}
+
 inline void Throw_DEF_And_USE(const std::string &nodeName) {
     throw DeadlyImportError("\"DEF\" and \"USE\" can not be defined both in <" + nodeName + ">.");
 }

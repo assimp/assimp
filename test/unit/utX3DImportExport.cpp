@@ -43,10 +43,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/postprocess.h>
+#include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+#include <string>
+#include <utility>
+#include <vector>
+
 using namespace Assimp;
+
+// A one-triangle scene whose ImageTexture carries the given url attribute, quotes included.
+static std::string texturedTriangle(const std::string &urlAttribute) {
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+           "<X3D profile=\"Interchange\" version=\"3.3\">\n"
+           "  <Scene>\n"
+           "    <Shape>\n"
+           "      <Appearance>\n"
+           "        <Material diffuseColor=\"1 1 1\"/>\n"
+           "        <ImageTexture url=" + urlAttribute + "/>\n"
+           "      </Appearance>\n"
+           "      <IndexedFaceSet coordIndex=\"0 1 2 -1\" texCoordIndex=\"0 1 2 -1\">\n"
+           "        <Coordinate point=\"0 0 0, 1 0 0, 0 1 0\"/>\n"
+           "        <TextureCoordinate point=\"0 0, 1 0, 0 1\"/>\n"
+           "      </IndexedFaceSet>\n"
+           "    </Shape>\n"
+           "  </Scene>\n"
+           "</X3D>\n";
+}
+
+// The diffuse texture path of the scene's one mesh.
+static std::string diffuseTexture(const aiScene *scene) {
+    aiString path;
+    EXPECT_EQ(1u, scene->mNumMeshes);
+    const aiMaterial *material = scene->mMaterials[scene->mMeshes[0]->mMaterialIndex];
+    EXPECT_EQ(aiReturn_SUCCESS, material->GetTexture(aiTextureType_DIFFUSE, 0, &path));
+    return path.C_Str();
+}
 
 class utX3DImportExport : public AbstractImportExportBase {
 public:
@@ -208,3 +241,66 @@ TEST_F(utX3DImportExport, importX3DEmptyScene) {
     ASSERT_EQ(0u, scene->mNumMeshes);
     ASSERT_NE(nullptr, scene->mRootNode);
 }
+
+TEST_F(utX3DImportExport, importX3DImageTextureUrlStrings) {
+    // An MFString is zero or more strings, each in double quotes, separated by whitespace
+    // (ISO/IEC 19776-1, 5.15). ImageTexture takes the first one.
+    const std::vector<std::pair<std::string, std::string>> cases = {
+        { "'\"wood.png\"'", "wood.png" },
+        { "\"&quot;wood.png&quot;\"", "wood.png" },
+        { "'\"wood.png\" \"https://example.com/wood.png\"'", "wood.png" },
+        { "'\"wood.png\" \"b.png\" \"c.png\"'", "wood.png" },
+        { "'\"wood.png\",\"b.png\"'", "wood.png" },
+        { "'\"wood.png\"\n\"b.png\"'", "wood.png" },
+        { "'\"my  wood.png\"'", "my  wood.png" },
+        { "'\"wo\\\"od.png\"'", "wo\"od.png" },
+        { "\"wood.png\"", "wood.png" }, // unquoted: not valid X3D, but files carry it
+    };
+    for (const auto &c : cases) {
+        SCOPED_TRACE(c.first);
+        const std::string xml = texturedTriangle(c.first);
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFileFromMemory(xml.c_str(), xml.length(), aiProcess_ValidateDataStructure, "x3d");
+        if (scene == nullptr) {
+            ADD_FAILURE() << importer.GetErrorString();
+            continue;
+        }
+        EXPECT_EQ(c.second, diffuseTexture(scene));
+    }
+}
+
+TEST_F(utX3DImportExport, importX3DUnterminatedUrlString) {
+    const std::string xml = texturedTriangle("'\"wood.png'");
+    Assimp::Importer importer;
+    EXPECT_EQ(nullptr, importer.ReadFileFromMemory(xml.c_str(), xml.length(), 0, "x3d"));
+}
+
+TEST_F(utX3DImportExport, importX3DEmptyInlineUrl) {
+    // An Inline whose only url is the empty string names no file to load.
+    std::string xml = texturedTriangle("'\"wood.png\"'");
+    xml.insert(xml.find("<Scene>") + 7, "<Inline url='\"\"'/>");
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(xml.c_str(), xml.length(), aiProcess_ValidateDataStructure, "x3d");
+    ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+    EXPECT_EQ("wood.png", diffuseTexture(scene));
+}
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+TEST_F(utX3DImportExport, exportX3DImageTextureReadsBack) {
+    // The X3D exporter writes the texture as one quoted string, url='"wood.png"'.
+    const std::string xml = texturedTriangle("\"wood.png\"");
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFileFromMemory(xml.c_str(), xml.length(), aiProcess_ValidateDataStructure, "x3d");
+    ASSERT_NE(nullptr, scene);
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "x3d");
+    ASSERT_NE(nullptr, blob);
+    const std::string written(static_cast<const char *>(blob->data), blob->size);
+    EXPECT_NE(std::string::npos, written.find("url='\"wood.png\"'"));
+
+    Assimp::Importer reader;
+    const aiScene *readBack = reader.ReadFileFromMemory(blob->data, blob->size, aiProcess_ValidateDataStructure, "x3d");
+    ASSERT_NE(nullptr, readBack) << reader.GetErrorString();
+    EXPECT_EQ("wood.png", diffuseTexture(readBack));
+}
+#endif // ASSIMP_BUILD_NO_EXPORT

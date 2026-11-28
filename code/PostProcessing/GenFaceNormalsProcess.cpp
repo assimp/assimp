@@ -153,6 +153,9 @@ bool GenFaceNormalsProcess::GenMeshFaceNormals(aiMesh *pMesh) {
     if (nullptr != pMesh->mNormals) {
         if (force_) {
             delete[] pMesh->mNormals;
+            // Line/point meshes return below without new normals, so the freed pointer
+            // must not stay behind. Otherwise it gets deleted again later (heap corruption).
+            pMesh->mNormals = nullptr;
         } else {
             return false;
         }

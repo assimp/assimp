@@ -730,6 +730,15 @@ LineGeometry::LineGeometry(uint64_t id, const Element& element, const std::strin
     const Element& PointsIndex = GetRequiredElement(*sc, "PointsIndex", &element);
     ParseVectorDataArray(m_vertices, Points);
     ParseVectorDataArray(m_indices, PointsIndex);
+
+    // The end point of a line is stored as -(index + 1), see ConvertLine().
+    const size_t vertex_count = m_vertices.size();
+    for (int index : m_indices) {
+        const int absi = index < 0 ? ~index : index;
+        if (static_cast<size_t>(absi) >= vertex_count) {
+            DOMError("line point index out of range", &PointsIndex);
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

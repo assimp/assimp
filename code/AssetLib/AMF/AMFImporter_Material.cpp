@@ -72,6 +72,7 @@ void AMFImporter::ParseNode_Color(XmlNode &node) {
     const std::string &profile = node.attribute("profile").as_string();
     bool read_flag[4] = { false, false, false, false };
     AMFNodeElementBase *ne = new AMFColor(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
     AMFColor &als = *((AMFColor *)ne); // alias for convenience
     ParseHelper_Node_Enter(ne);
     for (pugi::xml_node &child : node.children()) {
@@ -98,7 +99,6 @@ void AMFImporter::ParseNode_Color(XmlNode &node) {
         }
     }
     als.Composed = false;
-    mNodeElement_List.push_back(ne); // and to node element list because its a new object in graph.
     ParseHelper_Node_Exit();
     // check that all components was defined
 	if (!(read_flag[0] && read_flag[1] && read_flag[2])) {
@@ -117,6 +117,7 @@ void AMFImporter::ParseNode_Material(XmlNode &node) {
     // create new object and assign read data
 	std::string id = node.attribute("id").as_string();
 	AMFNodeElementBase *ne = new AMFMaterial(mNodeElement_Cur);
+	mNodeElement_List.push_back(ne);
 	((AMFMaterial*)ne)->ID = id;
 
     // Check for child nodes
@@ -134,8 +135,6 @@ void AMFImporter::ParseNode_Material(XmlNode &node) {
 	} else {
 		mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
 	}
-
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
 }
 
 // <texture
@@ -168,6 +167,7 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 
     // create new texture object.
     AMFNodeElementBase *ne = new AMFTexture(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
 
 	AMFTexture& als = *((AMFTexture*)ne);// alias for convenience
 
@@ -232,7 +232,6 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
     }
 
 	mNodeElement_Cur->Child.push_back(ne);// Add element to child list of current element
-	mNodeElement_List.push_back(ne);// and to node element list because its a new object in graph.
 }
 
 // <texmap
@@ -252,6 +251,7 @@ void AMFImporter::ParseNode_Texture(XmlNode &node) {
 void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
 	// Read attributes for node <color>.
     AMFNodeElementBase *ne = new AMFTexMap(mNodeElement_Cur);
+    mNodeElement_List.push_back(ne);
     AMFTexMap &als = *((AMFTexMap *)ne); //
     std::string rtexid, gtexid, btexid, atexid;
     if (!node.empty()) {
@@ -342,8 +342,6 @@ void AMFImporter::ParseNode_TexMap(XmlNode &node, const bool pUseOldName) {
 	als.TextureID_G = gtexid;
 	als.TextureID_B = btexid;
 	als.TextureID_A = atexid;
-
-	mNodeElement_List.push_back(ne);
 }
 
 }// namespace Assimp

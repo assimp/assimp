@@ -325,7 +325,7 @@ namespace Assimp {
         std::array<EDataType, 3> aiTypes{{ EDT_Char, EDT_Char, EDT_Char }};
 
         std::array<ai_uint, 3> aiNormal{{ NotSet, NotSet, NotSet }};
-        EDataType aiNormalTypes[3]{{ EDT_Char, EDT_Char, EDT_Char }};
+        std::array<EDataType, 3> aiNormalTypes{{ EDT_Char, EDT_Char, EDT_Char };
 
         std::array<unsigned int, 4> aiColors{{ NotSet, NotSet, NotSet, NotSet }};
         std::array<EDataType, 4> aiColorsTypes{{ EDT_Char, EDT_Char, EDT_Char, EDT_Char }};
@@ -352,7 +352,8 @@ namespace Assimp {
         PLY::EDataType aiGaussianOpacityType = EDT_Char;
 
         // now check whether which normal components are available
-        unsigned int _a(0), cnt(0);
+        unsigned int _a{0};
+        unsigned int cnt{0};
         for (auto a = pcElement->alProperties.begin(); a != pcElement->alProperties.end(); ++a, ++_a) {
             if (a->bIsList) {
                 continue;

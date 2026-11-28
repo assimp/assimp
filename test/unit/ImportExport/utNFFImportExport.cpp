@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 #include "UnitTestPCH.h"
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
@@ -57,4 +58,24 @@ public:
 
 TEST_F(utNFFImportExport, importNFFFromFileTest) {
     EXPECT_TRUE(importerTest());
+}
+
+TEST_F(utNFFImportExport, importNFF2PolygonColorAfterUncoloredFace) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/NFF/MixedPolygonColors.nff", aiProcess_ValidateDataStructure);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mNumMeshes);
+
+    const aiMesh *mesh = scene->mMeshes[0];
+    ASSERT_EQ(2u, mesh->mNumFaces);
+    ASSERT_EQ(7u, mesh->mNumVertices);
+    ASSERT_NE(nullptr, mesh->mColors[0]);
+
+    // the uncolored triangle keeps the default white, the quad gets its polygon color
+    for (unsigned int i = 0; i < 3; ++i) {
+        EXPECT_EQ(aiColor4D(1.f, 1.f, 1.f, 1.f), mesh->mColors[0][i]);
+    }
+    for (unsigned int i = 3; i < 7; ++i) {
+        EXPECT_EQ(aiColor4D(1.f, 0.f, 0.f, 1.f), mesh->mColors[0][i]);
+    }
 }

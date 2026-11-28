@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_OBJEXPORTER_H_INC
 
 #include <assimp/types.h>
+#include <cmath>
 #include <sstream>
 #include <vector>
 #include <map>
@@ -119,35 +120,42 @@ private:
     std::vector<vertexData> vp;
     bool useVc;
 
+    // Orders two components. NaN is greater than every number and equivalent to NaN, so that the
+    // comparators below are strict weak orderings, which std::map requires.
+    static bool lessComponent(ai_real a, ai_real b) {
+        if (std::isnan(a)) return false;
+        if (std::isnan(b)) return true;
+        return a < b;
+    }
+
     struct vertexDataCompare {
         bool operator() ( const vertexData& a, const vertexData& b ) const {
             // position
-            if (a.vp.x < b.vp.x) return true;
-            if (a.vp.x > b.vp.x) return false;
-            if (a.vp.y < b.vp.y) return true;
-            if (a.vp.y > b.vp.y) return false;
-            if (a.vp.z < b.vp.z) return true;
-            if (a.vp.z > b.vp.z) return false;
+            if (lessComponent(a.vp.x, b.vp.x)) return true;
+            if (lessComponent(b.vp.x, a.vp.x)) return false;
+            if (lessComponent(a.vp.y, b.vp.y)) return true;
+            if (lessComponent(b.vp.y, a.vp.y)) return false;
+            if (lessComponent(a.vp.z, b.vp.z)) return true;
+            if (lessComponent(b.vp.z, a.vp.z)) return false;
 
             // color
-            if (a.vc.r < b.vc.r) return true;
-            if (a.vc.r > b.vc.r) return false;
-            if (a.vc.g < b.vc.g) return true;
-            if (a.vc.g > b.vc.g) return false;
-            if (a.vc.b < b.vc.b) return true;
-            if (a.vc.b > b.vc.b) return false;
+            if (lessComponent(a.vc.r, b.vc.r)) return true;
+            if (lessComponent(b.vc.r, a.vc.r)) return false;
+            if (lessComponent(a.vc.g, b.vc.g)) return true;
+            if (lessComponent(b.vc.g, a.vc.g)) return false;
+            if (lessComponent(a.vc.b, b.vc.b)) return true;
+            if (lessComponent(b.vc.b, a.vc.b)) return false;
             return a.index < b.index;
         }
     };
 
     struct aiVectorCompare {
         bool operator() (const aiVector3D& a, const aiVector3D& b) const {
-            if(a.x < b.x) return true;
-            if(a.x > b.x) return false;
-            if(a.y < b.y) return true;
-            if(a.y > b.y) return false;
-            if(a.z < b.z) return true;
-            return false;
+            if (lessComponent(a.x, b.x)) return true;
+            if (lessComponent(b.x, a.x)) return false;
+            if (lessComponent(a.y, b.y)) return true;
+            if (lessComponent(b.y, a.y)) return false;
+            return lessComponent(a.z, b.z);
         }
     };
 

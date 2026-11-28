@@ -338,9 +338,9 @@ namespace Assimp {
         std::array<PLY::EDataType, 3> aiGaussianDCTypes{{ EDT_Char, EDT_Char, EDT_Char }};
 
         std::array<unsigned int, 45> aiGaussianRest;
-        aiGaussianRest.fill(45, NotSet);
+        aiGaussianRest.fill(NotSet);
         std::array<PLY::EDataType, 45> aiGaussianRestTypes;
-        aiGaussianRestTypes.fill(45, EDT_Char);
+        aiGaussianRestTypes.fill(EDT_Char);
 
         std::array<unsigned int, 3> aiGaussianScale{{ NotSet, NotSet, NotSet }};
         std::array<PLY::EDataType, 3> aiGaussianScaleTypes{{ EDT_Char, EDT_Char, EDT_Char }};

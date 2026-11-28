@@ -633,8 +633,7 @@ void ColladaParser::ReadAssetInfo(XmlNode &node) {
                 try {
                     fast_atoreal_move(tUnitSizeString.data(), mUnitSize);
                 } catch (const DeadlyImportError& die) {
-                    std::string warning("Collada: Failed to parse meter parameter to real number. Exception:\n");
-                    warning.append(die.what());
+                    const std::string warning = std::string("Collada: Failed to parse meter parameter to real number. Exception:\n") + std::string(die.what());
                     ASSIMP_LOG_WARN(warning.data());
                 }
             }
@@ -1823,7 +1822,7 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
         const Accessor *acc = input.mResolved;
         if (!acc->mData) {
             acc->mData = &ResolveLibraryReference(mDataLibrary, acc->mSource);
-            const size_t dataSize = acc->mOffset + acc->mCount * acc->mStride;
+            const size_t dataSize = acc->RequiredSourceSize();
             if (dataSize > acc->mData->mValues.size()) {
                 throw DeadlyImportError("Not enough data for accessor");
             }
@@ -1851,7 +1850,7 @@ size_t ColladaParser::ReadPrimitives(XmlNode &node, Mesh &pMesh, std::vector<Inp
         const Accessor *acc = input.mResolved;
         if (!acc->mData) {
             acc->mData = &ResolveLibraryReference(mDataLibrary, acc->mSource);
-            const size_t dataSize = acc->mOffset + acc->mCount * acc->mStride;
+            const size_t dataSize = acc->RequiredSourceSize();
             if (dataSize > acc->mData->mValues.size()) {
                 throw DeadlyImportError("Not enough data for accessor");
             }

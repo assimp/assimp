@@ -1353,3 +1353,90 @@ TEST_F(utglTF2ImportExport, importAnimationInterpolationIsPreserved) {
         }
     }
 }
+
+TEST_F(utglTF2ImportExport, exportCobWithOutOfOrderNodeMeshes) {
+    // The COB importer creates a node whose mesh list is {1, 0}. MergeMeshes
+    // used to keep a reference to the node's first mesh while removing the
+    // other meshes from the asset, so the removal renumbered the list under it.
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/dwarf.cob", 0);
+    ASSERT_NE(nullptr, scene) << importer.GetErrorString();
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "glb2");
+    EXPECT_NE(nullptr, blob) << exporter.GetErrorString();
+}
+
+TEST_F(utglTF2ImportExport, exportNodeWithDuplicateMeshRefs) {
+    // A node that references the same mesh twice used to merge the mesh into
+    // itself and then lose the mesh it referenced.
+    Assimp::Importer importer;
+    const aiScene *imported = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/COB/dwarf.cob", 0);
+    ASSERT_NE(nullptr, imported) << importer.GetErrorString();
+
+    aiScene *scene = nullptr;
+    aiCopyScene(imported, &scene);
+    ASSERT_NE(nullptr, scene);
+    ASSERT_EQ(1u, scene->mRootNode->mNumChildren);
+    ASSERT_EQ(1u, scene->mRootNode->mChildren[0]->mNumChildren);
+
+    aiNode *leaf = scene->mRootNode->mChildren[0]->mChildren[0];
+    ASSERT_EQ(2u, leaf->mNumMeshes);
+    leaf->mMeshes[0] = 1;
+    leaf->mMeshes[1] = 1;
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "glb2");
+    ASSERT_NE(nullptr, blob) << exporter.GetErrorString();
+
+    Assimp::Importer reimporter;
+    const aiScene *exported = reimporter.ReadFileFromMemory(
+            blob->data, blob->size, aiProcess_ValidateDataStructure, "glb");
+    ASSERT_NE(nullptr, exported) << reimporter.GetErrorString();
+    EXPECT_EQ(1u, exported->mNumMeshes);
+
+    aiFreeScene(scene);
+}
+
+TEST_F(utglTF2ImportExport, exportRemapsMeshRefsAfterMerging) {
+    // Merging removes a mesh from the asset, which renumbers every later mesh.
+    // A node that referenced the removed mesh and a later one used to keep the
+    // later index unadjusted.
+    static const char *model =
+            R"gltf({"asset":{"version":"2.0"},"scene":0,"scenes":[{"nodes":[0,1]}],"nodes":[{"name":"Merging","mesh":0},{"name":"Later","mesh":1}],"meshes":[{"primitives":[{"attributes":{"POSITION":0}},{"attributes":{"POSITION":0}}]},{"primitives":[{"attributes":{"POSITION":0}},{"attributes":{"POSITION":0}}]}],"accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[1,1,0]}],"bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":36}],"buffers":[{"byteLength":36,"uri":"data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAA"}]})gltf";
+
+    Assimp::Importer importer;
+    const aiScene *imported = importer.ReadFileFromMemory(model, strlen(model), 0, "gltf");
+    ASSERT_NE(nullptr, imported) << importer.GetErrorString();
+    ASSERT_EQ(2u, imported->mRootNode->mNumChildren);
+
+    // The importer creates one aiMesh per primitive: {0, 1} and {2, 3}.
+    ASSERT_EQ(2u, imported->mRootNode->mChildren[0]->mNumMeshes);
+    ASSERT_EQ(2u, imported->mRootNode->mChildren[1]->mNumMeshes);
+
+    aiScene *scene = nullptr;
+    aiCopyScene(imported, &scene);
+    ASSERT_NE(nullptr, scene);
+
+    // The first node merges its meshes {0, 1} and removes mesh 1. The second
+    // node references that mesh before mesh 3, so the remap has to adjust mesh
+    // 3 after dropping mesh 1.
+    aiNode *later = scene->mRootNode->mChildren[1];
+    later->mMeshes[0] = 1;
+    later->mMeshes[1] = 3;
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "glb2");
+    ASSERT_NE(nullptr, blob) << exporter.GetErrorString();
+
+    Assimp::Importer reimporter;
+    const aiScene *exported = reimporter.ReadFileFromMemory(
+            blob->data, blob->size, aiProcess_ValidateDataStructure, "glb");
+    ASSERT_NE(nullptr, exported) << reimporter.GetErrorString();
+    // Mesh 0 keeps both primitives of the merged node, and the later node
+    // still resolves to mesh 2. The glTF importer does not load mesh 3 because
+    // no node references it.
+    EXPECT_EQ(3u, exported->mNumMeshes);
+
+    aiFreeScene(scene);
+}

@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // other headers
 #include <memory>
+#include <array>
 
 namespace Assimp {
 

@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/quaternion.h>
 #include <assimp/types.h>
+#include <assimp/metadata.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,18 +62,19 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 /**
+ * @brief Enumeration for the supported animation interpolation states.
  */
 enum aiAnimInterpolation {
-    /** */
+    /** Step-wise interpolation */
     aiAnimInterpolation_Step,
 
-    /** */
+    /** Linear interpolation */
     aiAnimInterpolation_Linear,
 
-    /** */
+    /** Spherical linear interpolation */
     aiAnimInterpolation_Spherical_Linear,
 
-    /** */
+    /** Cubic-spline interpolation*/
     aiAnimInterpolation_Cubic_Spline,
 
 /** */
@@ -82,7 +84,9 @@ enum aiAnimInterpolation {
 };
 
 // ---------------------------------------------------------------------------
-/** A time-value pair specifying a certain 3D vector for the given time. */
+/** 
+ * @brief A time-value pair specifying a certain 3D vector for the given time. 
+ */
 struct aiVectorKey {
     /** The time of this key */
     double mTime;
@@ -457,6 +461,10 @@ struct aiAnimation {
      *  The array is mNumMorphMeshChannels in size. */
     C_STRUCT aiMeshMorphAnim **mMorphMeshChannels;
 
+    /** Metadata of the animation, if any. May be nullptr.
+     *  Populated from animation.extras in glTF2 files. */
+    C_STRUCT aiMetadata *mMetaData;
+
 #ifdef __cplusplus
     aiAnimation() AI_NO_EXCEPT
             : mDuration(-1.),
@@ -466,7 +474,8 @@ struct aiAnimation {
               mNumMeshChannels(0),
               mMeshChannels(nullptr),
               mNumMorphMeshChannels(0),
-              mMorphMeshChannels(nullptr) {
+              mMorphMeshChannels(nullptr),
+              mMetaData(nullptr) {
         // empty
     }
 
@@ -493,6 +502,7 @@ struct aiAnimation {
 
             delete[] mMorphMeshChannels;
         }
+        delete mMetaData;
     }
 #endif // __cplusplus
 };

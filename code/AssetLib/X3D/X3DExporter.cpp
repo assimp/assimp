@@ -461,11 +461,11 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
     // "ImageTexture" node.
     //
     {
-        auto RepeatToAttrList = [&](const string &pAttrName, const bool pAttrValue) {
-            if (!pAttrValue) attr_list.emplace_back( pAttrName, "false" );
+        auto RepeatToAttrList = [&](const string &pAttrName, const int pAttrValue) {
+            if (pAttrValue != aiTextureMapMode_Wrap && pAttrValue != aiTextureMapMode_Mirror) attr_list.emplace_back( pAttrName, "false" );
         };
 
-        bool tvalb;
+        int mappingMode;
         aiString tstring;
 
         // url=""         MFString
@@ -477,10 +477,10 @@ void X3DExporter::Export_Material(const size_t pIdxMaterial, const size_t pTabLe
         }
 
         // repeatS="true" SFBool
-        if (material.Get(AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0), tvalb) == AI_SUCCESS) RepeatToAttrList("repeatS", tvalb);
+        if (material.Get(AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0), mappingMode) == AI_SUCCESS) RepeatToAttrList("repeatS", mappingMode);
 
         // repeatT="true" SFBool
-        if (material.Get(AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0), tvalb) == AI_SUCCESS) RepeatToAttrList("repeatT", tvalb);
+        if (material.Get(AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0), mappingMode) == AI_SUCCESS) RepeatToAttrList("repeatT", mappingMode);
 
         NodeHelper_OpenNode("ImageTexture", pTabLevel + 1, true, attr_list);
         attr_list.clear();

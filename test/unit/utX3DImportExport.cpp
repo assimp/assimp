@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 
 using namespace Assimp;
@@ -208,3 +209,41 @@ TEST_F(utX3DImportExport, importX3DEmptyScene) {
     ASSERT_EQ(0u, scene->mNumMeshes);
     ASSERT_NE(nullptr, scene->mRootNode);
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utX3DImportExport, exportX3DTextureMappingModes) {
+    Assimp::Importer importer;
+    // BoxTextured has wrapS = MIRRORED_REPEAT (aiTextureMapMode_Mirror) and wrapT = CLAMP_TO_EDGE (aiTextureMapMode_Clamp).
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", 0);
+    ASSERT_NE(nullptr, scene);
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "x3d");
+    ASSERT_NE(nullptr, blob);
+    const std::string x3d((const char *)blob->data, blob->size);
+
+    // X3D default is repeatS='true' and repeatT='true'.
+    // aiTextureMapMode_Mirror repeats, so no repeatS attribute is written.
+    // aiTextureMapMode_Clamp does not repeat, so repeatT='false' is written.
+    EXPECT_EQ(std::string::npos, x3d.find("repeatS='false'"));
+    EXPECT_NE(std::string::npos, x3d.find("repeatT='false'"));
+}
+
+TEST_F(utX3DImportExport, exportX3DWrappingTextures) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/glTF2/ClearCoat-glTF/ClearCoatTest.gltf", 0);
+    ASSERT_NE(nullptr, scene);
+
+    Assimp::Exporter exporter;
+    const aiExportDataBlob *blob = exporter.ExportToBlob(scene, "x3d");
+    ASSERT_NE(nullptr, blob);
+    const std::string x3d((const char *)blob->data, blob->size);
+
+    // Wrapping textures should repeat (X3D default true), not emit repeatS='false' or repeatT='false'.
+    EXPECT_EQ(std::string::npos, x3d.find("repeatS='false'"));
+    EXPECT_EQ(std::string::npos, x3d.find("repeatT='false'"));
+}
+
+#endif // ASSIMP_BUILD_NO_EXPORT
+

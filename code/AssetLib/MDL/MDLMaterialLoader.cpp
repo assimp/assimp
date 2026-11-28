@@ -253,6 +253,39 @@ void MDLImporter::ParseTextureColorData(const unsigned char *szData,
         unsigned int iType,
         unsigned int *piSkip,
         aiTexture *pcNew) {
+    // Reject unknown texture formats before allocating any storage. Otherwise
+    // none of the branches below matches: the pixel array stays uninitialized,
+    // *piSkip stays zero and callers such as ReplaceTextureWithColor() read
+    // uninitialized memory.
+    switch (iType) {
+    case 0: // palletized 8 bit
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+        break;
+    // Types 1 (reference to another skin), 6 (embedded DDS file) and 7
+    // (reference to an external file) carry no raw pixel data and are handled
+    // by the callers of this function. SkipSkinLump_3DGS_MDL7() still forwards
+    // them here to query the size of the color data, which is zero, so it
+    // passes pcData == bad_texel. A real read would instead produce a texture
+    // whose pixel array stays null while mWidth/mHeight are set, and
+    // ReplaceTextureWithColor() dereferences that pointer.
+    case 1:
+    case 6:
+    case 7:
+        if (bad_texel != pcNew->pcData) {
+            throw DeadlyImportError("Invalid MDL file. Texture format ", iType, " has no color data.");
+        }
+        return;
+    default:
+        throw DeadlyImportError("Invalid MDL file. Unsupported texture format ", iType);
+    }
+
     const bool do_read = bad_texel != pcNew->pcData;
 
     // allocate storage for the texture image
@@ -422,8 +455,19 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
     ai_assert(nullptr != piSkip);
     bool bNoRead = *piSkip == UINT_MAX;
 
-    // allocate a new texture object
-    aiTexture *pcNew = new aiTexture();
+    // Types 1 (reference to another skin) and 7 (reference to an external
+    // file) carry no colour data. A size-only query only needs the size, which
+    // is zero, but a real read would end up with a texture whose pixel array
+    // stays null while mWidth/mHeight are set. Reject it before allocating the
+    // texture so a failed import does not leak it.
+    if (!bNoRead && (1 == iType || 7 == iType)) {
+        throw DeadlyImportError("Invalid MDL file. Texture format ", iType, " has no color data.");
+    }
+
+    // Allocate a new texture object. It is owned by a scoped pointer until the
+    // scene takes it, so a parse error below (unsupported format, bad size)
+    // cannot leak it.
+    std::unique_ptr<aiTexture> pcNew(new aiTexture());
 
     VALIDATE_FILE_SIZE(szData + 8);
 
@@ -439,6 +483,19 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
     if (bNoRead) {
         pcNew->pcData = bad_texel;
     }
+
+    // bad_texel is a sentinel, not an allocation, and ~aiTexture() deletes
+    // pcData unconditionally. Clear it on every exit from this point on -
+    // including the throw below for an unsupported secondary skin - so the
+    // scoped owner never hands the sentinel to the destructor.
+    struct ClearBadTexel {
+        aiTexture *texture;
+        ~ClearBadTexel() {
+            if (texture->pcData == bad_texel) {
+                texture->pcData = nullptr;
+            }
+        }
+    } clear_bad_texel{pcNew.get()};
 
     // this should not occur - at least the docs say it shouldn't.
     // however, one can easily try out what MED does if you have
@@ -462,7 +519,7 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
         }
     } else {
         // parse the color data of the texture
-        ParseTextureColorData(szData, iType, piSkip, pcNew);
+        ParseTextureColorData(szData, iType, piSkip, pcNew.get());
     }
     *piSkip += sizeof(uint32_t) * 2;
 
@@ -471,20 +528,20 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char *szData,
         if (!this->pScene->mNumTextures) {
             pScene->mNumTextures = 1;
             pScene->mTextures = new aiTexture *[1];
-            pScene->mTextures[0] = pcNew;
+            pScene->mTextures[0] = pcNew.release();
         } else {
             aiTexture **pc = pScene->mTextures;
             pScene->mTextures = new aiTexture *[pScene->mNumTextures + 1];
             for (unsigned int i = 0; i < pScene->mNumTextures; ++i)
                 this->pScene->mTextures[i] = pc[i];
 
-            pScene->mTextures[pScene->mNumTextures] = pcNew;
+            pScene->mTextures[pScene->mNumTextures] = pcNew.release();
             pScene->mNumTextures++;
             delete[] pc;
         }
     } else {
+        // Clear the sentinel so the scoped pointer does not try to free it.
         pcNew->pcData = nullptr;
-        delete pcNew;
     }
     return;
 }

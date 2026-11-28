@@ -68,3 +68,17 @@ TEST_F(utHMPImportExport, rejectsUnterminatedExternalTextureName) {
     EXPECT_EQ(nullptr, scene);
     EXPECT_STREQ("Invalid MDL file. External texture path is not null-terminated.", importer.GetErrorString());
 }
+
+TEST_F(utHMPImportExport, rejectsUnsupportedTextureFormat) {
+    // The single skin of this terrain claims the unimplemented texture format
+    // 14. The pixel array used to be allocated but left uninitialized and was
+    // then scanned by ReplaceTextureWithColor(), which read uninitialized
+    // memory (oss-fuzz 495086507).
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(
+            ASSIMP_TEST_MODELS_DIR "/HMP/invalid_texture_format.hmp",
+            aiProcess_ValidateDataStructure);
+
+    EXPECT_EQ(nullptr, scene);
+    EXPECT_NE(std::string::npos, std::string(importer.GetErrorString()).find("Unsupported texture format"));
+}

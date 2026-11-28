@@ -851,6 +851,7 @@ IF ( ASSIMP_BUILD_SAMPLES )
     ADD_SUBDIRECTORY( samples/SimpleTexturedDirectx11 )
   ENDIF ()
   ADD_SUBDIRECTORY( samples/SimpleOpenGL/ )
+  ADD_SUBDIRECTORY( samples/SkeletalAnimationOpenGL/ )
 ENDIF ()
 
 IF ( ASSIMP_BUILD_TESTS )

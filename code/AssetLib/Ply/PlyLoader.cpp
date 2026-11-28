@@ -325,7 +325,7 @@ namespace Assimp {
         std::array<EDataType, 3> aiTypes{{ EDT_Char, EDT_Char, EDT_Char }};
 
         std::array<ai_uint, 3> aiNormal{{ NotSet, NotSet, NotSet }};
-        std::array<EDataType, 3> aiNormalTypes{{ EDT_Char, EDT_Char, EDT_Char };
+        std::array<EDataType, 3> aiNormalTypes{{ EDT_Char, EDT_Char, EDT_Char }};
 
         std::array<unsigned int, 4> aiColors{{ NotSet, NotSet, NotSet, NotSet }};
         std::array<EDataType, 4> aiColorsTypes{{ EDT_Char, EDT_Char, EDT_Char, EDT_Char }};

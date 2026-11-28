@@ -237,10 +237,20 @@ static void logDDLParserMessage (LogSeverity severity, const std::string &rawmsg
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::~VertexContainer() {
-    delete[] m_colors;
+    clear();
+}
 
-    for (auto &texcoords : m_textureCoords) {
-        delete[] texcoords;
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::VertexContainer::clear() {
+    m_vertices.clear();
+    m_normals.clear();
+    delete[] m_colors;
+    m_colors = nullptr;
+    m_numColors = 0;
+    for (size_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+        delete[] m_textureCoords[i];
+        m_textureCoords[i] = nullptr;
+        m_numUVComps[i] = 0;
     }
 }
 
@@ -283,6 +293,8 @@ bool OpenGEXImporter::CanRead(const std::string &file, IOSystem *pIOHandler, boo
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScene, IOSystem *pIOHandler) {
+    resetReadState();
+
     // open source file
     std::unique_ptr<IOStream> file(pIOHandler->Open(filename, "rb"));
     if (!file) {
@@ -310,6 +322,33 @@ void OpenGEXImporter::InternReadFile(const std::string &filename, aiScene *pScen
     copyMaterials(pScene);
     resolveReferences();
     createNodeTree(pScene);
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::resetReadState() {
+    // The importer instance is reused for the next file. Everything collected for an earlier file
+    // refers to its scene, which has already been released.
+    m_root = nullptr;
+    m_nodeChildMap.clear();
+    m_meshCache.clear();
+    m_mesh2refMap.clear();
+    m_material2refMap.clear();
+    m_ctx = nullptr;
+    for (MetricInfo &metric : m_metrics) {
+        metric = MetricInfo();
+    }
+    m_currentNode = nullptr;
+    m_currentVertices.clear();
+    m_currentMesh = nullptr;
+    m_currentMaterial = nullptr;
+    m_currentLight = nullptr;
+    m_currentCamera = nullptr;
+    m_tokenType = Grammar::NoneType;
+    m_materialCache.clear();
+    m_cameraCache.clear();
+    m_lightCache.clear();
+    m_nodeStack.clear();
+    m_unresolvedRefStack.clear();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -685,6 +724,8 @@ void OpenGEXImporter::handleMeshNode(ODDLParser::DDLNode *node, aiScene *pScene)
     const size_t meshidx(m_meshCache.size());
     // ownership is transferred but a reference remains in m_currentMesh
     m_meshCache.emplace_back(m_currentMesh);
+    // the vertex attributes belong to a single mesh
+    m_currentVertices.clear();
 
     Property *prop = node->getProperties();
     if (nullptr != prop) {
@@ -857,6 +898,8 @@ void OpenGEXImporter::handleVertexArrayNode(ODDLParser::DDLNode *node, aiScene *
             m_currentVertices.m_vertices.resize(numItems);
             copyVectorArray(numItems, vaList, m_currentVertices.m_vertices.data());
         } else if (Color == attribType) {
+            delete[] m_currentVertices.m_colors;
+            m_currentVertices.m_colors = nullptr;
             m_currentVertices.m_numColors = numItems;
             m_currentVertices.m_colors = new aiColor4D[numItems];
             copyColor4DArray(numItems, vaList, m_currentVertices.m_colors);
@@ -864,6 +907,8 @@ void OpenGEXImporter::handleVertexArrayNode(ODDLParser::DDLNode *node, aiScene *
             m_currentVertices.m_normals.resize(numItems);
             copyVectorArray(numItems, vaList, m_currentVertices.m_normals.data());
         } else if (TexCoord == attribType) {
+            delete[] m_currentVertices.m_textureCoords[0];
+            m_currentVertices.m_textureCoords[0] = nullptr;
             m_currentVertices.m_numUVComps[0] = numItems;
             m_currentVertices.m_textureCoords[0] = new aiVector3D[numItems];
             copyVectorArray(numItems, vaList, m_currentVertices.m_textureCoords[0]);

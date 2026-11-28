@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/SceneCombiner.h>
 #include <assimp/Subdivision.h>
 #include <assimp/scene.h>
+#include <cstring>
 #include <memory>
 
 #include <functional>
@@ -119,6 +120,14 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_d
 
             BlenderModifier *const modifier = *curmod;
             if (modifier->IsActive(dat)) {
+                // Generic converted hull must not be cast as Mirror/Subsurf.
+                const char *need = modifier->RequiredDnaType();
+                if (need != nullptr && !BlendElemConvertedHullIs(*cur, need)) {
+                    const char *have = cur->converted_hull ? cur->converted_hull : cur->dna_type;
+                    ASSIMP_LOG_DEBUG("BlendModifier: skip `", dat.name, "` handler - converted hull `",
+                            have ? have : "?", "`, need `", need, "`");
+                    continue;
+                }
                 modifier->DoIt(out, conv_data, *static_cast<const ElemBase *>(cur), in, orig_object);
                 cnt++;
 
@@ -127,7 +136,7 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode &out, ConversionData &conv_d
             }
         }
         if (curgod) {
-            ASSIMP_LOG_WARN("Couldn't find a handler for modifier: ", dat.name);
+            ASSIMP_LOG_DEBUG("Couldn't find a handler for modifier: ", dat.name);
         }
     }
 

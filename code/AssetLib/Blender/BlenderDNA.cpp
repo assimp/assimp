@@ -64,6 +64,17 @@ static bool match4(StreamReaderAny &stream, const char *string) {
     return (tmp[0] == string[0] && tmp[1] == string[1] && tmp[2] == string[2] && tmp[3] == string[3]);
 }
 
+// Blender dna_genfile pad_up_4: align relative to the SDNA buffer base, NOT the
+// absolute file offset. DNA1 bodies can start at file_off%4 != 0 while markers
+// remain 4-aligned within the SDNA blob (see Blender dna_genfile.cc).
+static void padDnaSection(StreamReaderAny &stream, size_t dnaBase) {
+    const size_t rel = stream.GetCurrentPos() - dnaBase;
+    const size_t pad = (4u - (rel & 3u)) & 3u;
+    for (size_t i = 0; i < pad; ++i) {
+        stream.GetI1();
+    }
+}
+
 struct Type {
     size_t size;
     std::string name;
@@ -74,6 +85,7 @@ void DNAParser::Parse() {
     StreamReaderAny &stream = *db.reader;
     DNA &dna = db.dna;
 
+    const size_t dnaBase = stream.GetCurrentPos();
     if (!match4(stream, "SDNA")) {
         throw DeadlyImportError("BlenderDNA: Expected SDNA chunk");
     }
@@ -91,8 +103,7 @@ void DNAParser::Parse() {
     }
 
     // type dictionary
-    for (; stream.GetCurrentPos() & 0x3; stream.GetI1())
-        ;
+    padDnaSection(stream, dnaBase);
     if (!match4(stream, "TYPE")) {
         throw DeadlyImportError("BlenderDNA: Expected TYPE field");
     }
@@ -105,8 +116,7 @@ void DNAParser::Parse() {
     }
 
     // type length dictionary
-    for (; stream.GetCurrentPos() & 0x3; stream.GetI1())
-        ;
+    padDnaSection(stream, dnaBase);
     if (!match4(stream, "TLEN")) {
         throw DeadlyImportError("BlenderDNA: Expected TLEN field");
     }
@@ -116,8 +126,7 @@ void DNAParser::Parse() {
     }
 
     // structures dictionary
-    for (; stream.GetCurrentPos() & 0x3; stream.GetI1())
-        ;
+    padDnaSection(stream, dnaBase);
     if (!match4(stream, "STRC")) {
         throw DeadlyImportError("BlenderDNA: Expected STRC field");
     }
@@ -166,7 +175,10 @@ void DNAParser::Parse() {
 
             // pointers always specify the size of the pointee instead of their own.
             // The pointer asterisk remains a property of the lookup name.
-            if (f.name[0] == '*') {
+            // Function pointers are named `(*foo)()` / `(*foo)(void)` - also pointer-sized
+            // (otherwise offsets after callbacks drift, e.g. ParticleSystem.name/seed).
+            const bool isFuncPtr = f.name.size() >= 2 && f.name[0] == '(' && f.name[1] == '*';
+            if (f.name[0] == '*' || isFuncPtr) {
                 f.size = db.i64bit ? 8 : 4;
                 f.flags |= FieldFlag_Pointer;
             }
@@ -267,6 +279,14 @@ std::shared_ptr<ElemBase> DNA ::ConvertBlobToStructure(
 
     std::shared_ptr<ElemBase> ret = (structure.*((*it).second.first))();
     (structure.*((*it).second.second))(ret, db);
+    if (ret) {
+        const auto genIt = converters.find("GenericModifierData");
+        const bool usedGeneric = genIt != converters.end() &&
+                structure.name != "GenericModifierData" &&
+                (*it).second.first == genIt->second.first;
+        BlendElemBindConvertedHull(*ret, structure.name.c_str(),
+                usedGeneric ? "GenericModifierData" : structure.name.c_str());
+    }
 
     return ret;
 }
@@ -277,7 +297,21 @@ DNA::FactoryPair DNA ::GetBlobToStructureConverter(
         const FileDatabase & /*db*/
 ) const {
     std::map<std::string, FactoryPair>::const_iterator it = converters.find(structure.name);
-    return it == converters.end() ? FactoryPair() : (*it).second;
+    if (it != converters.end()) {
+        return (*it).second;
+    }
+    // Unknown XXXModifierData: still decode ModifierData header so Object.modifiers
+    // ListBase does not collapse when the first entry is e.g. NodesModifierData.
+    static const char kSuffix[] = "ModifierData";
+    const size_t n = structure.name.size();
+    const size_t sl = sizeof(kSuffix) - 1;
+    if (n > sl && structure.name.compare(n - sl, sl, kSuffix) == 0) {
+        it = converters.find("GenericModifierData");
+        if (it != converters.end()) {
+            return (*it).second;
+        }
+    }
+    return FactoryPair();
 }
 
 // basing on http://www.blender.org/development/architecture/notes-on-sdna/
@@ -331,11 +365,24 @@ void SectionParser ::Next() {
     };
     current.id = std::string(tmp, tmp[3] ? 4 : tmp[2] ? 3 : tmp[1] ? 2 : 1);
 
-    current.size = stream.GetI4();
-    current.address.val = ptr64 ? stream.GetU8() : stream.GetU4();
-
-    current.dna_index = stream.GetI4();
-    current.num = stream.GetI4();
+    if (largeBHead) {
+        // Blender LargeBHead8 (format v1): code, SDNAnr, old, len, nr
+        current.dna_index = static_cast<unsigned int>(stream.GetI4());
+        current.address.val = stream.GetU8();
+        const int64_t len64 = stream.GetI8();
+        const int64_t num64 = stream.GetI8();
+        if (len64 < 0 || num64 < 0) {
+            throw DeadlyImportError("BLEND: negative LargeBHead8 len/nr");
+        }
+        current.size = static_cast<size_t>(len64);
+        current.num = static_cast<size_t>(num64);
+    } else {
+        // BHead4 / SmallBHead8 (format v0): code, len, old, SDNAnr, nr
+        current.size = stream.GetI4();
+        current.address.val = ptr64 ? stream.GetU8() : stream.GetU4();
+        current.dna_index = stream.GetI4();
+        current.num = stream.GetI4();
+    }
 
     current.start = stream.GetCurrentPos();
     if (stream.GetRemainingSizeToLimit() < current.size) {

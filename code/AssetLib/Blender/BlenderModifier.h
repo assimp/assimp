@@ -71,6 +71,11 @@ public:
         return false;
     }
 
+    /** SDNA / converter name required before DoIt may static_cast the blob. */
+    virtual const char *RequiredDnaType() const {
+        return nullptr;
+    }
+
     // --------------------
     /**
      *  Apply the modifier to a given output node. The original data used
@@ -119,6 +124,10 @@ public:
     // --------------------
     virtual bool IsActive( const ModifierData& modin);
 
+    const char *RequiredDnaType() const override {
+        return "MirrorModifierData";
+    }
+
     // --------------------
     virtual void DoIt(aiNode& out,
         ConversionData& conv_data,
@@ -136,6 +145,10 @@ public:
 
     // --------------------
     virtual bool IsActive( const ModifierData& modin);
+
+    const char *RequiredDnaType() const override {
+        return "SubsurfModifierData";
+    }
 
     // --------------------
     virtual void DoIt(aiNode& out,

@@ -49,12 +49,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderLoader.h"
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
-#include <deque>
+#include <assimp/anim.h>
+#include <assimp/camera.h>
+#include <assimp/light.h>
 #include <assimp/material.h>
-
-struct aiTexture;
+#include <assimp/texture.h>
+#include <deque>
+#include <unordered_map>
 
 namespace Assimp {
+class IOSystem;
 namespace Blender {
 
     // --------------------------------------------------------------------
@@ -167,6 +171,42 @@ namespace Blender {
 
         // next texture ID for each texture type, respectively
         unsigned int next_texture[aiTextureType_UNKNOWN+1];
+
+        // Dedupe embedded aiTexture by Blender Image* (packedfiles / packedfile).
+        std::unordered_map<const Image *, unsigned int> embeddedImageTexIndex;
+
+        // Objects with AnimData (Object TRS -> aiNodeAnim), filled during ConvertNode.
+        std::vector<const Object *> trs_anim_objects;
+        // Camera objects (legacy list; also covered by trs_anim_objects).
+        std::vector<const Object *> camera_objects;
+        /** Directory of the .blend (for // relative MeshCache paths). */
+        std::string blendDirectory;
+        /** Optional IO for MeshCache MDD load. */
+        Assimp::IOSystem *io = nullptr;
+        /** Shape-key targets attached to aiMeshes (for weight-curve morph anim). */
+        struct ShapeKeyMeshRef {
+            std::string meshName;
+            std::vector<std::string> keyNames;
+            const Key *key = nullptr;
+            const Object *obj = nullptr;
+        };
+        std::vector<ShapeKeyMeshRef> shapeKeyMeshes;
+        /** MeshCache MDD -> aiMeshAnim produced during ConvertMesh. */
+        std::vector<aiAnimation *> pendingMeshAnims;
+        /**
+         * Optional per-submesh DNA totvert map (aiMesh vert -> Mesh.totvert).
+         * ConvertMesh usually builds an equivalent corner map locally. Keep/store
+         * outToSrcVert or this bag when the host must frame-build some anim kinds
+         * itself (MDD vs ShapeKeys coexistence, PC2, Alembic MeshSeqCache, etc.).
+         */
+        std::vector<std::vector<int>> meshSrcVertDna;
+        /** Armature objects (bone hierarchy + pose Action -> aiNodeAnim). */
+        std::vector<const Object *> armature_objects;
+        /**
+         * Map Armature Object name -> bone rest name used as aiNode::mName
+         * (unique: "ArmatureObj|BoneName") for pose channel targeting.
+         */
+        std::unordered_map<std::string, std::unordered_map<std::string, std::string>> armatureBoneNodeNames;
 
         // original file data
         const FileDatabase& db;

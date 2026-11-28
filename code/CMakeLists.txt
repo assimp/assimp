@@ -557,6 +557,8 @@ ADD_ASSIMP_IMPORTER( COB
 ADD_ASSIMP_IMPORTER( BLEND
   AssetLib/Blender/BlenderLoader.cpp
   AssetLib/Blender/BlenderLoader.h
+  AssetLib/Blender/BlenderAnimEmit.cpp
+  AssetLib/Blender/BlenderAnimEmit.h
   AssetLib/Blender/BlenderDNA.cpp
   AssetLib/Blender/BlenderDNA.h
   AssetLib/Blender/BlenderDNA.inl
@@ -572,7 +574,45 @@ ADD_ASSIMP_IMPORTER( BLEND
   AssetLib/Blender/BlenderTessellator.cpp
   AssetLib/Blender/BlenderCustomData.h
   AssetLib/Blender/BlenderCustomData.cpp
+  AssetLib/Blender/BlenderMeshAttributes.h
+  AssetLib/Blender/BlenderMeshAttributes.cpp
 )
+
+# Blender 3+ writes .blend as Zstandard by default. Prefer system libzstd;
+# otherwise compile vendored contrib/zstd into assimp (same approach as SPZ on Locla).
+string(FIND "${ASSIMP_IMPORTERS_ENABLED}" "BLEND" ASSIMP_BLEND_ZSTD_POS)
+if(NOT ASSIMP_BLEND_ZSTD_POS EQUAL -1)
+  find_path(ASSIMP_BLEND_ZSTD_INCLUDE_DIR zstd.h)
+  find_library(ASSIMP_BLEND_ZSTD_LIBRARY NAMES zstd libzstd)
+  set(ASSIMP_BLEND_USE_BUNDLED_ZSTD FALSE)
+  if(ASSIMP_BLEND_ZSTD_INCLUDE_DIR AND ASSIMP_BLEND_ZSTD_LIBRARY AND NOT ANDROID)
+    set(ASSIMP_BLEND_HAS_ZSTD TRUE)
+  elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/zstd/lib/zstd.h")
+    message(STATUS "Using bundled contrib/zstd for BLEND Zstandard .blend support")
+    set(ASSIMP_BLEND_HAS_ZSTD TRUE)
+    set(ASSIMP_BLEND_USE_BUNDLED_ZSTD TRUE)
+    set(ASSIMP_BLEND_ZSTD_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../contrib/zstd/lib")
+  else()
+    set(ASSIMP_BLEND_HAS_ZSTD FALSE)
+    message(STATUS "libzstd not found - BLEND importer will not open Zstandard-compressed .blend files")
+  endif()
+  if(ASSIMP_BLEND_HAS_ZSTD)
+    add_definitions(-DASSIMP_BLEND_SUPPORT_ZSTD)
+    include_directories(${ASSIMP_BLEND_ZSTD_INCLUDE_DIR})
+    if(ASSIMP_BLEND_USE_BUNDLED_ZSTD)
+      file(GLOB ASSIMP_BLEND_ZSTD_SRCS
+        ../contrib/zstd/lib/common/*.c
+        ../contrib/zstd/lib/compress/*.c
+        ../contrib/zstd/lib/decompress/*.c
+        ../contrib/zstd/lib/dictBuilder/*.c
+      )
+      list(APPEND ASSIMP_LOADER_SRCS ${ASSIMP_BLEND_ZSTD_SRCS})
+      source_group(contrib\\zstd FILES ${ASSIMP_BLEND_ZSTD_SRCS})
+      add_definitions(-DZSTD_DISABLE_ASM -DZSTD_MULTITHREAD=0 -DXXH_NAMESPACE=ZSTD_)
+      include_directories(../contrib/zstd/lib/common)
+    endif()
+  endif()
+endif()
 
 ADD_ASSIMP_IMPORTER( IFC
   AssetLib/IFC/IFCLoader.cpp
@@ -1713,6 +1753,11 @@ if(ASSIMP_ANDROID_JNIIOSYSTEM)
   set(ASSIMP_ANDROID_JNIIOSYSTEM_PATH port/AndroidJNI)
   add_subdirectory(../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/ ../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/)
   target_link_libraries(assimp android_jniiosystem)
+endif()
+
+# System libzstd for BLEND Zstandard .blend (when not compiling contrib/zstd into assimp).
+if(ASSIMP_BLEND_HAS_ZSTD AND NOT ASSIMP_BLEND_USE_BUNDLED_ZSTD AND ASSIMP_BLEND_ZSTD_LIBRARY)
+  target_link_libraries(assimp ${ASSIMP_BLEND_ZSTD_LIBRARY})
 endif()
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)

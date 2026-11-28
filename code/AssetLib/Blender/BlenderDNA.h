@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <assimp/DefaultLogger.hpp>
 #include <map>
+#include <cstring>
 #include <memory>
 
 // enable verbose log output. really verbose, so be careful.
@@ -101,21 +102,36 @@ struct Error : DeadlyImportError {
 // -------------------------------------------------------------------------------
 struct ElemBase {
     ElemBase() :
-            dna_type(nullptr) {
+            dna_type(nullptr),
+            converted_hull(nullptr) {
         // empty
     }
 
     virtual ~ElemBase() = default;
 
-    /** Type name of the element. The type
-     * string points is the `c_str` of the `name` attribute of the
-     * corresponding `Structure`, that is, it is only valid as long
-     * as the DNA is not modified. The dna_type is only set if the
-     * data type is not static, i.e. a std::shared_ptr<ElemBase>
-     * in the scene description would have its type resolved
-     * at runtime, so this member is always set. */
+    /** File SDNA structure name (`Structure::name` c_str). Valid while DNA lives. */
     const char *dna_type;
+
+    /**
+     * C++ converter hull actually allocated (usually same as #dna_type).
+     * GenericModifierData fallback keeps #dna_type as the file label but sets
+     * this to the stand-in name so casts cannot OOB (CodeRabbit PR7099).
+     */
+    const char *converted_hull;
 };
+
+inline bool BlendElemConvertedHullIs(const ElemBase &e, const char *need) {
+    if (need == nullptr) {
+        return false;
+    }
+    const char *have = e.converted_hull != nullptr ? e.converted_hull : e.dna_type;
+    return have != nullptr && std::strcmp(have, need) == 0;
+}
+
+inline void BlendElemBindConvertedHull(ElemBase &e, const char *fileSdnaName, const char *allocatedHullName) {
+    e.dna_type = fileSdnaName;
+    e.converted_hull = allocatedHullName != nullptr ? allocatedHullName : fileSdnaName;
+}
 
 // -------------------------------------------------------------------------------
 /** Represents a generic pointer to a memory location, which can be either 32
@@ -189,15 +205,14 @@ struct Field {
 enum ErrorPolicy {
     /** Substitute default value and ignore */
     ErrorPolicy_Igno,
-    /** Substitute default value and write to log */
+    /** Substitute default value; no log (DNA version gaps are routine, not Warn spam). */
     ErrorPolicy_Warn,
     /** Substitute a massive error message and crash the whole matrix. Its time for another zion */
     ErrorPolicy_Fail
 };
 
-#ifdef ASSIMP_BUILD_BLENDER_DEBUG
-#   define ErrorPolicy_Igno ErrorPolicy_Warn
-#endif
+// Do NOT remap Igno->Warn under ASSIMP_BUILD_DEBUG: that flooded logs with
+// thousands of expected missing-field lines (unlike other importers).
 
 // -------------------------------------------------------------------------------
 /** Represents a data structure in a BLEND file. A Structure defines n fields
@@ -393,7 +408,9 @@ template<>
 struct Structure::_defaultInitializer<ErrorPolicy_Warn> {
     template <typename T>
     void operator()(T &out, const char *reason = "<add reason>") {
-        ASSIMP_LOG_WARN(reason);
+        // Silent like Igno for volume: missing fields across Blender versions are
+        // expected. Real issues use explicit ASSIMP_LOG_WARN/ERROR elsewhere.
+        (void)reason;
 
         // ... and let the show go on
         _defaultInitializer<0 /*ErrorPolicy_Igno*/>()(out);
@@ -550,6 +567,12 @@ struct FileBlockHead {
     // original memory address of the data
     Pointer address;
 
+    // ID block (`old`) that owns this DATA chunk in file order.
+    // Blender resolves DATA pointers via a per-ID datamap (readfile.cc);
+    // the same `old` may be reused across IDs when writing (heap recycle /
+    // pre-stable-pointer files). Empty/zero for ID blocks themselves.
+    Pointer owner_id;
+
     // index into DNA
     unsigned int dna_index;
 
@@ -581,9 +604,11 @@ public:
     /** @param stream Inout stream, must point to the
      *  first section in the file. Call Next() once
      *  to have it read.
-     *  @param ptr64 Pointer size in file is 64 bits? */
-    SectionParser(StreamReaderAny &stream, bool ptr64) :
-            stream(stream), ptr64(ptr64) {
+     *  @param ptr64 Pointer size in file is 64 bits?
+     *  @param largeBHead Format v1 uses Blender LargeBHead8
+     *  (code, SDNAnr, old, len64, nr64) instead of SmallBHead8/BHead4. */
+    SectionParser(StreamReaderAny &stream, bool ptr64, bool largeBHead = false) :
+            stream(stream), ptr64(ptr64), largeBHead(largeBHead) {
         current.size = current.start = 0;
     }
 
@@ -603,6 +628,7 @@ public:
     FileBlockHead current;
     StreamReaderAny &stream;
     bool ptr64;
+    bool largeBHead;
 };
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
@@ -636,9 +662,6 @@ public:
 template <template <typename> class TOUT>
 class ObjectCache {
 public:
-    typedef std::map<Pointer, TOUT<ElemBase>> StructureCache;
-
-public:
     explicit ObjectCache(const FileDatabase &db) : db(db) {
         // currently there are only ~400 structure records per blend file.
         // we read only a small part of them and don't cache objects
@@ -651,9 +674,10 @@ public:
      *  @param s Data type of the item
      *  @param out Output pointer. Unchanged if the
      *   cache doesn't know the item yet.
-     *  @param ptr Item address to look for. */
+     *  @param ptr Item address to look for.
+     *  @param owner_id Per-ID datamap key for DATA (0 for ID blocks). */
     template <typename T>
-    void get( const Structure &s,TOUT<T> &out, const Pointer &ptr) const;
+    void get(const Structure &s, TOUT<T> &out, const Pointer &ptr, uint64_t owner_id = 0) const;
 
     // --------------------------------------------------------
     /** Add an item to the cache after the item has
@@ -662,13 +686,20 @@ public:
      * to abort.
      *  @param s Data type of the item
      *  @param out Item to insert into the cache
-     *  @param ptr address (cache key) of the item. */
+     *  @param ptr address (cache key) of the item.
+     *  @param owner_id Per-ID datamap key for DATA (0 for ID blocks). */
     template <typename T>
     void set(const Structure &s,
             const TOUT<T> &out,
-            const Pointer &ptr);
+            const Pointer &ptr,
+            uint64_t owner_id = 0);
 
 private:
+    // Cache key: (owner_id_old, pointer). DATA blocks share `old` across IDs;
+    // owner disambiguates like Blender's per-ID datamap.
+    typedef std::pair<uint64_t, uint64_t> CacheKey;
+    typedef std::map<CacheKey, TOUT<ElemBase>> StructureCache;
+
     mutable vector<StructureCache> caches;
     const FileDatabase &db;
 };
@@ -681,9 +712,9 @@ public:
     explicit ObjectCache(const FileDatabase &) {}
 
     template <typename T>
-    void get(const Structure &, vector<T> &, const Pointer &) {}
+    void get(const Structure &, vector<T> &, const Pointer &, uint64_t = 0) {}
     template <typename T>
-    void set(const Structure &, const vector<T> &, const Pointer &) {}
+    void set(const Structure &, const vector<T> &, const Pointer &, uint64_t = 0) {}
 };
 
 #ifdef _MSC_VER
@@ -724,10 +755,18 @@ public:
     // publicly accessible fields
     bool i64bit;
     bool little;
+    /// Blender low-level file format: 0 = classic 12-byte header, 1 = 17-byte + LargeBHead8.
+    int file_format_version = 0;
+    /// BLENDER_FILE_VERSION from header (3 digits for v0, 4 for v1, e.g. 500).
+    int blender_file_version = 0;
 
     DNA dna;
     std::shared_ptr<StreamReaderAny> reader;
     vector<FileBlockHead> entries;
+
+    // Active ID datablock for DATA pointer resolution (Blender datamap scope).
+    // Mutable: Convert/ResolvePointer take const FileDatabase&.
+    mutable Pointer active_id_scope;
 
 private:
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS

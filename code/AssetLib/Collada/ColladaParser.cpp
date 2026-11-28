@@ -740,6 +740,17 @@ void ColladaParser::PostProcessRootAnimations() {
         }
     }
 
+    // release the sub animations collected while parsing: the assignment below
+    // replaces them without deleting them, as Animation's assignment does not
+    // take ownership of the old sub animations
+    for (Animation *subAnim : mAnims.mSubAnims) {
+        delete subAnim;
+    }
+    mAnims.mSubAnims.clear();
+    mAnims = temp;
+
+    // Ensure no double deletes.
+    temp.mSubAnims.clear();
     mAnims = std::move(temp);
 }
 
